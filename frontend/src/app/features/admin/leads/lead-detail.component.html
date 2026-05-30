@@ -1,0 +1,126 @@
+<nav class="admin-nav">
+  <span class="nav-brand">RG // Admin</span>
+  <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
+  <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-secondary" (click)="logout()">ออกจากระบบ</button>
+</nav>
+
+<div class="admin-content">
+  <a routerLink="/admin/leads" class="back-link">← กลับ</a>
+
+  @if (detail()) {
+    <h2 class="admin-title" style="font-family: var(--mono); letter-spacing:.04em;">{{ detail()!.quoteNumber }}</h2>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <!-- Customer info -->
+      <div class="card">
+        <p class="sec-label">Customer Info</p>
+        <div class="kv-row">
+          <span class="kv-key">ชื่อ</span>
+          <span class="kv-val">{{ detail()!.customerName }}</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">เบอร์</span>
+          <span class="kv-val" style="display:flex; align-items:center; gap:10px;">
+            <a [href]="'tel:' + detail()!.phone" style="color: var(--blue); font-family:var(--mono); font-size:14px;">{{ detail()!.phone }}</a>
+            <button class="btn btn-sm btn-secondary" style="padding:4px 10px; font-size:11px;" (click)="copyPhone()">copy</button>
+          </span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">ที่อยู่</span>
+          <span class="kv-val">{{ detail()!.address || '—' }}</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">โซน</span>
+          <span class="kv-val">{{ detail()!.serviceZoneName || '—' }}</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">วันที่</span>
+          <span class="kv-val" style="font-family:var(--mono); font-size:13px; color:var(--text-2);">{{ formatDate(detail()!.createdAt) }}</span>
+        </div>
+      </div>
+
+      <!-- Quote spec -->
+      <div class="card">
+        <p class="sec-label">Job Specification</p>
+        <div class="kv-row">
+          <span class="kv-key">วัสดุ</span>
+          <span class="kv-val">{{ materialLabel(detail()!.material) }} {{ detail()!.sizeInches }}" {{ finishLabel(detail()!.finish) }}</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">ความยาว</span>
+          <span class="kv-val" style="font-family:var(--mono);">{{ detail()!.lengthMeters }} ม.</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">ท่อน้ำลง</span>
+          <span class="kv-val" style="font-family:var(--mono);">{{ detail()!.downspoutCount }} จุด</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">จำนวนชั้น</span>
+          <span class="kv-val" style="font-family:var(--mono);">{{ detail()!.floors }} ชั้น</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-key">รื้อถอนเดิม</span>
+          <span class="kv-val">
+            @if (detail()!.removeOld) {
+              <span class="badge badge-quoted">ใช่</span>
+            } @else {
+              <span style="color:var(--text-2);">ไม่</span>
+            }
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Price Breakdown -->
+    <div class="card">
+      <p class="sec-label">Price Breakdown</p>
+      <table>
+        <thead>
+          <tr>
+            <th>รายการ</th>
+            <th style="text-align:right;">จำนวนเงิน (บาท)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of breakdown(); track $index) {
+            <tr>
+              <td>{{ item.label }}</td>
+              <td style="text-align:right; font-family:var(--mono); font-size:14px;">{{ formatNumber(item.amount) }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><span class="total-label">ยอดรวมประเมิน</span></td>
+            <td style="text-align:right;">
+              <span class="total-value" style="font-size:24px;">{{ formatNumber(detail()!.estimatedTotal) }}</span>
+              <span style="font-family:var(--mono); font-size:11px; color:var(--text-2); margin-left:4px;">บาท</span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Status + Actions -->
+    <div class="card" style="display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span class="field-label" style="margin:0;">สถานะ</span>
+        <select class="form-control" [(ngModel)]="selectedStatus" style="width:180px;">
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ statusLabels[s] }}</option>
+          }
+        </select>
+        <button class="btn btn-primary btn-sm" (click)="updateStatus()" [disabled]="statusUpdating()">
+          {{ statusUpdating() ? 'บันทึก...' : 'บันทึกสถานะ' }}
+        </button>
+      </div>
+      <a [href]="pdfUrl()" target="_blank" class="btn btn-secondary btn-sm">⬇ ดาวน์โหลด PDF</a>
+    </div>
+
+  } @else {
+    <div style="font-family:var(--mono); font-size:13px; color:var(--text-2);">กำลังโหลด...</div>
+  }
+</div>

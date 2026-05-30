@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RainGutter.Api/RainGutter.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RainGutter.Tests/RainGutter.Tests.csproj" />
+  </Folder>
+</Solution>

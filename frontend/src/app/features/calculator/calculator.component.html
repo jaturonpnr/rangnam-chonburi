@@ -1,0 +1,248 @@
+<div class="container" style="padding-bottom: 56px;">
+
+  <!-- Hero Header -->
+  <div class="page-hero">
+    <div class="eyebrow">ESTIMATE CALCULATOR</div>
+    @if (shopProfile()) {
+      <h1>{{ shopProfile()!.shopName }}</h1>
+      <div class="hero-sub">TEL — {{ shopProfile()!.phone }}</div>
+    } @else {
+      <h1>คำนวณราคาติดตั้งรางน้ำฝน</h1>
+    }
+  </div>
+
+  <!-- Calculator Form -->
+  <div class="card">
+    <form [formGroup]="calcForm">
+
+      <!-- 01 Material -->
+      <p class="sec-label">01 — Material Spec</p>
+
+      <div class="form-group">
+        <span class="field-label">วัสดุราง</span>
+        <div class="mat-toggle">
+          <label class="mat-tile">
+            <input type="radio" class="sr-only" formControlName="material" value="Galvanized">
+            <div class="mat-tile-inner">
+              <span class="mat-code">GI</span>
+              <span class="mat-name">สังกะสี</span>
+              <span class="mat-sub">Galvanized</span>
+            </div>
+          </label>
+          <label class="mat-tile">
+            <input type="radio" class="sr-only" formControlName="material" value="Stainless">
+            <div class="mat-tile-inner">
+              <span class="mat-code">SS</span>
+              <span class="mat-name">สแตนเลส</span>
+              <span class="mat-sub">Stainless</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- 02 Dimensions -->
+      <p class="sec-label" style="margin-top: 8px;">02 — Dimensions</p>
+
+      <div class="form-group">
+        <label>ขนาดราง (นิ้ว)</label>
+        <select class="form-control" formControlName="sizeInches">
+          <option [value]="null" disabled>-- เลือกขนาด --</option>
+          @for (size of availableSizes(); track size) {
+            <option [value]="size">{{ size }}"</option>
+          }
+        </select>
+        @if (calcForm.get('sizeInches')?.invalid && calcForm.get('sizeInches')?.touched) {
+          <div class="error-msg">กรุณาเลือกขนาดราง</div>
+        }
+      </div>
+
+      @if (isStainless() && availableFinishes().length > 0) {
+        <div class="form-group">
+          <label>ผิวราง (Finish)</label>
+          <select class="form-control" formControlName="finish">
+            <option [value]="null" disabled>-- เลือกผิว --</option>
+            <option value="Glossy">เงา (Glossy)</option>
+            <option value="Matte">ด้าน (Matte)</option>
+          </select>
+        </div>
+      }
+
+      <div class="form-group">
+        <label>ความยาวราง (เมตร)</label>
+        <div class="input-unit-wrap">
+          <input class="form-control" type="number" min="0.1" step="0.5"
+                 formControlName="lengthMeters" placeholder="เช่น 15">
+          <span class="unit-tag">ม.</span>
+        </div>
+        @if (calcForm.get('lengthMeters')?.invalid && calcForm.get('lengthMeters')?.touched) {
+          <div class="error-msg">กรุณาระบุจำนวนเมตร (มากกว่า 0)</div>
+        }
+      </div>
+
+      <!-- 03 Installation Options -->
+      <p class="sec-label" style="margin-top: 8px;">03 — Installation Options</p>
+
+      <div class="form-group">
+        <label>จำนวนจุดท่อน้ำลง</label>
+        <div class="input-unit-wrap">
+          <input class="form-control" type="number" min="0" formControlName="downspoutCount" placeholder="0">
+          <span class="unit-tag">จุด</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>จำนวนชั้นอาคาร</label>
+        <div class="floor-seg">
+          <label>
+            <input type="radio" class="sr-only" [value]="1" formControlName="floors">
+            <span class="floor-pill">1 ชั้น</span>
+          </label>
+          <label>
+            <input type="radio" class="sr-only" [value]="2" formControlName="floors">
+            <span class="floor-pill">2 ชั้น</span>
+          </label>
+          <label>
+            <input type="radio" class="sr-only" [value]="3" formControlName="floors">
+            <span class="floor-pill">3 ชั้น</span>
+          </label>
+          <label>
+            <input type="radio" class="sr-only" [value]="4" formControlName="floors">
+            <span class="floor-pill">4 ชั้น</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="toggle-row">
+          <span class="switch">
+            <input type="checkbox" formControlName="removeOld">
+            <span class="switch-track"></span>
+          </span>
+          <span class="toggle-text">มีรางเก่าต้องรื้อถอน</span>
+        </label>
+      </div>
+
+      @if (zones().length > 0) {
+        <div class="form-group">
+          <label>พื้นที่ติดตั้ง</label>
+          <select class="form-control" formControlName="serviceZoneId">
+            <option [value]="null">-- ไม่ระบุ --</option>
+            @for (zone of zones(); track zone.id) {
+              <option [value]="zone.id">{{ zone.name }}{{ zone.travelSurcharge > 0 ? ' (+' + zone.travelSurcharge.toLocaleString() + ' บาท)' : '' }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <button type="button" class="btn btn-calculate btn-block"
+              [class.is-loading]="loading()"
+              (click)="calculate()"
+              [disabled]="loading()">
+        {{ loading() ? 'กำลังคำนวณ...' : '▶ คำนวณราคา' }}
+      </button>
+
+    </form>
+  </div>
+
+  <!-- Server Error -->
+  @if (serverError()) {
+    <div class="disclaimer" style="border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.07); color: #fca5a5; margin-bottom: 16px;">
+      <span>⚠</span>
+      <span>{{ serverError() }}</span>
+    </div>
+  }
+
+  <!-- Estimate Result -->
+  @if (estimate()) {
+    <div class="card">
+      <p class="sec-label">Estimate Output</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>รายการ</th>
+            <th style="text-align:right;">จำนวนเงิน (บาท)</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of estimate()!.breakdown; track $index) {
+            <tr>
+              <td>{{ item.label }}</td>
+              <td style="text-align:right; font-family: var(--mono); font-size: 14px;">{{ formatNumber(item.amount) }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>
+              <div class="total-label">ยอดรวมประเมิน</div>
+            </td>
+            <td style="text-align:right;">
+              <div class="total-value">{{ formatNumber(estimate()!.total) }}</div>
+              <div style="font-family: var(--mono); font-size: 11px; color: var(--text-2); letter-spacing: .06em;">บาท</div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="disclaimer" style="margin-top: 20px;">
+        <span>⚠</span>
+        <span>{{ estimate()!.disclaimer }}</span>
+      </div>
+
+      @if (!showContactForm()) {
+        <button type="button" class="btn btn-primary btn-block"
+                style="margin-top: 16px;"
+                (click)="showContactForm.set(true)">
+          ขอใบเสนอราคา / ให้ช่างติดต่อกลับ
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Contact Form -->
+  @if (showContactForm()) {
+    <div class="card">
+      <p class="sec-label">Contact Details</p>
+
+      <form [formGroup]="contactForm">
+        <div class="form-group">
+          <label>ชื่อ-นามสกุล <span style="color: var(--red);">*</span></label>
+          <input class="form-control" formControlName="customerName" placeholder="ชื่อของท่าน">
+          @if (contactForm.get('customerName')?.invalid && contactForm.get('customerName')?.touched) {
+            <div class="error-msg">กรุณาระบุชื่อ (อย่างน้อย 2 ตัวอักษร)</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>เบอร์โทรศัพท์ <span style="color: var(--red);">*</span></label>
+          <input class="form-control" formControlName="phone" type="tel" placeholder="0812345678">
+          @if (contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched) {
+            <div class="error-msg">เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>ที่อยู่ติดตั้ง (ถ้ามี)</label>
+          <textarea class="form-control" formControlName="address" rows="2" placeholder="บ้านเลขที่ / ซอย / ถนน"></textarea>
+        </div>
+
+        <button type="button" class="btn btn-success btn-block"
+                (click)="submitQuote()"
+                [disabled]="submitLoading()">
+          {{ submitLoading() ? 'กำลังส่งข้อมูล...' : 'ส่งขอใบเสนอราคา' }}
+        </button>
+      </form>
+    </div>
+  }
+
+  <!-- LINE Contact -->
+  @if (shopProfile()?.lineOaLink) {
+    <div style="text-align: center; padding: 8px 0 16px;">
+      <a [href]="shopProfile()!.lineOaLink" target="_blank" class="btn btn-line">
+        💬 แชทกับช่างทาง LINE
+      </a>
+    </div>
+  }
+
+</div>
