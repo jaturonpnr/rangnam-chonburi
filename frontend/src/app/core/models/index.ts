@@ -1,3 +1,5 @@
+import type { MultiLineString } from 'geojson';
+
 export type Material = 'Galvanized' | 'Stainless';
 export type QuoteStatus = 'New' | 'Contacted' | 'Quoted' | 'Won' | 'Lost';
 
@@ -94,7 +96,7 @@ export interface ShopProfile {
 export type MeasureSource = 'Manual' | 'Map';
 
 export interface MapMeasureResult {
-  geojson: GeoJSON.MultiLineString;
+  geojson: MultiLineString;
   measuredLengthMeters: number;
   centerLat: number;
   centerLng: number;
