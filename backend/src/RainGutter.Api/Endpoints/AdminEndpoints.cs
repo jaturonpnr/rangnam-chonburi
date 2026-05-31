@@ -117,8 +117,8 @@ public static class AdminEndpoints
 
             return Results.Ok(new QuoteRequestDetail(
                 q.Id, q.QuoteNumber, q.Lead.CustomerName, q.Lead.Phone, q.Lead.Address,
-                q.Lead.ServiceZone?.Name, q.Material, q.SizeInches, q.Finish,
-                q.LengthMeters, q.DownspoutCount, q.Floors, q.RemoveOld,
+                q.Lead.LocationDetail, q.Lead.ServiceZone?.Name, q.BuildingTypeLabelSnapshot,
+                q.Material, q.SizeInches, q.LengthMeters, q.DownspoutCount, q.Floors, q.RemoveOld,
                 q.EstimatedTotal, q.BreakdownJson, q.Status, q.CreatedAt));
         });
 
@@ -154,7 +154,7 @@ public static class AdminEndpoints
             var product = new GutterProduct
             {
                 Material = req.Material, SizeInches = req.SizeInches,
-                Finish = req.Finish, PricePerMeter = req.PricePerMeter, IsActive = req.IsActive
+                PricePerMeter = req.PricePerMeter, IsActive = req.IsActive
             };
             db.GutterProducts.Add(product);
             await db.SaveChangesAsync();
@@ -166,7 +166,7 @@ public static class AdminEndpoints
             var product = await db.GutterProducts.FindAsync(id);
             if (product is null) return Results.NotFound();
             product.Material = req.Material; product.SizeInches = req.SizeInches;
-            product.Finish = req.Finish; product.PricePerMeter = req.PricePerMeter; product.IsActive = req.IsActive;
+            product.PricePerMeter = req.PricePerMeter; product.IsActive = req.IsActive;
             await db.SaveChangesAsync();
             return Results.Ok(product);
         });
@@ -240,6 +240,41 @@ public static class AdminEndpoints
             profile.QuoteValidityDays = req.QuoteValidityDays; profile.QuoteFooterNote = req.QuoteFooterNote;
             await db.SaveChangesAsync();
             return Results.Ok(profile);
+        });
+
+        // Building types CRUD
+        app.MapGet("/api/admin/building-types", [Authorize] async (AppDbContext db) =>
+            Results.Ok(await db.BuildingTypes.OrderBy(b => b.DisplayOrder).ToListAsync()));
+
+        app.MapPost("/api/admin/building-types", [Authorize] async (UpsertBuildingTypeRequest req, AppDbContext db) =>
+        {
+            var bt = new Models.BuildingType
+            {
+                Label = req.Label, SizeInches = req.SizeInches,
+                DisplayOrder = req.DisplayOrder, IsActive = req.IsActive
+            };
+            db.BuildingTypes.Add(bt);
+            await db.SaveChangesAsync();
+            return Results.Created($"/api/admin/building-types/{bt.Id}", bt);
+        });
+
+        app.MapPut("/api/admin/building-types/{id:int}", [Authorize] async (int id, UpsertBuildingTypeRequest req, AppDbContext db) =>
+        {
+            var bt = await db.BuildingTypes.FindAsync(id);
+            if (bt is null) return Results.NotFound();
+            bt.Label = req.Label; bt.SizeInches = req.SizeInches;
+            bt.DisplayOrder = req.DisplayOrder; bt.IsActive = req.IsActive;
+            await db.SaveChangesAsync();
+            return Results.Ok(bt);
+        });
+
+        app.MapDelete("/api/admin/building-types/{id:int}", [Authorize] async (int id, AppDbContext db) =>
+        {
+            var bt = await db.BuildingTypes.FindAsync(id);
+            if (bt is null) return Results.NotFound();
+            db.BuildingTypes.Remove(bt);
+            await db.SaveChangesAsync();
+            return Results.NoContent();
         });
     }
 }

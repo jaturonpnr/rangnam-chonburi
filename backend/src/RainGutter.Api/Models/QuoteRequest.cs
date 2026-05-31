@@ -12,7 +12,8 @@ public class QuoteRequest
     // Input snapshot
     public Material Material { get; set; }
     public int SizeInches { get; set; }
-    public Finish? Finish { get; set; }
+    public int? BuildingTypeId { get; set; }
+    public string? BuildingTypeLabelSnapshot { get; set; }
     public decimal LengthMeters { get; set; }
     public int DownspoutCount { get; set; }
     public int Floors { get; set; }

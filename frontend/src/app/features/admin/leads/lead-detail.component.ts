@@ -49,7 +49,6 @@ export class LeadDetailComponent implements OnInit {
   formatNumber(n: number | undefined) { return n != null ? n.toLocaleString('th-TH') : '-'; }
   formatDate(d: string) { return new Date(d).toLocaleString('th-TH'); }
   materialLabel(m: string) { return m === 'Galvanized' ? 'สังกะสี' : 'สแตนเลส'; }
-  finishLabel(f: string | null) { if (!f) return '-'; return f === 'Glossy' ? 'เงา' : 'ด้าน'; }
   copyPhone() { navigator.clipboard.writeText(this.detail()!.phone); }
   logout() { this.auth.logout(); this.router.navigate(['/admin/login']); }
 }

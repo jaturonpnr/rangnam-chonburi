@@ -33,6 +33,10 @@
           <span class="kv-val">{{ detail()!.address || '—' }}</span>
         </div>
         <div class="kv-row">
+          <span class="kv-key">รายละเอียดพื้นที่</span>
+          <span class="kv-val">{{ detail()!.locationDetail || '—' }}</span>
+        </div>
+        <div class="kv-row">
           <span class="kv-key">โซน</span>
           <span class="kv-val">{{ detail()!.serviceZoneName || '—' }}</span>
         </div>
@@ -47,7 +51,7 @@
         <p class="sec-label">Job Specification</p>
         <div class="kv-row">
           <span class="kv-key">วัสดุ</span>
-          <span class="kv-val">{{ materialLabel(detail()!.material) }} {{ detail()!.sizeInches }}" {{ finishLabel(detail()!.finish) }}</span>
+          <span class="kv-val">{{ materialLabel(detail()!.material) }} {{ detail()!.sizeInches }}"{{ detail()!.buildingTypeLabel ? ' — ' + detail()!.buildingTypeLabel : '' }}</span>
         </div>
         <div class="kv-row">
           <span class="kv-key">ความยาว</span>

@@ -5,7 +5,7 @@
     <div class="eyebrow">ESTIMATE CALCULATOR</div>
     @if (shopProfile()) {
       <h1>{{ shopProfile()!.shopName }}</h1>
-      <div class="hero-sub">TEL — {{ shopProfile()!.phone }}</div>
+      <div class="hero-sub">TEL — <a href="tel:{{ shopProfile()!.phone }}" style="color:inherit; text-decoration:none;">{{ formatPhone(shopProfile()!.phone) }}</a></div>
     } @else {
       <h1>คำนวณราคาติดตั้งรางน้ำฝน</h1>
     }
@@ -44,28 +44,18 @@
       <p class="sec-label" style="margin-top: 8px;">02 — Dimensions</p>
 
       <div class="form-group">
-        <label>ขนาดราง (นิ้ว)</label>
-        <select class="form-control" formControlName="sizeInches">
-          <option [value]="null" disabled>-- เลือกขนาด --</option>
-          @for (size of availableSizes(); track size) {
-            <option [value]="size">{{ size }}"</option>
+        <label>ประเภทอาคาร <span style="color: var(--red);">*</span></label>
+        <select class="form-control" formControlName="buildingTypeId">
+          <option [value]="null" disabled>-- เลือกประเภทอาคาร --</option>
+          @for (bt of buildingTypes(); track bt.id) {
+            <option [value]="bt.id">{{ bt.label }}</option>
           }
         </select>
-        @if (calcForm.get('sizeInches')?.invalid && calcForm.get('sizeInches')?.touched) {
-          <div class="error-msg">กรุณาเลือกขนาดราง</div>
+        <div style="font-size:11px; color:var(--text-2); margin-top:4px; font-family:var(--mono);">ระบบจะเลือกขนาดรางที่เหมาะสมให้อัตโนมัติ</div>
+        @if (calcForm.get('buildingTypeId')?.invalid && calcForm.get('buildingTypeId')?.touched) {
+          <div class="error-msg">กรุณาเลือกประเภทอาคาร</div>
         }
       </div>
-
-      @if (isStainless() && availableFinishes().length > 0) {
-        <div class="form-group">
-          <label>ผิวราง (Finish)</label>
-          <select class="form-control" formControlName="finish">
-            <option [value]="null" disabled>-- เลือกผิว --</option>
-            <option value="Glossy">เงา (Glossy)</option>
-            <option value="Matte">ด้าน (Matte)</option>
-          </select>
-        </div>
-      }
 
       <div class="form-group">
         <label>ความยาวราง (เมตร)</label>
@@ -225,6 +215,11 @@
         <div class="form-group">
           <label>ที่อยู่ติดตั้ง (ถ้ามี)</label>
           <textarea class="form-control" formControlName="address" rows="2" placeholder="บ้านเลขที่ / ซอย / ถนน"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>รายละเอียดพื้นที่ / จุดสังเกต (ถ้ามี)</label>
+          <input class="form-control" formControlName="locationDetail" placeholder="เช่น ใกล้ปั้มน้ำมัน / บ้านสีฟ้า">
         </div>
 
         <button type="button" class="btn btn-success btn-block"

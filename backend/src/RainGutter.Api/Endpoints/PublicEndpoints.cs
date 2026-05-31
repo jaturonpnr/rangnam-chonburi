@@ -15,9 +15,17 @@ public static class PublicEndpoints
                 .Where(p => p.IsActive)
                 .OrderBy(p => p.Material)
                 .ThenBy(p => p.SizeInches)
-                .ThenBy(p => p.Finish)
                 .ToListAsync();
             return Results.Ok(products);
+        });
+
+        app.MapGet("/api/building-types", async (AppDbContext db) =>
+        {
+            var types = await db.BuildingTypes
+                .Where(b => b.IsActive)
+                .OrderBy(b => b.DisplayOrder)
+                .ToListAsync();
+            return Results.Ok(types);
         });
 
         app.MapGet("/api/zones", async (AppDbContext db) =>
@@ -36,7 +44,7 @@ public static class PublicEndpoints
             return Results.Ok(new { profile.ShopName, profile.Phone, profile.LineOaLink });
         });
 
-        app.MapPost("/api/estimate", async (EstimateRequest req, AppDbContext db, IPricingService pricing) =>
+        app.MapPost("/api/estimate", async (EstimateBody req, AppDbContext db, IPricingService pricing) =>
         {
             if (req.LengthMeters <= 0)
                 return Results.BadRequest(new { error = "จำนวนเมตรต้องมากกว่า 0" });
@@ -45,11 +53,14 @@ public static class PublicEndpoints
             if (req.Floors < 1)
                 return Results.BadRequest(new { error = "จำนวนชั้นต้องมากกว่า 0" });
 
+            var buildingType = await db.BuildingTypes.FirstOrDefaultAsync(b => b.Id == req.BuildingTypeId && b.IsActive);
+            if (buildingType is null)
+                return Results.BadRequest(new { error = "ไม่พบประเภทอาคารที่ระบุ" });
+
             var product = await db.GutterProducts.FirstOrDefaultAsync(p =>
                 p.IsActive &&
                 p.Material == req.Material &&
-                p.SizeInches == req.SizeInches &&
-                p.Finish == req.Finish);
+                p.SizeInches == buildingType.SizeInches);
 
             if (product is null)
                 return Results.BadRequest(new { error = "ไม่พบสินค้าที่ตรงกับเงื่อนไข" });
@@ -62,7 +73,8 @@ public static class PublicEndpoints
                 ? await db.ServiceZones.FirstOrDefaultAsync(z => z.Id == req.ServiceZoneId && z.IsActive)
                 : null;
 
-            var result = pricing.Calculate(req, config, product, zone);
+            var estimateReq = new EstimateRequest(req.LengthMeters, req.DownspoutCount, req.Floors, req.RemoveOld, req.ServiceZoneId);
+            var result = pricing.Calculate(estimateReq, config, product, zone);
             return Results.Ok(result);
         });
     }

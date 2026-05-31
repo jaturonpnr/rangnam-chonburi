@@ -23,19 +23,14 @@ await page.screenshot({ path: SS('01-home'), fullPage: true });
 const h1 = await page.textContent('h1');
 console.log('  H1:', h1);
 
-// ─── 2. กรอกฟอร์ม (Stainless 6" Glossy) ───────────────────────────────────
+// ─── 2. กรอกฟอร์ม (Stainless + บ้านพักอาศัย / ทาวน์เฮ้าส์) ──────────────
 console.log('\n[2] เลือกวัสดุ Stainless');
 await page.click('input[value="Stainless"]');
 await page.waitForTimeout(600);
 
-console.log('  เลือกขนาด 6 นิ้ว');
-await page.selectOption('select[formcontrolname="sizeInches"]', '6');
-await page.waitForTimeout(600);
-
-console.log('  รอ finish dropdown...');
-await page.waitForSelector('select[formcontrolname="finish"]', { timeout: 5000 });
-console.log('  เลือกผิวเงา Glossy');
-await page.selectOption('select[formcontrolname="finish"]', 'Glossy');
+console.log('  เลือกประเภทอาคาร (option แรก)');
+await page.waitForSelector('select[formcontrolname="buildingTypeId"]', { timeout: 5000 });
+await page.selectOption('select[formcontrolname="buildingTypeId"]', { index: 1 });
 
 await page.fill('input[formcontrolname="lengthMeters"]', '8');
 await page.fill('input[formcontrolname="downspoutCount"]', '2');
@@ -123,7 +118,7 @@ await page.click('a:has-text("ราคา/ตั้งค่า")');
 await page.waitForSelector('table', { timeout: 5000 });
 await page.screenshot({ path: SS('10-pricing') });
 const productRows = await page.locator('tbody tr').count();
-console.log('  product rows:', productRows, productRows === 8 ? '✅ 8 สินค้า' : `(expected 8, got ${productRows})`);
+console.log('  product rows:', productRows, productRows === 6 ? '✅ 6 สินค้า' : `(expected 6, got ${productRows})`);
 
 // ─── 11. Validation test ────────────────────────────────────────────────────
 console.log('\n[11] Validation — เบอร์โทรผิดรูปแบบ');
@@ -131,7 +126,8 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.setViewportSize({ width: 390, height: 844 });
 await page.click('input[value="Galvanized"]');
 await page.waitForTimeout(400);
-await page.selectOption('select[formcontrolname="sizeInches"]', '4');
+await page.waitForSelector('select[formcontrolname="buildingTypeId"]', { timeout: 5000 });
+await page.selectOption('select[formcontrolname="buildingTypeId"]', { index: 1 });
 await page.fill('input[formcontrolname="lengthMeters"]', '10');
 await page.click('button:has-text("คำนวณ")');
 await page.waitForSelector('tfoot', { timeout: 5000 });

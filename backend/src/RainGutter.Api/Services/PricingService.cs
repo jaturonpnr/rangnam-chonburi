@@ -13,15 +13,9 @@ public class PricingService : IPricingService
         var effectiveMeters = usedMinimum ? config.MinimumMeters : req.LengthMeters;
 
         var materialLabel = product.Material == Material.Galvanized ? "สังกะสี" : "สแตนเลส";
-        var finishLabel = product.Finish switch
-        {
-            Finish.Glossy => " เงา",
-            Finish.Matte => " ด้าน",
-            _ => ""
-        };
         var gutterLabel = usedMinimum
-            ? $"ค่าราง{materialLabel} {product.SizeInches}\" {finishLabel}(คิดราคาขั้นต่ำ {config.MinimumMeters} ม.)".Trim()
-            : $"ค่าราง{materialLabel} {product.SizeInches}\"{finishLabel} {req.LengthMeters} ม.".Trim();
+            ? $"ค่าราง{materialLabel} {product.SizeInches}\" (คิดราคาขั้นต่ำ {config.MinimumMeters} ม.)"
+            : $"ค่าราง{materialLabel} {product.SizeInches}\" {req.LengthMeters} ม.";
 
         var baseGutter = effectiveMeters * product.PricePerMeter;
         items.Add(new BreakdownItem(gutterLabel, baseGutter));

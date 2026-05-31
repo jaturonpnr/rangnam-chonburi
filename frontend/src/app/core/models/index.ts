@@ -1,13 +1,19 @@
 export type Material = 'Galvanized' | 'Stainless';
-export type Finish = 'Glossy' | 'Matte';
 export type QuoteStatus = 'New' | 'Contacted' | 'Quoted' | 'Won' | 'Lost';
 
 export interface GutterProduct {
   id: number;
   material: Material;
   sizeInches: number;
-  finish: Finish | null;
   pricePerMeter: number;
+  isActive: boolean;
+}
+
+export interface BuildingType {
+  id: number;
+  label: string;
+  sizeInches: number;
+  displayOrder: number;
   isActive: boolean;
 }
 
@@ -47,10 +53,11 @@ export interface QuoteRequestSummary {
 
 export interface QuoteRequestDetail extends QuoteRequestSummary {
   address: string | null;
+  locationDetail: string | null;
   serviceZoneName: string | null;
+  buildingTypeLabel: string | null;
   material: Material;
   sizeInches: number;
-  finish: Finish | null;
   lengthMeters: number;
   downspoutCount: number;
   floors: number;

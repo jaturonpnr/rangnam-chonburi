@@ -11,7 +11,7 @@ import { ApiService } from '../../core/services/api.service';
     <div class="ty-wrap">
       <div class="ty-card">
         <div class="ty-check">✓</div>
-        <h1 class="ty-title">ขอบคุณครับ/ค่ะ</h1>
+        <h1 class="ty-title">ขอบคุณครับ</h1>
         <p class="ty-sub">รับข้อมูลของท่านเรียบร้อยแล้ว<br>ทีมงานจะติดต่อกลับโดยเร็วที่สุด</p>
 
         <div class="ty-qn-wrap">
@@ -23,6 +23,11 @@ import { ApiService } from '../../core/services/api.service';
           @if (quoteRequestId()) {
             <a [href]="pdfUrl()" target="_blank" class="btn btn-primary">
               ⬇ ดาวน์โหลดใบเสนอราคา PDF
+            </a>
+          }
+          @if (shopPhone()) {
+            <a [href]="'tel:' + shopPhone()" class="btn btn-secondary">
+              📞 โทร {{ formatPhone(shopPhone()) }}
             </a>
           }
           @if (lineLink()) {
@@ -44,6 +49,7 @@ export class ThankYouComponent implements OnInit {
   quoteRequestId = signal<number | null>(null);
   pdfUrl = signal('');
   lineLink = signal<string | null>(null);
+  shopPhone = signal('');
 
   ngOnInit() {
     const qn = this.route.snapshot.paramMap.get('quoteNumber') ?? '';
@@ -55,6 +61,13 @@ export class ThankYouComponent implements OnInit {
     }
     this.api.getShopProfile().subscribe(s => {
       if (s.lineOaLink) this.lineLink.set(s.lineOaLink);
+      this.shopPhone.set(s.phone);
     });
+  }
+
+  formatPhone(phone: string): string {
+    if (phone.length === 10) return `${phone.slice(0, 3)}-${phone.slice(3, 6)}-${phone.slice(6)}`;
+    if (phone.length === 9) return `${phone.slice(0, 2)}-${phone.slice(2, 5)}-${phone.slice(5)}`;
+    return phone;
   }
 }

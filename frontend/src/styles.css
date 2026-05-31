@@ -59,6 +59,9 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
   margin: 0;
   z-index: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
 }
 
 /* ── Layout ── */
@@ -134,7 +137,7 @@ a { color: inherit; text-decoration: none; }
 
 .page-hero h1 {
   font-family: var(--thai);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--text);
   margin: 0 0 4px;
@@ -259,9 +262,8 @@ a { color: inherit; text-decoration: none; }
 .field-label {
   display: block;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 500;
-  letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--text-2);
   margin-bottom: 8px;
@@ -416,7 +418,7 @@ input[type="number"] { -moz-appearance: textfield; }
   user-select: none;
   padding: 4px 0;
 }
-.switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.switch { display: block; position: relative; width: 44px; height: 24px; flex-shrink: 0; overflow: hidden; }
 .switch input {
   position: absolute;
   top: 0; left: 0;
@@ -428,6 +430,7 @@ input[type="number"] { -moz-appearance: textfield; }
   z-index: 1;
   -webkit-appearance: none;
   appearance: none;
+  outline: none;
 }
 .switch-track {
   position: absolute;
@@ -470,9 +473,8 @@ table { width: 100%; border-collapse: collapse; }
 
 th {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-2);
   padding: 8px 12px;
@@ -495,8 +497,7 @@ tfoot td { border-top: 1px solid var(--border); border-bottom: none; padding-top
 /* ── Total readout ── */
 .total-label {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .1em;
+  font-size: 14px;
   text-transform: uppercase;
   color: var(--text-2);
 }
@@ -505,7 +506,6 @@ tfoot td { border-top: 1px solid var(--border); border-bottom: none; padding-top
   font-size: 34px;
   font-weight: 600;
   color: var(--amber);
-  letter-spacing: -.02em;
   line-height: 1.1;
 }
 
@@ -517,7 +517,6 @@ tfoot td { border-top: 1px solid var(--border); border-bottom: none; padding-top
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: .05em;
   text-transform: uppercase;
 }
 .badge-new       { background: rgba(56,189,248,.1);  color: var(--blue);  border: 1px solid rgba(56,189,248,.3); }
@@ -601,13 +600,11 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text); }
   font-size: 26px;
   font-weight: 600;
   color: var(--text);
-  letter-spacing: -.02em;
   margin-bottom: 6px;
 }
 .stat-card .label {
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-2);
 }
@@ -646,7 +643,6 @@ h3 { font-size: 15px; font-weight: 600; color: var(--text); }
   cursor: pointer;
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--text-2);
   transition: all .18s;

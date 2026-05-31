@@ -23,10 +23,11 @@ public record QuoteRequestDetail(
     string CustomerName,
     string Phone,
     string? Address,
+    string? LocationDetail,
     string? ServiceZoneName,
+    string? BuildingTypeLabel,
     Material Material,
     int SizeInches,
-    Finish? Finish,
     decimal LengthMeters,
     int DownspoutCount,
     int Floors,
@@ -57,8 +58,14 @@ public record TopProduct(string Label, int Count);
 public record UpsertProductRequest(
     Material Material,
     int SizeInches,
-    Finish? Finish,
     decimal PricePerMeter,
+    bool IsActive
+);
+
+public record UpsertBuildingTypeRequest(
+    string Label,
+    int SizeInches,
+    int DisplayOrder,
     bool IsActive
 );
 

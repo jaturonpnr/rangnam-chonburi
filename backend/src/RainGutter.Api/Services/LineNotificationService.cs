@@ -22,12 +22,22 @@ public class LineNotificationService(IHttpClientFactory httpClientFactory, ILogg
         try
         {
             var materialLabel = quote.Material == Material.Galvanized ? "สังกะสี" : "สแตนเลส";
-            var finishLabel = quote.Finish switch
+            var buildingLabel = !string.IsNullOrEmpty(quote.BuildingTypeLabelSnapshot)
+                ? $" ({quote.BuildingTypeLabelSnapshot})"
+                : "";
+
+            var bodyContents = new List<object>
             {
-                Finish.Glossy => " เงา",
-                Finish.Matte => " ด้าน",
-                _ => ""
+                new { type = "text", text = $"เลขที่: {quote.QuoteNumber}", size = "sm", color = "#888888" },
+                new { type = "separator" },
+                Row("ชื่อลูกค้า", lead.CustomerName),
+                Row("เบอร์โทร", lead.Phone),
+                Row("วัสดุ", $"{materialLabel} {quote.SizeInches}\"{buildingLabel}"),
+                Row("จำนวน", $"{quote.LengthMeters} เมตร"),
+                Row("ยอดประเมิน", $"{quote.EstimatedTotal:N0} บาท")
             };
+            if (!string.IsNullOrEmpty(lead.LocationDetail))
+                bodyContents.Add(Row("พื้นที่", lead.LocationDetail));
 
             var flexMessage = new
             {
@@ -48,16 +58,7 @@ public class LineNotificationService(IHttpClientFactory httpClientFactory, ILogg
                         type = "box",
                         layout = "vertical",
                         spacing = "md",
-                        contents = new object[]
-                        {
-                            new { type = "text", text = $"เลขที่: {quote.QuoteNumber}", size = "sm", color = "#888888" },
-                            new { type = "separator" },
-                            Row("ชื่อลูกค้า", lead.CustomerName),
-                            Row("เบอร์โทร", lead.Phone),
-                            Row("วัสดุ", $"{materialLabel} {quote.SizeInches}\"{finishLabel}"),
-                            Row("จำนวน", $"{quote.LengthMeters} เมตร"),
-                            Row("ยอดประเมิน", $"{quote.EstimatedTotal:N0} บาท")
-                        }
+                        contents = bodyContents
                     }
                 }
             };

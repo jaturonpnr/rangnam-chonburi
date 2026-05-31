@@ -6,6 +6,7 @@ namespace RainGutter.Api.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<GutterProduct> GutterProducts => Set<GutterProduct>();
+    public DbSet<BuildingType> BuildingTypes => Set<BuildingType>();
     public DbSet<PricingConfig> PricingConfigs => Set<PricingConfig>();
     public DbSet<ServiceZone> ServiceZones => Set<ServiceZone>();
     public DbSet<ShopProfile> ShopProfiles => Set<ShopProfile>();
@@ -36,14 +37,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // Store enums as strings for readability
         modelBuilder.Entity<GutterProduct>()
             .Property(p => p.Material).HasConversion<string>();
-        modelBuilder.Entity<GutterProduct>()
-            .Property(p => p.Finish).HasConversion<string>();
         modelBuilder.Entity<QuoteRequest>()
             .Property(q => q.Material).HasConversion<string>();
         modelBuilder.Entity<QuoteRequest>()
-            .Property(q => q.Finish).HasConversion<string>();
-        modelBuilder.Entity<QuoteRequest>()
             .Property(q => q.Status).HasConversion<string>();
+
+        modelBuilder.Entity<QuoteRequest>()
+            .HasOne<BuildingType>()
+            .WithMany()
+            .HasForeignKey(q => q.BuildingTypeId)
+            .IsRequired(false);
 
         // Unique index on QuoteNumber
         modelBuilder.Entity<QuoteRequest>()

@@ -4,8 +4,7 @@ namespace RainGutter.Api.Dtos;
 
 public record CreateQuoteRequest(
     Material Material,
-    int SizeInches,
-    Finish? Finish,
+    int BuildingTypeId,
     decimal LengthMeters,
     int DownspoutCount,
     int Floors,
@@ -13,7 +12,8 @@ public record CreateQuoteRequest(
     int? ServiceZoneId,
     string CustomerName,
     string Phone,
-    string? Address
+    string? Address,
+    string? LocationDetail
 );
 
 public record CreateQuoteResponse(string QuoteNumber, int QuoteRequestId);

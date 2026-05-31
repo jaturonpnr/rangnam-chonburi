@@ -16,10 +16,11 @@
 
   <!-- Tab bar -->
   <div class="tab-bar">
-    <button class="tab-btn" [class.active]="activeTab()==='products'" (click)="activeTab.set('products')">สินค้า/ราคา</button>
-    <button class="tab-btn" [class.active]="activeTab()==='config'"   (click)="activeTab.set('config')">ตั้งค่าราคา</button>
-    <button class="tab-btn" [class.active]="activeTab()==='zones'"    (click)="activeTab.set('zones')">โซนพื้นที่</button>
-    <button class="tab-btn" [class.active]="activeTab()==='shop'"     (click)="activeTab.set('shop')">ข้อมูลร้าน</button>
+    <button class="tab-btn" [class.active]="activeTab()==='products'"  (click)="activeTab.set('products')">สินค้า/ราคา</button>
+    <button class="tab-btn" [class.active]="activeTab()==='buildings'" (click)="activeTab.set('buildings')">ประเภทอาคาร</button>
+    <button class="tab-btn" [class.active]="activeTab()==='config'"    (click)="activeTab.set('config')">ตั้งค่าราคา</button>
+    <button class="tab-btn" [class.active]="activeTab()==='zones'"     (click)="activeTab.set('zones')">โซนพื้นที่</button>
+    <button class="tab-btn" [class.active]="activeTab()==='shop'"      (click)="activeTab.set('shop')">ข้อมูลร้าน</button>
   </div>
 
   <!-- Products Tab -->
@@ -41,14 +42,6 @@
             <option [value]="5">5"</option>
             <option [value]="6">6"</option>
             <option [value]="8">8"</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin:0;">
-          <label>ผิว (SS)</label>
-          <select class="form-control" formControlName="finish">
-            <option [value]="null">—</option>
-            <option value="Glossy">เงา</option>
-            <option value="Matte">ด้าน</option>
           </select>
         </div>
         <div class="form-group" style="margin:0;">
@@ -77,7 +70,6 @@
           <tr>
             <th style="padding-left:20px;">วัสดุ</th>
             <th>ขนาด</th>
-            <th>ผิว</th>
             <th style="text-align:right;">ราคา/เมตร</th>
             <th>สถานะ</th>
             <th style="padding-right:16px;"></th>
@@ -88,12 +80,78 @@
             <tr>
               <td style="padding-left:20px;">{{ materialLabel(p.material) }}</td>
               <td style="font-family:var(--mono);">{{ p.sizeInches }}"</td>
-              <td>{{ finishLabel(p.finish) }}</td>
               <td style="text-align:right; font-family:var(--mono); font-weight:600; color:var(--amber);">{{ p.pricePerMeter.toLocaleString() }}</td>
               <td><span class="badge" [ngClass]="p.isActive ? 'badge-active' : 'badge-inactive'">{{ p.isActive ? 'ใช้งาน' : 'ปิด' }}</span></td>
               <td style="display:flex; gap:6px; padding-right:16px;">
                 <button class="btn btn-sm btn-secondary" (click)="editProduct(p)">แก้ไข</button>
                 <button class="btn btn-sm btn-danger" (click)="deleteProduct(p.id)">ลบ</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Buildings Tab -->
+  @if (activeTab() === 'buildings') {
+    <div class="card">
+      <p class="sec-label">{{ editingBuildingId() ? 'แก้ไขประเภทอาคาร' : 'เพิ่มประเภทอาคารใหม่' }}</p>
+      <form [formGroup]="buildingForm" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(155px, 1fr)); gap:12px; align-items:end;">
+        <div class="form-group" style="margin:0;">
+          <label>ชื่อประเภทอาคาร</label>
+          <input class="form-control" formControlName="label" placeholder="เช่น บ้านพักอาศัย">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>ขนาดราง (นิ้ว)</label>
+          <select class="form-control" formControlName="sizeInches">
+            <option [value]="4">4"</option>
+            <option [value]="5">5"</option>
+            <option [value]="6">6"</option>
+            <option [value]="8">8"</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>ลำดับ</label>
+          <input class="form-control" type="number" formControlName="displayOrder">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>สถานะ</label>
+          <select class="form-control" formControlName="isActive">
+            <option [value]="true">ใช้งาน</option>
+            <option [value]="false">ปิด</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px; padding-bottom:1px;">
+          <button type="button" class="btn btn-primary btn-sm" (click)="saveBuilding()">บันทึก</button>
+          @if (editingBuildingId()) {
+            <button type="button" class="btn btn-secondary btn-sm" (click)="resetBuildingForm()">ยกเลิก</button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="card" style="overflow-x:auto; padding:0;">
+      <table>
+        <thead>
+          <tr>
+            <th style="padding-left:20px;">ชื่อ</th>
+            <th>ขนาดราง</th>
+            <th>ลำดับ</th>
+            <th>สถานะ</th>
+            <th style="padding-right:16px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of buildings(); track b.id) {
+            <tr>
+              <td style="padding-left:20px;">{{ b.label }}</td>
+              <td style="font-family:var(--mono);">{{ b.sizeInches }}"</td>
+              <td style="font-family:var(--mono);">{{ b.displayOrder }}</td>
+              <td><span class="badge" [ngClass]="b.isActive ? 'badge-active' : 'badge-inactive'">{{ b.isActive ? 'ใช้งาน' : 'ปิด' }}</span></td>
+              <td style="display:flex; gap:6px; padding-right:16px;">
+                <button class="btn btn-sm btn-secondary" (click)="editBuilding(b)">แก้ไข</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteBuilding(b.id)">ลบ</button>
               </td>
             </tr>
           }

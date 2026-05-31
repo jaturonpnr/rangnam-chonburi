@@ -18,10 +18,9 @@ public class PricingServiceTests
         SurveyFee = 1000
     };
 
-    private static GutterProduct Stainless6Glossy() => new()
+    private static GutterProduct Stainless6() => new()
     {
-        Material = Material.Stainless, SizeInches = 6,
-        Finish = Finish.Glossy, PricePerMeter = 850
+        Material = Material.Stainless, SizeInches = 6, PricePerMeter = 850
     };
 
     private static GutterProduct Galvanized4() => new()
@@ -32,8 +31,8 @@ public class PricingServiceTests
     [Fact]
     public void BelowMinimum_BillsAsMinimumMeters()
     {
-        var req = new EstimateRequest(Material.Stainless, 6, Finish.Glossy, 8, 0, 1, false, null);
-        var result = _svc.Calculate(req, DefaultConfig(), Stainless6Glossy(), null);
+        var req = new EstimateRequest(8, 0, 1, false, null);
+        var result = _svc.Calculate(req, DefaultConfig(), Stainless6(), null);
 
         // baseGutter = 10 * 850 = 8500
         Assert.Equal(8500, result.Total);
@@ -43,8 +42,8 @@ public class PricingServiceTests
     [Fact]
     public void ExactMinimum_NoMinimumNote()
     {
-        var req = new EstimateRequest(Material.Stainless, 6, Finish.Glossy, 10, 0, 1, false, null);
-        var result = _svc.Calculate(req, DefaultConfig(), Stainless6Glossy(), null);
+        var req = new EstimateRequest(10, 0, 1, false, null);
+        var result = _svc.Calculate(req, DefaultConfig(), Stainless6(), null);
 
         Assert.Equal(8500, result.Total);
         Assert.DoesNotContain(result.Breakdown, b => b.Label.Contains("คิดราคาขั้นต่ำ"));
@@ -53,7 +52,7 @@ public class PricingServiceTests
     [Fact]
     public void AboveMinimum_UsesActualMeters()
     {
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 15, 0, 1, false, null);
+        var req = new EstimateRequest(15, 0, 1, false, null);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), null);
 
         // baseGutter = 15 * 400 = 6000
@@ -65,7 +64,7 @@ public class PricingServiceTests
     [InlineData(2, 0)]
     public void HeightSurcharge_NoSurchargeUpToTwoFloors(int floors, decimal expectedSurcharge)
     {
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 10, 0, floors, false, null);
+        var req = new EstimateRequest(10, 0, floors, false, null);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), null);
 
         // base = 10 * 400 = 4000, no surcharge
@@ -76,7 +75,7 @@ public class PricingServiceTests
     [Fact]
     public void HeightSurcharge_ThreeFloors_Adds20Percent()
     {
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 10, 0, 3, false, null);
+        var req = new EstimateRequest(10, 0, 3, false, null);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), null);
 
         // base = 4000, height = 4000 * 0.2 = 800
@@ -87,7 +86,7 @@ public class PricingServiceTests
     [Fact]
     public void DownspoutFee_CalculatesCorrectly()
     {
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 10, 3, 1, false, null);
+        var req = new EstimateRequest(10, 3, 1, false, null);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), null);
 
         // base = 4000, downspout = 3 * 500 = 1500
@@ -99,8 +98,8 @@ public class PricingServiceTests
     public void RemovalFee_WhenEnabled_UsesActualLength()
     {
         // removal uses actual LengthMeters (8m), not effectiveMeters (10m)
-        var req = new EstimateRequest(Material.Stainless, 6, Finish.Glossy, 8, 0, 1, true, null);
-        var result = _svc.Calculate(req, DefaultConfig(), Stainless6Glossy(), null);
+        var req = new EstimateRequest(8, 0, 1, true, null);
+        var result = _svc.Calculate(req, DefaultConfig(), Stainless6(), null);
 
         // base = 10 * 850 = 8500, removal = 8 * 60 = 480
         Assert.Equal(8980, result.Total);
@@ -110,7 +109,7 @@ public class PricingServiceTests
     [Fact]
     public void RemovalFee_WhenDisabled_NotCharged()
     {
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 10, 0, 1, false, null);
+        var req = new EstimateRequest(10, 0, 1, false, null);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), null);
 
         Assert.DoesNotContain(result.Breakdown, b => b.Label.Contains("รื้อถอน"));
@@ -120,7 +119,7 @@ public class PricingServiceTests
     public void TravelSurcharge_AddedFromZone()
     {
         var zone = new ServiceZone { Name = "ต่างจังหวัด", TravelSurcharge = 500 };
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 10, 0, 1, false, zone.Id);
+        var req = new EstimateRequest(10, 0, 1, false, zone.Id);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), zone);
 
         // base = 4000, travel = 500
@@ -132,18 +131,18 @@ public class PricingServiceTests
     public void ZoneWithZeroSurcharge_NoTravelLineItem()
     {
         var zone = new ServiceZone { Name = "พื้นที่หลัก", TravelSurcharge = 0 };
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 10, 0, 1, false, zone.Id);
+        var req = new EstimateRequest(10, 0, 1, false, zone.Id);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), zone);
 
         Assert.DoesNotContain(result.Breakdown, b => b.Label.Contains("ค่าเดินทาง"));
     }
 
     [Fact]
-    public void SpecExample_Stainless6Glossy_8m_2Downspouts_RemoveOld_2Floors_Total9980()
+    public void SpecExample_Stainless6_8m_2Downspouts_RemoveOld_2Floors_Total9980()
     {
-        // From spec §6: Stainless 6" Glossy, 8m input, 2 downspouts, removeOld=true, floors=2 → 9980
-        var req = new EstimateRequest(Material.Stainless, 6, Finish.Glossy, 8, 2, 2, true, null);
-        var result = _svc.Calculate(req, DefaultConfig(), Stainless6Glossy(), null);
+        // Stainless 6", 8m input, 2 downspouts, removeOld=true, floors=2 → 9980
+        var req = new EstimateRequest(8, 2, 2, true, null);
+        var result = _svc.Calculate(req, DefaultConfig(), Stainless6(), null);
 
         // base(min10) = 10*850 = 8500, height(floors≤2) = 0, downspout = 2*500 = 1000, removal = 8*60 = 480
         Assert.Equal(9980, result.Total);
@@ -152,7 +151,7 @@ public class PricingServiceTests
     [Fact]
     public void Disclaimer_AlwaysPresent()
     {
-        var req = new EstimateRequest(Material.Galvanized, 4, null, 10, 0, 1, false, null);
+        var req = new EstimateRequest(10, 0, 1, false, null);
         var result = _svc.Calculate(req, DefaultConfig(), Galvanized4(), null);
 
         Assert.False(string.IsNullOrEmpty(result.Disclaimer));

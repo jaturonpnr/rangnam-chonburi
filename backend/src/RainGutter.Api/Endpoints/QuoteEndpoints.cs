@@ -24,9 +24,12 @@ public static class QuoteEndpoints
             if (req.LengthMeters <= 0)
                 return Results.BadRequest(new { error = "จำนวนเมตรต้องมากกว่า 0" });
 
+            var buildingType = await db.BuildingTypes.FirstOrDefaultAsync(b => b.Id == req.BuildingTypeId && b.IsActive);
+            if (buildingType is null)
+                return Results.BadRequest(new { error = "ไม่พบประเภทอาคารที่ระบุ" });
+
             var product = await db.GutterProducts.FirstOrDefaultAsync(p =>
-                p.IsActive && p.Material == req.Material &&
-                p.SizeInches == req.SizeInches && p.Finish == req.Finish);
+                p.IsActive && p.Material == req.Material && p.SizeInches == buildingType.SizeInches);
             if (product is null)
                 return Results.BadRequest(new { error = "ไม่พบสินค้าที่ตรงกับเงื่อนไข" });
 
@@ -37,8 +40,7 @@ public static class QuoteEndpoints
                 ? await db.ServiceZones.FirstOrDefaultAsync(z => z.Id == req.ServiceZoneId && z.IsActive)
                 : null;
 
-            var estimateReq = new EstimateRequest(req.Material, req.SizeInches, req.Finish,
-                req.LengthMeters, req.DownspoutCount, req.Floors, req.RemoveOld, req.ServiceZoneId);
+            var estimateReq = new EstimateRequest(req.LengthMeters, req.DownspoutCount, req.Floors, req.RemoveOld, req.ServiceZoneId);
             var estimate = pricing.Calculate(estimateReq, config, product, zone);
 
             await using var tx = await db.Database.BeginTransactionAsync(
@@ -59,6 +61,7 @@ public static class QuoteEndpoints
                 CustomerName = req.CustomerName,
                 Phone = req.Phone,
                 Address = req.Address,
+                LocationDetail = req.LocationDetail,
                 ServiceZoneId = req.ServiceZoneId
             };
             db.Leads.Add(lead);
@@ -69,8 +72,9 @@ public static class QuoteEndpoints
                 QuoteNumber = quoteNumber,
                 LeadId = lead.Id,
                 Material = req.Material,
-                SizeInches = req.SizeInches,
-                Finish = req.Finish,
+                SizeInches = buildingType.SizeInches,
+                BuildingTypeId = buildingType.Id,
+                BuildingTypeLabelSnapshot = buildingType.Label,
                 LengthMeters = req.LengthMeters,
                 DownspoutCount = req.DownspoutCount,
                 Floors = req.Floors,

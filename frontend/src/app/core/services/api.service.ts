@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import {
-  GutterProduct, ServiceZone, ShopProfilePublic, EstimateResult,
+  GutterProduct, BuildingType, ServiceZone, ShopProfilePublic, EstimateResult,
   QuoteRequestSummary, QuoteRequestDetail, PricingConfig,
   ShopProfile, StatsResponse
 } from '../models';
@@ -15,6 +15,9 @@ export class ApiService {
   // Public
   getProducts() {
     return this.http.get<GutterProduct[]>(`${this.base}/api/products`);
+  }
+  getBuildingTypes() {
+    return this.http.get<BuildingType[]>(`${this.base}/api/building-types`);
   }
   getZones() {
     return this.http.get<ServiceZone[]>(`${this.base}/api/zones`);
@@ -70,6 +73,19 @@ export class ApiService {
   }
   deleteProduct(id: number) {
     return this.http.delete(`${this.base}/api/admin/products/${id}`);
+  }
+
+  getAdminBuildingTypes() {
+    return this.http.get<BuildingType[]>(`${this.base}/api/admin/building-types`);
+  }
+  createBuildingType(body: object) {
+    return this.http.post<BuildingType>(`${this.base}/api/admin/building-types`, body);
+  }
+  updateBuildingType(id: number, body: object) {
+    return this.http.put<BuildingType>(`${this.base}/api/admin/building-types/${id}`, body);
+  }
+  deleteBuildingType(id: number) {
+    return this.http.delete(`${this.base}/api/admin/building-types/${id}`);
   }
 
   getConfig() {

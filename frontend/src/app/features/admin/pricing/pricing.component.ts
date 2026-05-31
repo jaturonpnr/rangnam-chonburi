@@ -4,7 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { GutterProduct, ServiceZone, PricingConfig, ShopProfile } from '../../../core/models';
+import { GutterProduct, BuildingType, ServiceZone, PricingConfig, ShopProfile } from '../../../core/models';
 
 @Component({
   selector: 'app-pricing',
@@ -18,9 +18,10 @@ export class PricingComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  activeTab = signal<'products' | 'config' | 'zones' | 'shop'>('products');
+  activeTab = signal<'products' | 'buildings' | 'config' | 'zones' | 'shop'>('products');
 
   products = signal<GutterProduct[]>([]);
+  buildings = signal<BuildingType[]>([]);
   zones = signal<ServiceZone[]>([]);
   config = signal<PricingConfig | null>(null);
   shop = signal<ShopProfile | null>(null);
@@ -30,8 +31,16 @@ export class PricingComponent implements OnInit {
   productForm = this.fb.group({
     material: ['Galvanized', Validators.required],
     sizeInches: [4, Validators.required],
-    finish: [null as string | null],
     pricePerMeter: [0, [Validators.required, Validators.min(1)]],
+    isActive: [true]
+  });
+
+  editingBuildingId = signal<number | null>(null);
+
+  buildingForm = this.fb.group({
+    label: ['', Validators.required],
+    sizeInches: [6, Validators.required],
+    displayOrder: [1, Validators.required],
     isActive: [true]
   });
 
@@ -69,6 +78,7 @@ export class PricingComponent implements OnInit {
 
   loadAll() {
     this.api.getAdminProducts().subscribe(p => this.products.set(p));
+    this.api.getAdminBuildingTypes().subscribe(bt => this.buildings.set(bt));
     this.api.getAdminZones().subscribe(z => this.zones.set(z));
     this.api.getConfig().subscribe(c => { this.config.set(c); this.configForm.patchValue(c as any); });
     this.api.getAdminShopProfile().subscribe(s => { this.shop.set(s); this.shopForm.patchValue(s as any); });
@@ -76,7 +86,7 @@ export class PricingComponent implements OnInit {
 
   editProduct(p: GutterProduct) {
     this.editingProductId.set(p.id);
-    this.productForm.patchValue({ material: p.material, sizeInches: p.sizeInches, finish: p.finish, pricePerMeter: p.pricePerMeter, isActive: p.isActive });
+    this.productForm.patchValue({ material: p.material, sizeInches: p.sizeInches, pricePerMeter: p.pricePerMeter, isActive: p.isActive });
   }
 
   saveProduct() {
@@ -92,7 +102,27 @@ export class PricingComponent implements OnInit {
     this.api.deleteProduct(id).subscribe(() => this.api.getAdminProducts().subscribe(p => this.products.set(p)));
   }
 
-  resetProductForm() { this.editingProductId.set(null); this.productForm.reset({ material: 'Galvanized', sizeInches: 4, finish: null, pricePerMeter: 0, isActive: true }); }
+  resetProductForm() { this.editingProductId.set(null); this.productForm.reset({ material: 'Galvanized', sizeInches: 4, pricePerMeter: 0, isActive: true }); }
+
+  editBuilding(b: BuildingType) {
+    this.editingBuildingId.set(b.id);
+    this.buildingForm.patchValue({ label: b.label, sizeInches: b.sizeInches, displayOrder: b.displayOrder, isActive: b.isActive });
+  }
+
+  saveBuilding() {
+    if (this.buildingForm.invalid) return;
+    const body = this.buildingForm.value;
+    const id = this.editingBuildingId();
+    const obs = id ? this.api.updateBuildingType(id, body) : this.api.createBuildingType(body);
+    obs.subscribe(() => { this.api.getAdminBuildingTypes().subscribe(bt => this.buildings.set(bt)); this.resetBuildingForm(); this.flashSaved(); });
+  }
+
+  deleteBuilding(id: number) {
+    if (!confirm('ลบประเภทอาคารนี้?')) return;
+    this.api.deleteBuildingType(id).subscribe(() => this.api.getAdminBuildingTypes().subscribe(bt => this.buildings.set(bt)));
+  }
+
+  resetBuildingForm() { this.editingBuildingId.set(null); this.buildingForm.reset({ label: '', sizeInches: 6, displayOrder: 1, isActive: true }); }
 
   saveConfig() {
     if (this.configForm.invalid) return;
@@ -123,5 +153,4 @@ export class PricingComponent implements OnInit {
   flashSaved() { this.savedMsg.set('บันทึกเรียบร้อยแล้ว ✓'); setTimeout(() => this.savedMsg.set(''), 2500); }
   logout() { this.auth.logout(); this.router.navigate(['/admin/login']); }
   materialLabel(m: string) { return m === 'Galvanized' ? 'สังกะสี' : 'สแตนเลส'; }
-  finishLabel(f: string | null) { if (!f) return '-'; return f === 'Glossy' ? 'เงา' : 'ด้าน'; }
 }

@@ -59,6 +59,8 @@ public class PdfService : IPdfService
                         inner.Item().Text($"โทร: {lead.Phone}");
                         if (!string.IsNullOrEmpty(lead.Address))
                             inner.Item().Text($"ที่อยู่: {lead.Address}");
+                        if (!string.IsNullOrEmpty(lead.LocationDetail))
+                            inner.Item().Text($"รายละเอียดพื้นที่: {lead.LocationDetail}");
                     });
 
                     // Line items table
