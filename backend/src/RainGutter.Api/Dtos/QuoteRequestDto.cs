@@ -13,7 +13,13 @@ public record CreateQuoteRequest(
     string CustomerName,
     string Phone,
     string? Address,
-    string? LocationDetail
+    string? LocationDetail,
+    string MeasureSource = "Manual",
+    decimal? MeasuredLengthMeters = null,
+    string? MeasuredGeoJson = null,
+    double? MapCenterLat = null,
+    double? MapCenterLng = null,
+    int? MapZoom = null
 );
 
 public record CreateQuoteResponse(string QuoteNumber, int QuoteRequestId);

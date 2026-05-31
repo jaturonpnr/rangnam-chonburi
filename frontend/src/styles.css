@@ -1,20 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap');
 
 :root {
-  --bg-base:      #07101c;
-  --bg-panel:     #0b1829;
-  --bg-surface:   #0f1f32;
-  --bg-input:     #0c1a2e;
-  --border:       #1a3050;
-  --border-hi:    #2d4f72;
-  --blue:         #38bdf8;
-  --amber:        #f59e0b;
-  --teal:         #2dd4bf;
-  --green:        #34d399;
-  --red:          #f87171;
-  --text:         #c8d8e8;
-  --text-2:       #607d8b;
-  --text-dim:     #2d4459;
+  --bg-base:      #EBF4FF;
+  --bg-panel:     #F0F7FF;
+  --bg-surface:   #FFFFFF;
+  --bg-input:     #F4F8FC;
+  --border:       #C9D8E8;
+  --border-hi:    #7BAFD4;
+  --blue:         #0284C7;
+  --amber:        #D97706;
+  --teal:         #0891B2;
+  --green:        #059669;
+  --red:          #DC2626;
+  --text:         #0D2137;
+  --text-2:       #4B6A85;
+  --text-dim:     #94A3B8;
   --mono:         'IBM Plex Mono', monospace;
   --thai:         'Sarabun', sans-serif;
   --head:         'Barlow Condensed', sans-serif;
@@ -40,8 +40,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(56,189,248,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56,189,248,.03) 1px, transparent 1px);
+    linear-gradient(rgba(2,132,199,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(2,132,199,.05) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
   z-index: 0;
@@ -195,10 +195,10 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-primary:hover:not(:disabled) {
   background: #7dd3fc;
-  box-shadow: 0 0 20px rgba(56,189,248,.35);
+  box-shadow: 0 0 20px rgba(2,132,199,.35);
 }
 .btn-primary:disabled {
-  background: #122a42;
+  background: #C8DCF0;
   color: var(--text-dim);
   border-color: var(--border);
   cursor: not-allowed;
@@ -219,8 +219,8 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 0 28px rgba(245,158,11,.45);
 }
 .btn-calculate:disabled {
-  background: #20160000;
-  color: #4a3010;
+  background: rgba(217,119,6,.08);
+  color: #92530A;
   border-color: var(--border);
   cursor: not-allowed;
 }
@@ -238,7 +238,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--blue);
   border-color: var(--border-hi);
 }
-.btn-secondary:hover { background: rgba(56,189,248,.07); }
+.btn-secondary:hover { background: rgba(2,132,199,.07); }
 
 .btn-success {
   background: var(--green);
@@ -296,7 +296,7 @@ textarea.form-control { resize: vertical; min-height: 72px; }
 .form-control:focus {
   outline: none;
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(56,189,248,.12);
+  box-shadow: 0 0 0 3px rgba(2,132,199,.12);
 }
 .form-control.ng-invalid.ng-touched {
   border-color: var(--red);
@@ -308,7 +308,7 @@ select.form-control option { background: var(--bg-panel); color: var(--text); }
 /* Remove number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-input[type="number"] { -moz-appearance: textfield; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 
 .error-msg {
   font-family: var(--mono);
@@ -332,6 +332,20 @@ input[type="number"] { -moz-appearance: textfield; }
   pointer-events: none;
   letter-spacing: .04em;
 }
+.input-unit-wrap .input-unit {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-2);
+  pointer-events: none;
+  letter-spacing: .04em;
+}
+.input-with-map { display: flex; gap: 8px; align-items: flex-start; }
+.input-with-map .input-unit-wrap { flex: 1; }
+.map-btn { white-space: nowrap; flex-shrink: 0; margin-top: 0; }
 
 /* ── Material toggle (GI / SS) ── */
 .mat-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -352,8 +366,8 @@ input[type="number"] { -moz-appearance: textfield; }
 
 .mat-tile:has(input:checked) .mat-tile-inner {
   border-color: var(--blue);
-  background: rgba(56,189,248,.06);
-  box-shadow: 0 0 18px rgba(56,189,248,.1), inset 0 0 0 1px rgba(56,189,248,.15);
+  background: rgba(2,132,199,.06);
+  box-shadow: 0 0 18px rgba(2,132,199,.1), inset 0 0 0 1px rgba(2,132,199,.15);
 }
 .mat-tile:has(input:checked) .mat-code { color: var(--blue); }
 
@@ -485,13 +499,13 @@ th {
 
 td {
   padding: 12px;
-  border-bottom: 1px solid rgba(26,48,80,.6);
+  border-bottom: 1px solid rgba(201,216,232,.9);
   font-size: 15px;
   color: var(--text);
 }
 
 tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: rgba(56,189,248,.025); }
+tbody tr:hover td { background: rgba(2,132,199,.025); }
 tfoot td { border-top: 1px solid var(--border); border-bottom: none; padding-top: 16px; }
 
 /* ── Total readout ── */
@@ -519,13 +533,13 @@ tfoot td { border-top: 1px solid var(--border); border-bottom: none; padding-top
   font-weight: 500;
   text-transform: uppercase;
 }
-.badge-new       { background: rgba(56,189,248,.1);  color: var(--blue);  border: 1px solid rgba(56,189,248,.3); }
+.badge-new       { background: rgba(2,132,199,.1);  color: var(--blue);  border: 1px solid rgba(2,132,199,.3); }
 .badge-contacted { background: rgba(245,158,11,.1);  color: var(--amber); border: 1px solid rgba(245,158,11,.3); }
 .badge-quoted    { background: rgba(45,212,191,.1);  color: var(--teal);  border: 1px solid rgba(45,212,191,.3); }
 .badge-won       { background: rgba(52,211,153,.1);  color: var(--green); border: 1px solid rgba(52,211,153,.3); }
 .badge-lost      { background: rgba(248,113,113,.1); color: var(--red);   border: 1px solid rgba(248,113,113,.25); }
 .badge-active    { background: rgba(52,211,153,.1);  color: var(--green); border: 1px solid rgba(52,211,153,.3); }
-.badge-inactive  { background: rgba(48,68,80,.4);   color: var(--text-2); border: 1px solid var(--border); }
+.badge-inactive  { background: rgba(148,163,184,.15); color: var(--text-2); border: 1px solid var(--border); }
 
 /* ── Admin nav ── */
 .admin-nav {
@@ -547,7 +561,7 @@ tfoot td { border-top: 1px solid var(--border); border-bottom: none; padding-top
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--blue);
-  border: 1px solid rgba(56,189,248,.3);
+  border: 1px solid rgba(2,132,199,.3);
   padding: 4px 10px;
   border-radius: 2px;
   white-space: nowrap;
@@ -668,7 +682,7 @@ code {
   font-family: var(--mono);
   font-size: 13px;
   color: var(--blue);
-  background: rgba(56,189,248,.08);
+  background: rgba(2,132,199,.08);
   padding: 2px 8px;
   border-radius: 2px;
 }
@@ -694,7 +708,7 @@ code {
   align-items: baseline;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid rgba(26,48,80,.5);
+  border-bottom: 1px solid rgba(201,216,232,.8);
 }
 .kv-row:last-child { border-bottom: none; }
 .kv-key {

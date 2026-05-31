@@ -119,7 +119,13 @@ public static class AdminEndpoints
                 q.Id, q.QuoteNumber, q.Lead.CustomerName, q.Lead.Phone, q.Lead.Address,
                 q.Lead.LocationDetail, q.Lead.ServiceZone?.Name, q.BuildingTypeLabelSnapshot,
                 q.Material, q.SizeInches, q.LengthMeters, q.DownspoutCount, q.Floors, q.RemoveOld,
-                q.EstimatedTotal, q.BreakdownJson, q.Status, q.CreatedAt));
+                q.EstimatedTotal, q.BreakdownJson, q.Status, q.CreatedAt,
+                q.MeasureSource,
+                q.MeasuredLengthMeters,
+                q.MeasuredGeoJson,
+                q.MapCenterLat,
+                q.MapCenterLng,
+                q.MapZoom));
         });
 
         // Update status

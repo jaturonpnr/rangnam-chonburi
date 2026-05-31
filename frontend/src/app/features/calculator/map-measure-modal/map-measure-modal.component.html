@@ -1,0 +1,33 @@
+<div class="modal-backdrop" (click)="dismissed.emit()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <span class="modal-title">วัดความยาวรางจากแผนที่</span>
+      <button class="modal-close" (click)="dismissed.emit()">✕</button>
+    </div>
+
+    <div class="map-wrapper">
+      <div id="map-measure-container"></div>
+      <div class="map-disclaimer">📍 ค่าประมาณจากแผนที่ ยืนยันความยาวจริงหน้างาน</div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="length-display">
+        ความยาวรวม: <strong>{{ totalMeters | number:'1.1-1' }} เมตร</strong>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary btn-sm" type="button" (click)="locateMe()">
+          📍 ตำแหน่งปัจจุบัน
+        </button>
+        <button class="btn btn-secondary btn-sm" type="button" (click)="clearAll()">
+          🗑 ล้าง / วาดใหม่
+        </button>
+        <button class="btn btn-primary" type="button"
+                [disabled]="totalMeters === 0" (click)="apply()">
+          ใช้ค่านี้ (≈ {{ totalMeters | number:'1.1-1' }} เมตร)
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

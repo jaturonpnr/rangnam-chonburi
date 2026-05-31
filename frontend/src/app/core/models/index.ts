@@ -1,3 +1,5 @@
+import type { MultiLineString } from 'geojson';
+
 export type Material = 'Galvanized' | 'Stainless';
 export type QuoteStatus = 'New' | 'Contacted' | 'Quoted' | 'Won' | 'Lost';
 
@@ -63,6 +65,12 @@ export interface QuoteRequestDetail extends QuoteRequestSummary {
   floors: number;
   removeOld: boolean;
   breakdownJson: string;
+  measureSource: MeasureSource;
+  measuredLengthMeters: number | null;
+  measuredGeoJson: string | null;
+  mapCenterLat: number | null;
+  mapCenterLng: number | null;
+  mapZoom: number | null;
 }
 
 export interface PricingConfig {
@@ -83,6 +91,16 @@ export interface ShopProfile {
   lineOaLink: string;
   quoteValidityDays: number;
   quoteFooterNote: string;
+}
+
+export type MeasureSource = 'Manual' | 'Map';
+
+export interface MapMeasureResult {
+  geojson: MultiLineString;
+  measuredLengthMeters: number;
+  centerLat: number;
+  centerLng: number;
+  zoom: number;
 }
 
 export interface StatsResponse {

@@ -4,8 +4,18 @@ import { environment } from '../../../environments/environment';
 import {
   GutterProduct, BuildingType, ServiceZone, ShopProfilePublic, EstimateResult,
   QuoteRequestSummary, QuoteRequestDetail, PricingConfig,
-  ShopProfile, StatsResponse
+  ShopProfile, StatsResponse, MeasureSource
 } from '../models';
+
+export interface CreateQuoteRequestPayload {
+  [key: string]: unknown;
+  measureSource?: MeasureSource;
+  measuredLengthMeters?: number | null;
+  measuredGeoJson?: string | null;
+  mapCenterLat?: number | null;
+  mapCenterLng?: number | null;
+  mapZoom?: number | null;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -28,7 +38,7 @@ export class ApiService {
   estimate(body: object) {
     return this.http.post<EstimateResult>(`${this.base}/api/estimate`, body);
   }
-  createQuoteRequest(body: object) {
+  createQuoteRequest(body: CreateQuoteRequestPayload) {
     return this.http.post<{ quoteNumber: string; quoteRequestId: number }>(`${this.base}/api/quote-requests`, body);
   }
   getQuotePdfUrl(id: number) {

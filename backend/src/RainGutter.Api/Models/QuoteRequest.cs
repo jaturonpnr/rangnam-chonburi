@@ -18,6 +18,12 @@ public class QuoteRequest
     public int DownspoutCount { get; set; }
     public int Floors { get; set; }
     public bool RemoveOld { get; set; }
+    public string MeasureSource { get; set; } = "Manual";
+    public decimal? MeasuredLengthMeters { get; set; }
+    public string? MeasuredGeoJson { get; set; }
+    public double? MapCenterLat { get; set; }
+    public double? MapCenterLng { get; set; }
+    public int? MapZoom { get; set; }
 
     public decimal EstimatedTotal { get; set; }
     public string BreakdownJson { get; set; } = "[]";

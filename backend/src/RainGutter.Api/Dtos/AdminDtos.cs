@@ -35,7 +35,13 @@ public record QuoteRequestDetail(
     decimal EstimatedTotal,
     string BreakdownJson,
     QuoteStatus Status,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string MeasureSource,
+    decimal? MeasuredLengthMeters,
+    string? MeasuredGeoJson,
+    double? MapCenterLat,
+    double? MapCenterLng,
+    int? MapZoom
 );
 
 public record StatsResponse(

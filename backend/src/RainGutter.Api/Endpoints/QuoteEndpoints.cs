@@ -1,5 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO.Converters;
 using RainGutter.Api.Data;
 using RainGutter.Api.Dtos;
 using RainGutter.Api.Models;
@@ -15,8 +17,10 @@ public static class QuoteEndpoints
             CreateQuoteRequest req,
             AppDbContext db,
             IPricingService pricing,
-            ILineNotificationService line) =>
+            ILineNotificationService line,
+            ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("QuoteEndpoints");
             if (string.IsNullOrWhiteSpace(req.CustomerName))
                 return Results.BadRequest(new { error = "กรุณาระบุชื่อลูกค้า" });
             if (!System.Text.RegularExpressions.Regex.IsMatch(req.Phone, @"^\d{9,10}$"))
@@ -80,15 +84,43 @@ public static class QuoteEndpoints
                 Floors = req.Floors,
                 RemoveOld = req.RemoveOld,
                 EstimatedTotal = estimate.Total,
-                BreakdownJson = JsonSerializer.Serialize(estimate.Breakdown)
+                BreakdownJson = JsonSerializer.Serialize(estimate.Breakdown),
+                MeasureSource = req.MeasureSource,
+                MeasuredLengthMeters = req.MeasuredLengthMeters,
+                MeasuredGeoJson = req.MeasuredGeoJson,
+                MapCenterLat = req.MapCenterLat,
+                MapCenterLng = req.MapCenterLng,
+                MapZoom = req.MapZoom
             };
             db.QuoteRequests.Add(quoteRequest);
             await db.SaveChangesAsync();
             await tx.CommitAsync();
 
-            // Fire-and-forget LINE notification
-            _ = line.SendNewLeadNotificationAsync(quoteRequest, lead);
+            if (!string.IsNullOrEmpty(req.MeasuredGeoJson) && req.MeasuredLengthMeters > 0)
+            {
+                try
+                {
+                    var ntsOpts = new JsonSerializerOptions();
+                    ntsOpts.Converters.Add(new GeoJsonConverterFactory());
+                    var geom = JsonSerializer.Deserialize<Geometry>(req.MeasuredGeoJson, ntsOpts);
+                    if (geom != null)
+                    {
+                        double serverMetres = ComputeGeodesicMetres(geom);
+                        double clientMetres = (double)req.MeasuredLengthMeters.Value;
+                        double diff = Math.Abs(serverMetres - clientMetres) / clientMetres;
+                        if (diff > 0.10)
+                            logger.LogWarning(
+                                "Map length mismatch: client={Client}m server={Server}m diff={Diff:P0} quote={Quote}",
+                                Math.Round(clientMetres, 1), Math.Round(serverMetres, 1), diff, quoteNumber);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Could not validate MeasuredGeoJson for {Quote}", quoteNumber);
+                }
+            }
 
+            _ = line.SendNewLeadNotificationAsync(quoteRequest, lead);
             return Results.Ok(new CreateQuoteResponse(quoteNumber, quoteRequest.Id));
         });
 
@@ -106,5 +138,35 @@ public static class QuoteEndpoints
             var pdfBytes = pdf.GenerateQuotePdf(quote, quote.Lead, shop);
             return Results.File(pdfBytes, "application/pdf", $"{quote.QuoteNumber}.pdf");
         });
+    }
+
+    private static double ComputeGeodesicMetres(Geometry geom)
+    {
+        double total = 0;
+        if (geom is MultiLineString mls)
+            foreach (var g in mls.Geometries)
+                total += SumSegments(g.Coordinates);
+        else
+            total = SumSegments(geom.Coordinates);
+        return total;
+    }
+
+    private static double SumSegments(Coordinate[] coords)
+    {
+        double d = 0;
+        for (int i = 0; i < coords.Length - 1; i++)
+            d += Haversine(coords[i].Y, coords[i].X, coords[i + 1].Y, coords[i + 1].X);
+        return d;
+    }
+
+    private static double Haversine(double lat1, double lng1, double lat2, double lng2)
+    {
+        const double R = 6371000;
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLng = (lng2 - lng1) * Math.PI / 180;
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+              + Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180)
+              * Math.Sin(dLng / 2) * Math.Sin(dLng / 2);
+        return R * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
     }
 }

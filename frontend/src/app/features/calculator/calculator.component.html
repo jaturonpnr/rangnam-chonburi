@@ -59,13 +59,20 @@
 
       <div class="form-group">
         <label>ความยาวราง (เมตร)</label>
-        <div class="input-unit-wrap">
-          <input class="form-control" type="number" min="0.1" step="0.5"
-                 formControlName="lengthMeters" placeholder="เช่น 15">
-          <span class="unit-tag">ม.</span>
+        <div class="input-with-map">
+          <div class="input-unit-wrap">
+            <input class="form-control" type="number" formControlName="lengthMeters"
+                   placeholder="เช่น 15" min="0.1" step="0.1"
+                   (input)="onLengthMetersInput()">
+            <span class="input-unit">ม.</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm map-btn"
+                  (click)="showMapModal.set(true)">
+            📍 วัดจากแผนที่
+          </button>
         </div>
         @if (calcForm.get('lengthMeters')?.invalid && calcForm.get('lengthMeters')?.touched) {
-          <div class="error-msg">กรุณาระบุจำนวนเมตร (มากกว่า 0)</div>
+          <span class="error-msg">กรุณาระบุความยาว</span>
         }
       </div>
 
@@ -238,6 +245,13 @@
         💬 แชทกับช่างทาง LINE
       </a>
     </div>
+  }
+
+  @if (showMapModal()) {
+    <app-map-measure-modal
+      (applied)="onMapApplied($event)"
+      (dismissed)="showMapModal.set(false)">
+    </app-map-measure-modal>
   }
 
 </div>

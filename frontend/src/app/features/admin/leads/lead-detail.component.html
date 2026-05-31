@@ -46,6 +46,20 @@
         </div>
       </div>
 
+      @if (detail()?.measuredGeoJson) {
+        <div class="card">
+          <div class="sec-label">วัดจากแผนที่</div>
+          <div class="kv-row" style="margin-bottom: 10px;">
+            <span class="kv-key">ความยาวที่วัด</span>
+            <span class="kv-val">
+              <strong>{{ detail()!.measuredLengthMeters | number:'1.1-1' }} เมตร</strong>
+              <span class="badge badge-new" style="margin-left: 8px;">Map</span>
+            </span>
+          </div>
+          <div id="admin-mini-map" style="height: 280px; border-radius: 4px; border: 1px solid var(--border);"></div>
+        </div>
+      }
+
       <!-- Quote spec -->
       <div class="card">
         <p class="sec-label">Job Specification</p>
