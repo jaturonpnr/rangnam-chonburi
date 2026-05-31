@@ -4,12 +4,12 @@ import { environment } from '../../../environments/environment';
 import {
   GutterProduct, BuildingType, ServiceZone, ShopProfilePublic, EstimateResult,
   QuoteRequestSummary, QuoteRequestDetail, PricingConfig,
-  ShopProfile, StatsResponse
+  ShopProfile, StatsResponse, MeasureSource
 } from '../models';
 
 export interface CreateQuoteRequestPayload {
   [key: string]: unknown;
-  measureSource?: string;
+  measureSource?: MeasureSource;
   measuredLengthMeters?: number | null;
   measuredGeoJson?: string | null;
   mapCenterLat?: number | null;
