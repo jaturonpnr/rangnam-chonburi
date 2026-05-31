@@ -23,6 +23,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(q => q.BreakdownJson)
             .HasColumnType("jsonb");
 
+        modelBuilder.Entity<QuoteRequest>()
+            .Property(q => q.MeasuredGeoJson)
+            .HasColumnType("jsonb");
+
         modelBuilder.Entity<Lead>()
             .HasOne(l => l.ServiceZone)
             .WithMany()
