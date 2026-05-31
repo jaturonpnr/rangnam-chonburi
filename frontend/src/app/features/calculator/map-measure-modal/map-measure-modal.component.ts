@@ -21,6 +21,7 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
   totalMeters = 0;
   private map!: L.Map;
   private drawnLayers: L.Polyline[] = [];
+  private locationMarker: L.CircleMarker | null = null;
 
   ngAfterViewInit() {
     // Fix Leaflet default icon paths broken by Angular bundler
@@ -81,7 +82,15 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
 
   locateMe() {
     navigator.geolocation.getCurrentPosition(
-      pos => this.map.setView([pos.coords.latitude, pos.coords.longitude], 18),
+      pos => {
+        const latlng: L.LatLngTuple = [pos.coords.latitude, pos.coords.longitude];
+        this.map.setView(latlng, 18);
+        this.locationMarker?.remove();
+        this.locationMarker = L.circleMarker(latlng, {
+          radius: 8, color: '#fff', weight: 2,
+          fillColor: '#0284C7', fillOpacity: 1
+        }).addTo(this.map).bindPopup('ตำแหน่งของคุณ').openPopup();
+      },
       () => {}
     );
   }
@@ -90,6 +99,8 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
     (this.map as any).pm.getGeomanLayers().forEach((l: L.Layer) => l.remove());
     this.drawnLayers = [];
     this.totalMeters = 0;
+    this.locationMarker?.remove();
+    this.locationMarker = null;
   }
 
   apply() {
