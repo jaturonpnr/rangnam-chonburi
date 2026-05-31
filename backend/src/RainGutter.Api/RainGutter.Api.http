@@ -1,0 +1,6 @@
+@RainGutter.Api_HostAddress = http://localhost:5282
+
+GET {{RainGutter.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: rangnam-chonburi-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: ConnectionStrings__Default
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: AllowedOrigins
+        sync: false
+      - key: LINE_CHANNEL_ACCESS_TOKEN
+        sync: false
+      - key: LINE_CHANNEL_SECRET
+        sync: false
+      - key: LINE_OWNER_ID
+        sync: false
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

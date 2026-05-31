@@ -1,0 +1,79 @@
+<nav class="admin-nav">
+  <span class="nav-brand">RG // Admin</span>
+  <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
+  <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-secondary" (click)="logout()">ออกจากระบบ</button>
+</nav>
+
+<div class="admin-content">
+  <h2 class="admin-title">Dashboard</h2>
+
+  @if (stats()) {
+    <!-- KPI Cards -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:14px; margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="value">{{ formatNumber(stats()!.totalLeads) }}</div>
+        <div class="label">Lead ทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">{{ formatNumber(stats()!.leadsThisMonth) }}</div>
+        <div class="label">เดือนนี้</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">{{ formatNumber(stats()!.leadsThisWeek) }}</div>
+        <div class="label">สัปดาห์นี้</div>
+      </div>
+      <div class="stat-card">
+        <div class="value" style="font-size:20px;">{{ formatNumber(stats()!.totalEstimatedValue) }}</div>
+        <div class="label">มูลค่ารวม (บาท)</div>
+      </div>
+      <div class="stat-card">
+        <div class="value" style="font-size:20px; color: var(--amber);">{{ formatNumber(stats()!.averageQuoteValue) }}</div>
+        <div class="label">เฉลี่ยต่อ quote (บาท)</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+      <!-- Status breakdown -->
+      <div class="card">
+        <p class="sec-label">สถานะ Lead</p>
+        <table>
+          @for (s of stats()!.byStatus; track s.status) {
+            <tr>
+              <td style="padding: 8px 0;">
+                <span class="badge badge-{{s.status.toLowerCase()}}">{{ statusLabel(s.status) }}</span>
+              </td>
+              <td style="text-align:right; font-family: var(--mono); font-weight:600; font-size:14px; padding: 8px 0;">{{ s.count }}</td>
+            </tr>
+          }
+        </table>
+      </div>
+
+      <!-- Top products -->
+      <div class="card">
+        <p class="sec-label">วัสดุที่ขอบ่อยสุด</p>
+        <table>
+          @for (p of stats()!.topProducts; track p.label) {
+            <tr>
+              <td style="padding: 8px 0;">{{ p.label }}</td>
+              <td style="text-align:right; font-family: var(--mono); font-weight:600; font-size:14px; padding: 8px 0;">{{ p.count }}</td>
+            </tr>
+          }
+        </table>
+      </div>
+    </div>
+
+    <!-- Weekly chart -->
+    <div class="card">
+      <p class="sec-label">Lead ต่อสัปดาห์ (12 สัปดาห์ล่าสุด)</p>
+      <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar" style="max-height:200px;"></canvas>
+    </div>
+
+  } @else {
+    <div style="font-family: var(--mono); font-size:13px; color: var(--text-2); letter-spacing:.04em;">
+      กำลังโหลดข้อมูล...
+    </div>
+  }
+</div>

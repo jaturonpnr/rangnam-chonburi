@@ -1,0 +1,15 @@
+# .NET
+backend/src/*/bin/
+backend/src/*/obj/
+backend/tests/*/bin/
+backend/tests/*/obj/
+backend/.env
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Misc
+.DS_Store
+*.user

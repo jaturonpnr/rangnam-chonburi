@@ -1,0 +1,92 @@
+<nav class="admin-nav">
+  <span class="nav-brand">RG // Admin</span>
+  <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
+  <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-secondary" (click)="logout()">ออกจากระบบ</button>
+</nav>
+
+<div class="admin-content">
+  <h2 class="admin-title">Lead / ใบเสนอราคา</h2>
+
+  <!-- Filters -->
+  <div class="card" style="padding: 18px 24px;">
+    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+      <div class="form-group" style="margin:0; min-width:140px;">
+        <label>สถานะ</label>
+        <select class="form-control" [(ngModel)]="filterStatus" style="width:160px;">
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ statusLabels[s] }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>จาก</label>
+        <input class="form-control" type="date" [(ngModel)]="filterFrom" style="width:150px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>ถึง</label>
+        <input class="form-control" type="date" [(ngModel)]="filterTo" style="width:150px;">
+      </div>
+      <button class="btn btn-primary btn-sm" (click)="applyFilter()">ค้นหา</button>
+    </div>
+  </div>
+
+  <div class="card" style="overflow-x:auto; padding: 0;">
+    <table>
+      <thead>
+        <tr>
+          <th style="padding-left:20px;">เลขที่</th>
+          <th>ลูกค้า</th>
+          <th>เบอร์</th>
+          <th style="text-align:right;">ยอดประเมิน</th>
+          <th>สถานะ</th>
+          <th>วันที่</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr>
+            <td colspan="7" style="text-align:center; font-family:var(--mono); font-size:12px; color:var(--text-2); padding:24px;">
+              กำลังโหลด...
+            </td>
+          </tr>
+        }
+        @for (item of items(); track item.id) {
+          <tr>
+            <td style="padding-left:20px;"><code>{{ item.quoteNumber }}</code></td>
+            <td>{{ item.customerName }}</td>
+            <td>
+              <a [href]="'tel:' + item.phone" style="font-family:var(--mono); font-size:13px; color:var(--text-2);">
+                {{ item.phone }}
+              </a>
+            </td>
+            <td style="text-align:right; font-family:var(--mono); font-size:14px; font-weight:600;">
+              {{ formatNumber(item.estimatedTotal) }}
+            </td>
+            <td><span class="badge badge-{{item.status.toLowerCase()}}">{{ statusLabels[item.status] || item.status }}</span></td>
+            <td style="font-family:var(--mono); font-size:12px; color:var(--text-2);">{{ formatDate(item.createdAt) }}</td>
+            <td style="padding-right:16px;">
+              <a [routerLink]="['/admin/leads', item.id]" class="btn btn-sm btn-secondary">ดูรายละเอียด</a>
+            </td>
+          </tr>
+        }
+        @if (!loading() && items().length === 0) {
+          <tr>
+            <td colspan="7" style="text-align:center; font-family:var(--mono); font-size:12px; color:var(--text-2); padding:24px;">
+              ไม่พบข้อมูล
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="pagination" style="padding: 12px 20px;">
+      <button (click)="prevPage()" [disabled]="page() === 1">‹ ก่อนหน้า</button>
+      <span>หน้า {{ page() }} / {{ totalPages() }}</span>
+      <button (click)="nextPage()" [disabled]="page() >= totalPages()">ถัดไป ›</button>
+    </div>
+  </div>
+</div>
