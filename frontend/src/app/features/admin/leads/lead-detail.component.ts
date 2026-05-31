@@ -56,7 +56,8 @@ export class LeadDetailComponent implements OnInit, OnDestroy {
 
     L.tileLayer(environment.satelliteTileUrl, {
       attribution: environment.satelliteAttribution,
-      maxZoom: 20
+      maxZoom: 20,
+      maxNativeZoom: 18
     }).addTo(map);
 
     try {
