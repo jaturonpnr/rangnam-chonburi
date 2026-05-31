@@ -332,6 +332,20 @@ input[type="number"] { -moz-appearance: textfield; }
   pointer-events: none;
   letter-spacing: .04em;
 }
+.input-unit-wrap .input-unit {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-2);
+  pointer-events: none;
+  letter-spacing: .04em;
+}
+.input-with-map { display: flex; gap: 8px; align-items: flex-start; }
+.input-with-map .input-unit-wrap { flex: 1; }
+.map-btn { white-space: nowrap; flex-shrink: 0; margin-top: 0; }
 
 /* ── Material toggle (GI / SS) ── */
 .mat-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
