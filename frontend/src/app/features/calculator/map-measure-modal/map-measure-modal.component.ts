@@ -66,6 +66,9 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
       this.drawnLayers = this.drawnLayers.filter(l => l !== e.layer);
       this.recalculate();
     });
+
+    this.map.on('pm:drawstart', () => this.locationMarker?.setStyle({ opacity: 0, fillOpacity: 0 }));
+    this.map.on('pm:drawend', () => this.locationMarker?.setStyle({ opacity: 1, fillOpacity: 1 }));
   }
 
   ngOnDestroy() {
