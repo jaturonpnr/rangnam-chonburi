@@ -41,8 +41,8 @@
           <div class="kv-row"><span class="kv-key">หมดอายุ</span><span class="kv-val">{{ job()!.warrantyExpiry }}</span></div>
           <div class="kv-row"><span class="kv-key">Token</span><span class="kv-val" style="font-family:var(--mono); font-size:11px; word-break:break-all;">{{ job()!.publicToken }}</span></div>
           <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
-            <a [href]="qrUrl()" target="_blank" class="btn btn-secondary btn-sm">⬇ QR PNG</a>
-            <a [href]="pdfUrl()" target="_blank" class="btn btn-secondary btn-sm">⬇ PDF ประกัน</a>
+            <button (click)="downloadQr()" class="btn btn-secondary btn-sm">⬇ QR PNG</button>
+            <button (click)="downloadPdf()" class="btn btn-secondary btn-sm">⬇ PDF ประกัน</button>
           </div>
         </div>
 

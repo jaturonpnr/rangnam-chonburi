@@ -80,7 +80,14 @@ export class LeadDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  pdfUrl() { return this.api.getAdminQuotePdfUrl(this.detail()!.id); }
+  downloadPdf() {
+    this.api.downloadAdminQuotePdf(this.detail()!.id).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${this.detail()!.quoteNumber}.pdf`;
+      a.click(); URL.revokeObjectURL(url);
+    });
+  }
   formatNumber(n: number | undefined) { return n != null ? n.toLocaleString('th-TH') : '-'; }
   formatDate(d: string) { return new Date(d).toLocaleString('th-TH'); }
   materialLabel(m: string) { return m === 'Galvanized' ? 'สังกะสี' : 'สแตนเลส'; }

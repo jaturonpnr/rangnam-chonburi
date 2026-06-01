@@ -135,7 +135,7 @@
           {{ statusUpdating() ? 'บันทึก...' : 'บันทึกสถานะ' }}
         </button>
       </div>
-      <a [href]="pdfUrl()" target="_blank" class="btn btn-secondary btn-sm">⬇ ดาวน์โหลด PDF</a>
+      <button (click)="downloadPdf()" class="btn btn-secondary btn-sm">⬇ ดาวน์โหลด PDF</button>
     </div>
 
     <!-- ปิดงาน -->

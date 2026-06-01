@@ -70,8 +70,8 @@ export class ApiService {
   updateQuoteStatus(id: number, status: string) {
     return this.http.put(`${this.base}/api/admin/quote-requests/${id}/status`, { status });
   }
-  getAdminQuotePdfUrl(id: number) {
-    return `${this.base}/api/admin/quote-requests/${id}/pdf`;
+  downloadAdminQuotePdf(id: number) {
+    return this.http.get(`${this.base}/api/admin/quote-requests/${id}/pdf`, { responseType: 'blob' });
   }
 
   getAdminProducts() {
@@ -165,11 +165,11 @@ export class ApiService {
   deleteJobPhoto(jobId: number, photoId: number) {
     return this.http.delete(`${this.base}/api/admin/jobs/${jobId}/photos/${photoId}`);
   }
-  getJobQrUrl(jobId: number) {
-    return `${this.base}/api/admin/jobs/${jobId}/qr`;
+  downloadJobQr(jobId: number) {
+    return this.http.get(`${this.base}/api/admin/jobs/${jobId}/qr`, { responseType: 'blob' });
   }
-  getJobWarrantyPdfUrl(jobId: number) {
-    return `${this.base}/api/admin/jobs/${jobId}/warranty-pdf`;
+  downloadJobWarrantyPdf(jobId: number) {
+    return this.http.get(`${this.base}/api/admin/jobs/${jobId}/warranty-pdf`, { responseType: 'blob' });
   }
   getAdminServiceRequests(status?: string, page = 1, pageSize = 20) {
     let p = new HttpParams().set('page', page).set('pageSize', pageSize);

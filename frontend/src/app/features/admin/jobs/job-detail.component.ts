@@ -95,8 +95,22 @@ export class JobDetailComponent implements OnInit {
     this.api.updateServiceRequestStatus(id, status).subscribe(() => this.loadJob());
   }
 
-  qrUrl() { return this.api.getJobQrUrl(this.job()!.id); }
-  pdfUrl() { return this.api.getJobWarrantyPdfUrl(this.job()!.id); }
+  downloadQr() {
+    this.api.downloadJobQr(this.job()!.id).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${this.job()!.warrantyNumber}-qr.png`;
+      a.click(); URL.revokeObjectURL(url);
+    });
+  }
+  downloadPdf() {
+    this.api.downloadJobWarrantyPdf(this.job()!.id).subscribe(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${this.job()!.warrantyNumber}-warranty.pdf`;
+      a.click(); URL.revokeObjectURL(url);
+    });
+  }
   materialLabel(m: string) { return m === 'Galvanized' ? 'สังกะสี' : 'สแตนเลส'; }
   logout() { this.auth.logout(); this.router.navigate(['/admin/login']); }
 }
