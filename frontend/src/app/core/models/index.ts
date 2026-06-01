@@ -114,3 +114,104 @@ export interface StatsResponse {
   weeklySeries: { week: string; count: number }[];
   topProducts: { label: string; count: number }[];
 }
+
+// ── CR3: Warranty + Portfolio ─────────────────────────────────────────────
+
+export type PhotoType = 'Before' | 'After' | 'Other';
+export type ServiceRequestType = 'WarrantyClaim' | 'Maintenance' | 'Other';
+export type ServiceRequestStatus = 'New' | 'Contacted' | 'Done';
+
+export interface JobPhoto {
+  id: number;
+  url: string;
+  type: PhotoType;
+  caption: string | null;
+  displayOrder: number;
+}
+
+export interface ServiceRequestItem {
+  id: number;
+  contactPhone: string;
+  customerNote: string | null;
+  type: ServiceRequestType;
+  status: ServiceRequestStatus;
+  createdAt: string;
+}
+
+export interface JobSummary {
+  id: number;
+  warrantyNumber: string;
+  quoteNumber: string;
+  installedDate: string;
+  warrantyExpiry: string;
+  material: Material;
+  sizeInches: number;
+  lengthMeters: number;
+  showInPortfolio: boolean;
+  photoConsent: boolean;
+  serviceRequestCount: number;
+}
+
+export interface JobDetail {
+  id: number;
+  quoteRequestId: number;
+  quoteNumber: string;
+  warrantyNumber: string;
+  publicToken: string;
+  installedDate: string;
+  warrantyMonths: number;
+  warrantyExpiry: string;
+  material: Material;
+  sizeInches: number;
+  lengthMeters: number;
+  downspoutCount: number;
+  lat: number | null;
+  lng: number | null;
+  approxLat: number | null;
+  approxLng: number | null;
+  areaName: string | null;
+  showInPortfolio: boolean;
+  photoConsent: boolean;
+  photos: JobPhoto[];
+  serviceRequests: ServiceRequestItem[];
+}
+
+export interface WarrantyCard {
+  warrantyNumber: string;
+  installedDate: string;
+  warrantyExpiry: string;
+  material: Material;
+  sizeInches: number;
+  lengthMeters: number;
+  downspoutCount: number;
+  photos: JobPhoto[];
+  shopName: string;
+  shopPhone: string;
+  lineOaLink: string;
+}
+
+export interface PortfolioPin {
+  jobId: number;
+  approxLat: number;
+  approxLng: number;
+  areaName: string | null;
+  material: Material;
+  installedDate: string;
+  consentedPhotos: JobPhoto[];
+}
+
+export interface PortfolioSummary {
+  total: number;
+  byArea: { name: string; count: number }[];
+}
+
+export interface AdminServiceRequest {
+  id: number;
+  contactPhone: string;
+  customerNote: string | null;
+  type: ServiceRequestType;
+  status: ServiceRequestStatus;
+  createdAt: string;
+  jobId: number;
+  warrantyNumber: string;
+}

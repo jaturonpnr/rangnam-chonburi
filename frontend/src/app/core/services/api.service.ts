@@ -4,7 +4,9 @@ import { environment } from '../../../environments/environment';
 import {
   GutterProduct, BuildingType, ServiceZone, ShopProfilePublic, EstimateResult,
   QuoteRequestSummary, QuoteRequestDetail, PricingConfig,
-  ShopProfile, StatsResponse, MeasureSource
+  ShopProfile, StatsResponse, MeasureSource,
+  JobSummary, JobDetail, JobPhoto, WarrantyCard, PortfolioPin, PortfolioSummary,
+  AdminServiceRequest, ServiceRequestStatus
 } from '../models';
 
 export interface CreateQuoteRequestPayload {
@@ -123,5 +125,60 @@ export class ApiService {
   }
   updateShopProfile(body: object) {
     return this.http.put<ShopProfile>(`${this.base}/api/admin/shop-profile`, body);
+  }
+
+  // ── Public Warranty + Portfolio ───────────────────────────────────────────
+  getWarranty(token: string) {
+    return this.http.get<WarrantyCard>(`${this.base}/api/warranty/${token}`);
+  }
+  createServiceRequest(token: string, body: { contactPhone: string; customerNote?: string; type: string }) {
+    return this.http.post<{ id: number }>(`${this.base}/api/warranty/${token}/service-request`, body);
+  }
+  getPortfolioPins() {
+    return this.http.get<PortfolioPin[]>(`${this.base}/api/portfolio`);
+  }
+  getPortfolioSummary() {
+    return this.http.get<PortfolioSummary>(`${this.base}/api/portfolio/summary`);
+  }
+
+  // ── Admin Jobs ────────────────────────────────────────────────────────────
+  completeJob(quoteRequestId: number, body: { installedDate: string; warrantyMonths: number; lat?: number | null; lng?: number | null; areaName?: string | null }) {
+    return this.http.post<JobDetail>(`${this.base}/api/admin/quote-requests/${quoteRequestId}/complete`, body);
+  }
+  getAdminJobs(page = 1, pageSize = 20) {
+    return this.http.get<{ total: number; page: number; pageSize: number; items: JobSummary[] }>(
+      `${this.base}/api/admin/jobs`, { params: { page, pageSize } });
+  }
+  getAdminJobDetail(id: number) {
+    return this.http.get<JobDetail>(`${this.base}/api/admin/jobs/${id}`);
+  }
+  updateAdminJob(id: number, body: { warrantyMonths: number; installedDate: string; areaName?: string | null; lat?: number | null; lng?: number | null; showInPortfolio: boolean; photoConsent: boolean }) {
+    return this.http.put<{ id: number }>(`${this.base}/api/admin/jobs/${id}`, body);
+  }
+  uploadJobPhoto(jobId: number, file: File, type: string, caption?: string) {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('type', type);
+    if (caption) form.append('caption', caption);
+    return this.http.post<JobPhoto>(`${this.base}/api/admin/jobs/${jobId}/photos`, form);
+  }
+  deleteJobPhoto(jobId: number, photoId: number) {
+    return this.http.delete(`${this.base}/api/admin/jobs/${jobId}/photos/${photoId}`);
+  }
+  getJobQrUrl(jobId: number) {
+    return `${this.base}/api/admin/jobs/${jobId}/qr`;
+  }
+  getJobWarrantyPdfUrl(jobId: number) {
+    return `${this.base}/api/admin/jobs/${jobId}/warranty-pdf`;
+  }
+  getAdminServiceRequests(status?: string, page = 1, pageSize = 20) {
+    let p = new HttpParams().set('page', page).set('pageSize', pageSize);
+    if (status) p = p.set('status', status);
+    return this.http.get<{ total: number; page: number; pageSize: number; items: AdminServiceRequest[] }>(
+      `${this.base}/api/admin/service-requests`, { params: p });
+  }
+  updateServiceRequestStatus(id: number, status: ServiceRequestStatus) {
+    return this.http.put<{ id: number; status: string }>(
+      `${this.base}/api/admin/service-requests/${id}/status`, { status });
   }
 }
