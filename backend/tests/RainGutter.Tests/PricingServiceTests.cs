@@ -156,4 +156,18 @@ public class PricingServiceTests
 
         Assert.False(string.IsNullOrEmpty(result.Disclaimer));
     }
+
+    [Fact]
+    public void Jitter_OffsetIsBetween150And300Metres()
+    {
+        double lat = 13.3, lng = 100.9;
+        for (int i = 0; i < 50; i++)
+        {
+            var (aLat, aLng) = JitterHelper.Jitter(lat, lng);
+            double dLat = (aLat - lat) * 111320.0;
+            double dLng = (aLng - lng) * 111320.0 * Math.Cos(lat * Math.PI / 180);
+            double dist = Math.Sqrt(dLat * dLat + dLng * dLng);
+            Assert.InRange(dist, 149.0, 300.5);
+        }
+    }
 }

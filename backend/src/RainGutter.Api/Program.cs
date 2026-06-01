@@ -39,6 +39,8 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<ILineNotificationService, LineNotificationService>();
+builder.Services.AddScoped<IStorageService, StorageService>();
+builder.Services.AddScoped<IQrService, QrService>();
 builder.Services.AddHttpClient();
 
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "dev-secret-change-in-production";
@@ -83,6 +85,8 @@ app.MapPublicEndpoints();
 app.MapQuoteEndpoints();
 app.MapLineEndpoints();
 app.MapAdminEndpoints();
+app.MapJobEndpoints();
+app.MapWarrantyEndpoints();
 
 app.Run();
 

@@ -135,8 +135,47 @@
           {{ statusUpdating() ? 'บันทึก...' : 'บันทึกสถานะ' }}
         </button>
       </div>
-      <a [href]="pdfUrl()" target="_blank" class="btn btn-secondary btn-sm">⬇ ดาวน์โหลด PDF</a>
+      <button (click)="downloadPdf()" class="btn btn-secondary btn-sm">⬇ ดาวน์โหลด PDF</button>
     </div>
+
+    <!-- ปิดงาน -->
+    @if (detail()!.status === 'Won' && !hasJob()) {
+      <div class="card" style="border:2px solid #86efac; margin-top:16px;">
+        <p class="sec-label" style="color:#166534;">ปิดงาน → สร้างใบรับประกัน</p>
+        @if (!showCompleteForm()) {
+          <button class="btn btn-primary btn-sm" (click)="showCompleteForm.set(true)">ปิดงาน (สร้าง Job)</button>
+        } @else {
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+            <div>
+              <label class="field-label">วันที่ติดตั้ง *</label>
+              <input type="date" class="form-control" [(ngModel)]="completeForm.installedDate" />
+            </div>
+            <div>
+              <label class="field-label">ระยะประกัน (เดือน)</label>
+              <input type="number" class="form-control" [(ngModel)]="completeForm.warrantyMonths" min="1" />
+            </div>
+            <div>
+              <label class="field-label">Lat (ไม่บังคับ)</label>
+              <input type="number" class="form-control" [(ngModel)]="completeForm.lat" step="0.00001" placeholder="13.xxxxx" />
+            </div>
+            <div>
+              <label class="field-label">Lng (ไม่บังคับ)</label>
+              <input type="number" class="form-control" [(ngModel)]="completeForm.lng" step="0.00001" placeholder="100.xxxxx" />
+            </div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label class="field-label">พื้นที่</label>
+            <input type="text" class="form-control" [(ngModel)]="completeForm.areaName" placeholder="เช่น ศรีราชา" />
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary btn-sm" (click)="completeJob()" [disabled]="completing()">
+              {{ completing() ? 'กำลังสร้าง...' : 'สร้าง Job' }}
+            </button>
+            <button class="btn btn-secondary btn-sm" (click)="showCompleteForm.set(false)">ยกเลิก</button>
+          </div>
+        }
+      </div>
+    }
 
   } @else {
     <div style="font-family:var(--mono); font-size:13px; color:var(--text-2);">กำลังโหลด...</div>

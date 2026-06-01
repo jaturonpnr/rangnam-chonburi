@@ -13,6 +13,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Lead> Leads => Set<Lead>();
     public DbSet<QuoteRequest> QuoteRequests => Set<QuoteRequest>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
+    public DbSet<Job> Jobs => Set<Job>();
+    public DbSet<JobPhoto> JobPhotos => Set<JobPhoto>();
+    public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,25 +23,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<ShopProfile>().HasKey(s => s.Id);
 
         modelBuilder.Entity<QuoteRequest>()
-            .Property(q => q.BreakdownJson)
-            .HasColumnType("jsonb");
-
+            .Property(q => q.BreakdownJson).HasColumnType("jsonb");
         modelBuilder.Entity<QuoteRequest>()
-            .Property(q => q.MeasuredGeoJson)
-            .HasColumnType("jsonb");
+            .Property(q => q.MeasuredGeoJson).HasColumnType("jsonb");
 
         modelBuilder.Entity<Lead>()
-            .HasOne(l => l.ServiceZone)
-            .WithMany()
-            .HasForeignKey(l => l.ServiceZoneId)
-            .IsRequired(false);
+            .HasOne(l => l.ServiceZone).WithMany()
+            .HasForeignKey(l => l.ServiceZoneId).IsRequired(false);
 
         modelBuilder.Entity<QuoteRequest>()
-            .HasOne(q => q.Lead)
-            .WithMany()
+            .HasOne(q => q.Lead).WithMany()
             .HasForeignKey(q => q.LeadId);
 
-        // Store enums as strings for readability
         modelBuilder.Entity<GutterProduct>()
             .Property(p => p.Material).HasConversion<string>();
         modelBuilder.Entity<QuoteRequest>()
@@ -47,14 +43,36 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(q => q.Status).HasConversion<string>();
 
         modelBuilder.Entity<QuoteRequest>()
-            .HasOne<BuildingType>()
-            .WithMany()
-            .HasForeignKey(q => q.BuildingTypeId)
-            .IsRequired(false);
-
-        // Unique index on QuoteNumber
+            .HasOne<BuildingType>().WithMany()
+            .HasForeignKey(q => q.BuildingTypeId).IsRequired(false);
         modelBuilder.Entity<QuoteRequest>()
-            .HasIndex(q => q.QuoteNumber)
-            .IsUnique();
+            .HasIndex(q => q.QuoteNumber).IsUnique();
+
+        // Job relationships
+        modelBuilder.Entity<Job>()
+            .HasOne(j => j.QuoteRequest).WithMany()
+            .HasForeignKey(j => j.QuoteRequestId);
+        modelBuilder.Entity<Job>()
+            .HasIndex(j => j.WarrantyNumber).IsUnique();
+        modelBuilder.Entity<Job>()
+            .HasIndex(j => j.PublicToken).IsUnique();
+
+        modelBuilder.Entity<JobPhoto>()
+            .HasOne(p => p.Job).WithMany(j => j.Photos)
+            .HasForeignKey(p => p.JobId);
+
+        modelBuilder.Entity<ServiceRequest>()
+            .HasOne(s => s.Job).WithMany(j => j.ServiceRequests)
+            .HasForeignKey(s => s.JobId);
+
+        // Enum conversions
+        modelBuilder.Entity<Job>()
+            .Property(j => j.Material).HasConversion<string>();
+        modelBuilder.Entity<JobPhoto>()
+            .Property(p => p.Type).HasConversion<string>();
+        modelBuilder.Entity<ServiceRequest>()
+            .Property(s => s.Type).HasConversion<string>();
+        modelBuilder.Entity<ServiceRequest>()
+            .Property(s => s.Status).HasConversion<string>();
     }
 }

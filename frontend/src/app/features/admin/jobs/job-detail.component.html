@@ -1,0 +1,160 @@
+<nav class="admin-nav">
+  <span class="nav-brand">RG // Admin</span>
+  <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
+  <a routerLink="/admin/jobs" routerLinkActive="active">งาน/ประกัน</a>
+  <a routerLink="/admin/service-requests" routerLinkActive="active">เคลม</a>
+  <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-secondary" (click)="logout()">ออกจากระบบ</button>
+</nav>
+
+<div class="admin-content">
+  <a routerLink="/admin/jobs" class="back-link">← กลับ</a>
+
+  @if (job()) {
+    <h2 class="admin-title" style="font-family:var(--mono);">{{ job()!.warrantyNumber }}</h2>
+
+    <!-- Tabs -->
+    <div style="display:flex; gap:0; margin-bottom:16px; border-bottom:2px solid var(--border);">
+      @for (tab of [['details','ข้อมูล'],['photos','รูปภาพ'],['claims','เคลม']]; track tab[0]) {
+        <button (click)="activeTab.set($any(tab[0]))"
+                [style.border-bottom]="activeTab() === tab[0] ? '2px solid var(--blue)' : '2px solid transparent'"
+                [style.color]="activeTab() === tab[0] ? 'var(--blue)' : 'var(--text-2)'"
+                style="background:none; border:none; border-bottom-width:2px; padding:8px 16px; cursor:pointer; font-size:14px; margin-bottom:-2px;">
+          {{ tab[1] }}
+        </button>
+      }
+    </div>
+
+    <!-- Details tab -->
+    @if (activeTab() === 'details') {
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="card">
+          <p class="sec-label">ข้อมูลใบรับประกัน</p>
+          <div class="kv-row"><span class="kv-key">เลขที่</span><span class="kv-val" style="font-family:var(--mono);">{{ job()!.warrantyNumber }}</span></div>
+          <div class="kv-row"><span class="kv-key">QT</span><span class="kv-val" style="font-family:var(--mono);">{{ job()!.quoteNumber }}</span></div>
+          <div class="kv-row"><span class="kv-key">วัสดุ</span><span class="kv-val">{{ materialLabel(job()!.material) }} {{ job()!.sizeInches }}"</span></div>
+          <div class="kv-row"><span class="kv-key">ความยาว</span><span class="kv-val">{{ job()!.lengthMeters }} ม.</span></div>
+          <div class="kv-row"><span class="kv-key">ท่อน้ำลง</span><span class="kv-val">{{ job()!.downspoutCount }} จุด</span></div>
+          <div class="kv-row"><span class="kv-key">ติดตั้ง</span><span class="kv-val">{{ job()!.installedDate }}</span></div>
+          <div class="kv-row"><span class="kv-key">หมดอายุ</span><span class="kv-val">{{ job()!.warrantyExpiry }}</span></div>
+          <div class="kv-row"><span class="kv-key">Token</span><span class="kv-val" style="font-family:var(--mono); font-size:11px; word-break:break-all;">{{ job()!.publicToken }}</span></div>
+          <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+            <button (click)="downloadQr()" class="btn btn-secondary btn-sm">⬇ QR PNG</button>
+            <button (click)="downloadPdf()" class="btn btn-secondary btn-sm">⬇ PDF ประกัน</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="sec-label">แก้ไข</p>
+          <div style="margin-bottom:8px;">
+            <label class="field-label">วันที่ติดตั้ง</label>
+            <input type="date" class="form-control" [(ngModel)]="editForm.installedDate" />
+          </div>
+          <div style="margin-bottom:8px;">
+            <label class="field-label">ระยะประกัน (เดือน)</label>
+            <input type="number" class="form-control" [(ngModel)]="editForm.warrantyMonths" min="1" />
+          </div>
+          <div style="margin-bottom:8px;">
+            <label class="field-label">พื้นที่</label>
+            <input type="text" class="form-control" [(ngModel)]="editForm.areaName" placeholder="เช่น ศรีราชา" />
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+            <div>
+              <label class="field-label">Lat</label>
+              <input type="number" class="form-control" [(ngModel)]="editForm.lat" step="0.00001" />
+            </div>
+            <div>
+              <label class="field-label">Lng</label>
+              <input type="number" class="form-control" [(ngModel)]="editForm.lng" step="0.00001" />
+            </div>
+          </div>
+          <div style="display:flex; gap:16px; margin-bottom:12px;">
+            <label style="font-size:13px; display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" [(ngModel)]="editForm.showInPortfolio" />
+              แสดงในพอร์ตโฟลิโอ
+            </label>
+            <label style="font-size:13px; display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" [(ngModel)]="editForm.photoConsent" />
+              อนุญาตแสดงรูป
+            </label>
+          </div>
+          <button class="btn btn-primary btn-sm" (click)="saveJob()" [disabled]="saving()">
+            {{ saving() ? 'บันทึก...' : 'บันทึก' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Photos tab -->
+    @if (activeTab() === 'photos') {
+      <div class="card">
+        <p class="sec-label">อัปโหลดรูปภาพ</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin-bottom:12px;">
+          <div>
+            <label class="field-label">ไฟล์</label>
+            <input type="file" accept="image/*" (change)="onFileChange($event)" class="form-control" style="width:auto;" />
+          </div>
+          <div>
+            <label class="field-label">ประเภท</label>
+            <select class="form-control" [(ngModel)]="uploadType">
+              <option value="Before">ก่อน</option>
+              <option value="After">หลัง</option>
+              <option value="Other">อื่นๆ</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">คำบรรยาย</label>
+            <input type="text" class="form-control" [(ngModel)]="uploadCaption" placeholder="ไม่บังคับ" />
+          </div>
+          <button class="btn btn-primary btn-sm" (click)="uploadPhoto()" [disabled]="!uploadFile || uploading()">
+            {{ uploading() ? 'กำลังอัปโหลด...' : 'อัปโหลด' }}
+          </button>
+        </div>
+        @if (uploadError()) { <p style="color:#dc2626; font-size:13px;">{{ uploadError() }}</p> }
+
+        <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
+          @for (p of job()!.photos; track p.id) {
+            <div style="position:relative;">
+              <img [src]="p.url" [alt]="p.caption ?? p.type" style="width:120px; height:90px; object-fit:cover; border-radius:6px; border:1px solid var(--border);" />
+              <div style="font-size:11px; color:var(--text-2); text-align:center; margin-top:2px;">{{ p.type }}</div>
+              <button (click)="deletePhoto(p.id)"
+                      style="position:absolute; top:4px; right:4px; background:rgba(0,0,0,.5); color:#fff; border:none; border-radius:4px; padding:2px 6px; font-size:11px; cursor:pointer;">✕</button>
+            </div>
+          }
+          @if (job()!.photos.length === 0) {
+            <p style="color:var(--text-2); font-size:13px;">ยังไม่มีรูปภาพ</p>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Claims tab -->
+    @if (activeTab() === 'claims') {
+      <div class="card">
+        <p class="sec-label">รายการเคลม / บริการ ({{ job()!.serviceRequests.length }})</p>
+        @for (sr of job()!.serviceRequests; track sr.id) {
+          <div style="border:1px solid var(--border); border-radius:6px; padding:12px; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:13px; font-weight:600;">{{ sr.type }}</span>
+              <select class="form-control" [ngModel]="sr.status" (ngModelChange)="updateClaimStatus(sr.id, $any($event))" style="width:130px; font-size:12px; padding:4px 8px;">
+                <option value="New">ใหม่</option>
+                <option value="Contacted">ติดต่อแล้ว</option>
+                <option value="Done">เสร็จสิ้น</option>
+              </select>
+            </div>
+            <div style="font-size:13px;"><strong>เบอร์:</strong> {{ sr.contactPhone }}</div>
+            @if (sr.customerNote) { <div style="font-size:13px; color:var(--text-2);">{{ sr.customerNote }}</div> }
+            <div style="font-size:11px; color:var(--text-2); margin-top:4px;">{{ sr.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+        }
+        @if (job()!.serviceRequests.length === 0) {
+          <p style="color:var(--text-2); font-size:13px;">ยังไม่มีรายการ</p>
+        }
+      </div>
+    }
+  } @else {
+    <div style="font-family:var(--mono); font-size:13px; color:var(--text-2);">กำลังโหลด...</div>
+  }
+</div>

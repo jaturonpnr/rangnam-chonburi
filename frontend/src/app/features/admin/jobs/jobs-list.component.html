@@ -1,0 +1,62 @@
+<nav class="admin-nav">
+  <span class="nav-brand">RG // Admin</span>
+  <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
+  <a routerLink="/admin/jobs" routerLinkActive="active">งาน/ประกัน</a>
+  <a routerLink="/admin/service-requests" routerLinkActive="active">เคลม</a>
+  <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-secondary" (click)="logout()">ออกจากระบบ</button>
+</nav>
+
+<div class="admin-content">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+    <h2 class="admin-title">งาน / ใบรับประกัน</h2>
+    <span style="font-size:13px; color:var(--text-2);">ทั้งหมด {{ total() }} รายการ</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>เลขประกัน</th>
+          <th>QT</th>
+          <th>วัสดุ</th>
+          <th>ติดตั้ง</th>
+          <th>หมดอายุ</th>
+          <th>พอร์ตโฟลิโอ</th>
+          <th>เคลม</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (j of jobs(); track j.id) {
+          <tr>
+            <td style="font-family:var(--mono); font-size:13px;">{{ j.warrantyNumber }}</td>
+            <td style="font-family:var(--mono); font-size:12px; color:var(--text-2);">{{ j.quoteNumber }}</td>
+            <td>{{ materialLabel(j.material) }} {{ j.sizeInches }}"</td>
+            <td style="font-size:13px; color:var(--text-2);">{{ j.installedDate }}</td>
+            <td style="font-size:13px; color:var(--text-2);">{{ j.warrantyExpiry }}</td>
+            <td style="text-align:center;">
+              @if (j.showInPortfolio) { <span class="badge badge-quoted">ใช่</span> }
+              @else { <span style="color:var(--text-2); font-size:12px;">—</span> }
+            </td>
+            <td style="text-align:center; font-family:var(--mono);">{{ j.serviceRequestCount }}</td>
+            <td><a [routerLink]="['/admin/jobs', j.id]" class="btn btn-sm btn-secondary">ดู</a></td>
+          </tr>
+        }
+        @if (jobs().length === 0) {
+          <tr><td colspan="8" style="text-align:center; color:var(--text-2); padding:24px;">ยังไม่มีงาน</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (total() > pageSize) {
+    <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" (click)="prevPage()" [disabled]="page() === 1">← ก่อนหน้า</button>
+      <span style="font-size:13px; color:var(--text-2); align-self:center;">หน้า {{ page() }}</span>
+      <button class="btn btn-secondary btn-sm" (click)="nextPage()" [disabled]="page() * pageSize >= total()">ถัดไป →</button>
+    </div>
+  }
+</div>
