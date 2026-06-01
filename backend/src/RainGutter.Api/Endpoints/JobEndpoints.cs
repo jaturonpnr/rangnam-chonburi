@@ -14,7 +14,7 @@ public static class JobEndpoints
     public static void MapJobEndpoints(this WebApplication app)
     {
         // POST /api/admin/quote-requests/{id}/complete
-        app.MapPost("/api/admin/quote-requests/{id}/complete", [Authorize] async (
+        app.MapPost("/api/admin/quote-requests/{id:int}/complete", [Authorize] async (
             int id, CompleteJobRequest req, AppDbContext db) =>
         {
             var quote = await db.QuoteRequests
@@ -99,7 +99,7 @@ public static class JobEndpoints
         });
 
         // GET /api/admin/jobs/{id}
-        app.MapGet("/api/admin/jobs/{id}", [Authorize] async (int id, AppDbContext db) =>
+        app.MapGet("/api/admin/jobs/{id:int}", [Authorize] async (int id, AppDbContext db) =>
         {
             var job = await db.Jobs
                 .Include(j => j.QuoteRequest)
@@ -111,7 +111,7 @@ public static class JobEndpoints
         });
 
         // PUT /api/admin/jobs/{id}
-        app.MapPut("/api/admin/jobs/{id}", [Authorize] async (
+        app.MapPut("/api/admin/jobs/{id:int}", [Authorize] async (
             int id, EditJobRequest req, AppDbContext db) =>
         {
             var job = await db.Jobs.FindAsync(id);
@@ -136,7 +136,7 @@ public static class JobEndpoints
         });
 
         // POST /api/admin/jobs/{id}/photos
-        app.MapPost("/api/admin/jobs/{id}/photos", [Authorize] async (
+        app.MapPost("/api/admin/jobs/{id:int}/photos", [Authorize] async (
             int id, HttpRequest request, AppDbContext db, IStorageService storage) =>
         {
             var job = await db.Jobs.FindAsync(id);
@@ -146,6 +146,8 @@ public static class JobEndpoints
             var file = form.Files["file"];
             if (file is null || file.Length == 0)
                 return Results.BadRequest(new { error = "No file uploaded" });
+            if (file.Length > 10 * 1024 * 1024)
+                return Results.BadRequest(new { error = "ขนาดไฟล์ต้องไม่เกิน 10 MB" });
             if (!Enum.TryParse<PhotoType>(form["type"], true, out var photoType))
                 return Results.BadRequest(new { error = "Invalid photo type (Before/After/Other)" });
 
@@ -175,10 +177,11 @@ public static class JobEndpoints
             return Results.Ok(new JobPhotoDto(photo.Id, photo.Url, photo.Type, photo.Caption, photo.DisplayOrder));
         });
 
-        // DELETE /api/admin/jobs/{id}/photos/{photoId}
-        app.MapDelete("/api/admin/jobs/{id}/photos/{photoId}", [Authorize] async (
-            int id, int photoId, AppDbContext db, IStorageService storage) =>
+        // DELETE /api/admin/jobs/{id:int}/photos/{photoId:int}
+        app.MapDelete("/api/admin/jobs/{id:int}/photos/{photoId:int}", [Authorize] async (
+            int id, int photoId, AppDbContext db, IStorageService storage, ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("JobEndpoints");
             var photo = await db.JobPhotos.FirstOrDefaultAsync(p => p.Id == photoId && p.JobId == id);
             if (photo is null) return Results.NotFound();
 
@@ -188,7 +191,10 @@ public static class JobEndpoints
                 var fileName = uri.AbsolutePath.TrimStart('/');
                 await storage.DeleteAsync(fileName);
             }
-            catch { /* storage delete failure should not block DB cleanup */ }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Storage delete failed for {Url} — orphaned file", photo.Url);
+            }
 
             db.JobPhotos.Remove(photo);
             await db.SaveChangesAsync();
@@ -196,7 +202,7 @@ public static class JobEndpoints
         });
 
         // GET /api/admin/jobs/{id}/qr
-        app.MapGet("/api/admin/jobs/{id}/qr", [Authorize] async (
+        app.MapGet("/api/admin/jobs/{id:int}/qr", [Authorize] async (
             int id, AppDbContext db, IQrService qr) =>
         {
             var job = await db.Jobs.FindAsync(id);
@@ -207,7 +213,7 @@ public static class JobEndpoints
         });
 
         // GET /api/admin/jobs/{id}/warranty-pdf
-        app.MapGet("/api/admin/jobs/{id}/warranty-pdf", [Authorize] async (
+        app.MapGet("/api/admin/jobs/{id:int}/warranty-pdf", [Authorize] async (
             int id, AppDbContext db, IPdfService pdf, IQrService qr) =>
         {
             var job = await db.Jobs.FindAsync(id);
@@ -222,21 +228,30 @@ public static class JobEndpoints
 
         // GET /api/admin/service-requests
         app.MapGet("/api/admin/service-requests", [Authorize] async (
-            AppDbContext db, string? status) =>
+            AppDbContext db, string? status, int page = 1, int pageSize = 20) =>
         {
             var query = db.ServiceRequests.Include(s => s.Job).AsQueryable();
             if (!string.IsNullOrEmpty(status) && Enum.TryParse<ServiceRequestStatus>(status, out var st))
                 query = query.Where(s => s.Status == st);
-            var items = await query.OrderByDescending(s => s.CreatedAt).ToListAsync();
-            return Results.Ok(items.Select(s => new
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(s => s.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return Results.Ok(new
             {
-                s.Id, s.ContactPhone, s.CustomerNote, s.Type, s.Status, s.CreatedAt,
-                JobId = s.JobId, WarrantyNumber = s.Job.WarrantyNumber
-            }));
+                total, page, pageSize,
+                items = items.Select(s => new
+                {
+                    s.Id, s.ContactPhone, s.CustomerNote, s.Type, s.Status, s.CreatedAt,
+                    JobId = s.JobId, WarrantyNumber = s.Job.WarrantyNumber
+                })
+            });
         });
 
         // PUT /api/admin/service-requests/{id}/status
-        app.MapPut("/api/admin/service-requests/{id}/status", [Authorize] async (
+        app.MapPut("/api/admin/service-requests/{id:int}/status", [Authorize] async (
             int id, UpdateServiceRequestStatusRequest req, AppDbContext db) =>
         {
             var sr = await db.ServiceRequests.FindAsync(id);
