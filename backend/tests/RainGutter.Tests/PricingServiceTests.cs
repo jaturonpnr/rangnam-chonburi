@@ -167,7 +167,7 @@ public class PricingServiceTests
             double dLat = (aLat - lat) * 111320.0;
             double dLng = (aLng - lng) * 111320.0 * Math.Cos(lat * Math.PI / 180);
             double dist = Math.Sqrt(dLat * dLat + dLng * dLng);
-            Assert.InRange(dist, 149.0, 301.5);
+            Assert.InRange(dist, 149.0, 300.5);
         }
     }
 }

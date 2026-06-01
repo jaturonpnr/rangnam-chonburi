@@ -1,7 +1,6 @@
-namespace RainGutter.Api.Models;
+using RainGutter.Api.Enums;
 
-public enum ServiceRequestType { WarrantyClaim, Maintenance, Other }
-public enum ServiceRequestStatus { New, Contacted, Done }
+namespace RainGutter.Api.Models;
 
 public class ServiceRequest
 {

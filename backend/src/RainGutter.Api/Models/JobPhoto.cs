@@ -1,6 +1,6 @@
-namespace RainGutter.Api.Models;
+using RainGutter.Api.Enums;
 
-public enum PhotoType { Before, After, Other }
+namespace RainGutter.Api.Models;
 
 public class JobPhoto
 {
