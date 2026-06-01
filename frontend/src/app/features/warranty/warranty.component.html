@@ -1,0 +1,121 @@
+<div style="max-width:480px; margin:0 auto; padding:16px; font-family:'Sarabun',sans-serif;">
+  @if (loading()) {
+    <p style="color:#888; text-align:center; padding:40px 0;">กำลังโหลด...</p>
+  } @else if (notFound()) {
+    <div style="text-align:center; padding:40px 16px;">
+      <p style="font-size:18px; color:#dc2626;">ไม่พบใบรับประกัน</p>
+      <p style="color:#888;">QR Code อาจไม่ถูกต้องหรือหมดอายุแล้ว</p>
+    </div>
+  } @else if (card()) {
+    <!-- Header -->
+    <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:16px; margin-bottom:16px;">
+      <div style="font-size:13px; color:#166534; font-weight:600; margin-bottom:4px;">ใบรับประกันการติดตั้ง</div>
+      <div style="font-size:22px; font-weight:700; letter-spacing:.04em; color:#15803d; font-family:monospace;">{{ card()!.warrantyNumber }}</div>
+      <div style="font-size:13px; color:#888; margin-top:4px;">{{ card()!.shopName }}</div>
+    </div>
+
+    <!-- Expiry status -->
+    <div [style.background]="daysLeft() > 0 ? '#eff6ff' : '#fef2f2'"
+         [style.border]="daysLeft() > 0 ? '1px solid #93c5fd' : '1px solid #fca5a5'"
+         style="border-radius:8px; padding:12px 16px; margin-bottom:16px; text-align:center;">
+      @if (daysLeft() > 0) {
+        <div style="color:#1d4ed8; font-size:15px; font-weight:600;">เหลืออีก {{ daysLeft() }} วัน</div>
+        <div style="color:#60a5fa; font-size:12px;">หมดอายุ {{ card()!.warrantyExpiry }}</div>
+      } @else {
+        <div style="color:#dc2626; font-size:15px; font-weight:600;">ประกันหมดอายุแล้ว</div>
+        <div style="color:#f87171; font-size:12px;">{{ card()!.warrantyExpiry }}</div>
+      }
+    </div>
+
+    <!-- Details -->
+    <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:14px; margin-bottom:16px;">
+      <div style="font-size:12px; color:#888; font-weight:600; margin-bottom:8px; text-transform:uppercase; letter-spacing:.05em;">รายละเอียดการติดตั้ง</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; font-size:14px;">
+        <span style="color:#888;">วัสดุ</span>
+        <span>{{ materialLabel(card()!.material) }} {{ card()!.sizeInches }}"</span>
+        <span style="color:#888;">ความยาว</span>
+        <span>{{ card()!.lengthMeters }} เมตร</span>
+        <span style="color:#888;">ท่อน้ำลง</span>
+        <span>{{ card()!.downspoutCount }} จุด</span>
+        <span style="color:#888;">วันติดตั้ง</span>
+        <span>{{ card()!.installedDate }}</span>
+      </div>
+    </div>
+
+    <!-- Before/After photos -->
+    @if (beforePhotos().length > 0 || afterPhotos().length > 0) {
+      <div style="margin-bottom:16px;">
+        @if (beforePhotos().length > 0) {
+          <div style="font-size:12px; color:#888; font-weight:600; margin-bottom:6px;">ก่อนติดตั้ง</div>
+          <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;">
+            @for (p of beforePhotos(); track p.id) {
+              <img [src]="p.url" [alt]="p.caption || 'Before'"
+                   style="height:120px; width:auto; border-radius:6px; flex-shrink:0; object-fit:cover;" />
+            }
+          </div>
+        }
+        @if (afterPhotos().length > 0) {
+          <div style="font-size:12px; color:#888; font-weight:600; margin:10px 0 6px;">หลังติดตั้ง</div>
+          <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;">
+            @for (p of afterPhotos(); track p.id) {
+              <img [src]="p.url" [alt]="p.caption || 'After'"
+                   style="height:120px; width:auto; border-radius:6px; flex-shrink:0; object-fit:cover;" />
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Contact -->
+    <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:14px; margin-bottom:16px; display:flex; gap:12px; flex-wrap:wrap;">
+      <a [href]="'tel:' + card()!.shopPhone"
+         style="flex:1; min-width:120px; display:block; background:#0284c7; color:#fff; text-align:center; padding:10px; border-radius:6px; text-decoration:none; font-size:14px;">
+        📞 โทร {{ card()!.shopPhone }}
+      </a>
+      @if (card()!.lineOaLink) {
+        <a [href]="card()!.lineOaLink" target="_blank"
+           style="flex:1; min-width:120px; display:block; background:#06C755; color:#fff; text-align:center; padding:10px; border-radius:6px; text-decoration:none; font-size:14px;">
+          LINE OA
+        </a>
+      }
+    </div>
+
+    <!-- Claim form -->
+    @if (!submitted()) {
+      <div style="background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin-bottom:16px;">
+        <div style="font-size:14px; font-weight:600; margin-bottom:12px; color:#1e293b;">แจ้งเคลม / ขอให้ช่างมาดู</div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:13px; color:#555; display:block; margin-bottom:4px;">ประเภท</label>
+          <select [(ngModel)]="claimType" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:5px; font-size:14px;">
+            <option value="WarrantyClaim">เคลมประกัน</option>
+            <option value="Maintenance">ขอบริการ/ซ่อมบำรุง</option>
+            <option value="Other">อื่นๆ</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:13px; color:#555; display:block; margin-bottom:4px;">เบอร์ติดต่อ *</label>
+          <input [(ngModel)]="claimPhone" type="tel" placeholder="เบอร์โทรศัพท์ของท่าน"
+                 style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; box-sizing:border-box;" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label style="font-size:13px; color:#555; display:block; margin-bottom:4px;">รายละเอียด (ไม่บังคับ)</label>
+          <textarea [(ngModel)]="claimNote" rows="3" placeholder="อธิบายปัญหาหรือรายละเอียดที่ต้องการ"
+                    style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; box-sizing:border-box; resize:vertical;"></textarea>
+        </div>
+        @if (submitError()) {
+          <p style="color:#dc2626; font-size:13px; margin-bottom:8px;">{{ submitError() }}</p>
+        }
+        <button (click)="submitClaim()" [disabled]="submitting() || !claimPhone.trim()"
+                style="width:100%; padding:11px; background:#0284c7; color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer;">
+          {{ submitting() ? 'กำลังส่ง...' : 'ส่งการแจ้ง' }}
+        </button>
+      </div>
+    } @else {
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:16px; text-align:center;">
+        <div style="font-size:20px; margin-bottom:6px;">✓</div>
+        <div style="color:#166534; font-weight:600;">ส่งการแจ้งสำเร็จ</div>
+        <div style="color:#888; font-size:13px; margin-top:4px;">ทางร้านจะติดต่อกลับหาท่านโดยเร็ว</div>
+      </div>
+    }
+  }
+</div>
