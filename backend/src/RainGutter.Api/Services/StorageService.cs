@@ -27,7 +27,7 @@ public class StorageService : IStorageService
             ContentType = contentType
         };
         await client.PutObjectAsync(request);
-        return $"{publicBase}/{fileName}";
+        return $"{publicBase.TrimEnd('/')}/{fileName}";
     }
 
     public async Task DeleteAsync(string fileName)

@@ -142,11 +142,8 @@ public class LineNotificationService(IHttpClientFactory httpClientFactory, ILogg
 
             var payload = new { to = ownerId, messages = new[] { flexMessage } };
             var client = httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            var content = new System.Net.Http.StringContent(
-                System.Text.Json.JsonSerializer.Serialize(payload),
-                System.Text.Encoding.UTF8, "application/json");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await client.PostAsync("https://api.line.me/v2/bot/message/push", content);
             if (!response.IsSuccessStatusCode)
             {
