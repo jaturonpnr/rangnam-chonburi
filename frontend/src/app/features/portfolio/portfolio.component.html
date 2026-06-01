@@ -1,0 +1,19 @@
+<div style="font-family:'Sarabun',sans-serif;">
+  <!-- Banner -->
+  <div style="background:#0284c7; color:#fff; padding:12px 20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+    @if (summary()) {
+      <span style="font-size:15px; font-weight:600;">
+        ติดตั้งแล้ว {{ summary()!.total }} จุด
+        @if (areaLabel()) {
+          · {{ areaLabel() }}
+        }
+      </span>
+    } @else {
+      <span style="font-size:15px; font-weight:600;">แผนที่ผลงาน</span>
+    }
+    <span style="font-size:12px; color:#bae6fd;">พื้นที่ชลบุรี / ศรีราชา / พัทยา</span>
+  </div>
+
+  <!-- Map -->
+  <div id="portfolio-map" style="height: calc(100vh - 54px); width: 100%;"></div>
+</div>
