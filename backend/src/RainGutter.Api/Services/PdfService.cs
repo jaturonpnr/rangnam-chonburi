@@ -3,6 +3,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using RainGutter.Api.Dtos;
+using RainGutter.Api.Enums;
 using RainGutter.Api.Models;
 
 namespace RainGutter.Api.Services;
@@ -107,6 +108,64 @@ public class PdfService : IPdfService
                         row.RelativeItem().Text(shop.QuoteFooterNote).FontColor(Colors.Grey.Darken1).FontSize(10);
                         row.ConstantItem(120).AlignRight().Text($"หน้า 1/1").FontColor(Colors.Grey.Darken1).FontSize(10);
                     });
+                });
+            });
+        });
+
+        return document.GeneratePdf();
+    }
+
+    public byte[] GenerateWarrantyPdf(Job job, ShopProfile shop, byte[] qrPng)
+    {
+        var materialLabel = job.Material == Material.Galvanized ? "สังกะสี" : "สแตนเลส";
+        var expiry = job.InstalledDate.AddMonths(job.WarrantyMonths);
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(40);
+                page.DefaultTextStyle(x => x.FontFamily("Sarabun").FontSize(12));
+
+                page.Content().Column(col =>
+                {
+                    col.Item().Row(row =>
+                    {
+                        row.RelativeItem().Column(inner =>
+                        {
+                            inner.Item().Text(shop.ShopName).Bold().FontSize(18);
+                            inner.Item().Text("ใบรับประกันการติดตั้ง").Bold().FontSize(14).FontColor(Colors.Green.Darken2);
+                            inner.Item().PaddingTop(4).Text($"เลขที่: {job.WarrantyNumber}").Bold();
+                        });
+                        row.ConstantItem(90).AlignRight().Image(qrPng).FitArea();
+                    });
+
+                    col.Item().PaddingTop(8).LineHorizontal(1).LineColor(Colors.Grey.Medium);
+
+                    col.Item().PaddingTop(12).Column(inner =>
+                    {
+                        inner.Item().Text("รายละเอียดการติดตั้ง").Bold().Underline();
+                        inner.Item().PaddingTop(6).Text($"วันที่ติดตั้ง: {job.InstalledDate:dd/MM/yyyy}");
+                        inner.Item().Text($"วันหมดอายุประกัน: {expiry:dd/MM/yyyy}");
+                        inner.Item().Text($"วัสดุ: {materialLabel} {job.SizeInches}\"");
+                        inner.Item().Text($"ความยาว: {job.LengthMeters} เมตร");
+                        inner.Item().Text($"ท่อน้ำลง: {job.DownspoutCount} จุด");
+                    });
+
+                    col.Item().PaddingTop(16).LineHorizontal(1).LineColor(Colors.Grey.Medium);
+
+                    col.Item().PaddingTop(8).Column(inner =>
+                    {
+                        inner.Item().Text("ติดต่อ").Bold();
+                        inner.Item().Text($"โทร: {shop.Phone}");
+                        if (!string.IsNullOrEmpty(shop.LineOaLink))
+                            inner.Item().Text($"LINE OA: {shop.LineOaLink}");
+                    });
+
+                    col.Item().PaddingTop(16).Background(Colors.Green.Lighten4).Padding(8)
+                        .Text("สแกน QR เพื่อดูใบรับประกันดิจิทัลและแจ้งเคลม")
+                        .FontColor(Colors.Green.Darken3);
                 });
             });
         });
