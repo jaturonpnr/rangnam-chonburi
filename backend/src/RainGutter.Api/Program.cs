@@ -86,6 +86,7 @@ app.MapQuoteEndpoints();
 app.MapLineEndpoints();
 app.MapAdminEndpoints();
 app.MapJobEndpoints();
+app.MapWarrantyEndpoints();
 
 app.Run();
 
