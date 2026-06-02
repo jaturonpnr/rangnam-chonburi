@@ -63,12 +63,14 @@
           <div class="input-unit-wrap">
             <input class="form-control" type="number" formControlName="lengthMeters"
                    placeholder="เช่น 15" min="0.1" step="0.1"
+                   inputmode="decimal"
                    (input)="onLengthMetersInput()">
             <span class="input-unit">ม.</span>
           </div>
           <button type="button" class="btn btn-secondary btn-sm map-btn"
                   (click)="showMapModal.set(true)">
-            📍 วัดจากแผนที่
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            วัดจากแผนที่
           </button>
         </div>
         @if (calcForm.get('lengthMeters')?.invalid && calcForm.get('lengthMeters')?.touched) {
@@ -82,7 +84,7 @@
       <div class="form-group">
         <label>จำนวนจุดท่อน้ำลง</label>
         <div class="input-unit-wrap">
-          <input class="form-control" type="number" min="0" formControlName="downspoutCount" placeholder="0">
+          <input class="form-control" type="number" min="0" formControlName="downspoutCount" placeholder="0" inputmode="numeric">
           <span class="unit-tag">จุด</span>
         </div>
       </div>
@@ -135,7 +137,10 @@
               [class.is-loading]="loading()"
               (click)="calculate()"
               [disabled]="loading()">
-        {{ loading() ? 'กำลังคำนวณ...' : '▶ คำนวณราคา' }}
+        @if (!loading()) {
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0"><polygon points="5,3 19,12 5,21"/></svg>
+        }
+        {{ loading() ? 'กำลังคำนวณ...' : 'คำนวณราคา' }}
       </button>
 
     </form>
@@ -143,8 +148,8 @@
 
   <!-- Server Error -->
   @if (serverError()) {
-    <div class="disclaimer" style="border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.07); color: #fca5a5; margin-bottom: 16px;">
-      <span>⚠</span>
+    <div class="disclaimer" role="alert" style="border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.07); color: #fca5a5; margin-bottom: 16px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
       <span>{{ serverError() }}</span>
     </div>
   }
@@ -183,7 +188,7 @@
       </table>
 
       <div class="disclaimer" style="margin-top: 20px;">
-        <span>⚠</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         <span>{{ estimate()!.disclaimer }}</span>
       </div>
 
@@ -205,7 +210,7 @@
       <form [formGroup]="contactForm">
         <div class="form-group">
           <label>ชื่อ-นามสกุล <span style="color: var(--red);">*</span></label>
-          <input class="form-control" formControlName="customerName" placeholder="ชื่อของท่าน">
+          <input class="form-control" formControlName="customerName" placeholder="ชื่อของท่าน" autocomplete="name">
           @if (contactForm.get('customerName')?.invalid && contactForm.get('customerName')?.touched) {
             <div class="error-msg">กรุณาระบุชื่อ (อย่างน้อย 2 ตัวอักษร)</div>
           }
@@ -213,7 +218,7 @@
 
         <div class="form-group">
           <label>เบอร์โทรศัพท์ <span style="color: var(--red);">*</span></label>
-          <input class="form-control" formControlName="phone" type="tel" placeholder="0812345678">
+          <input class="form-control" formControlName="phone" type="tel" placeholder="0812345678" inputmode="tel" autocomplete="tel">
           @if (contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched) {
             <div class="error-msg">เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก</div>
           }
@@ -221,7 +226,7 @@
 
         <div class="form-group">
           <label>ที่อยู่ติดตั้ง (ถ้ามี)</label>
-          <textarea class="form-control" formControlName="address" rows="2" placeholder="บ้านเลขที่ / ซอย / ถนน"></textarea>
+          <textarea class="form-control" formControlName="address" rows="2" placeholder="บ้านเลขที่ / ซอย / ถนน" autocomplete="street-address"></textarea>
         </div>
 
         <div class="form-group">
@@ -241,8 +246,9 @@
   <!-- LINE Contact -->
   @if (shopProfile()?.lineOaLink) {
     <div style="text-align: center; padding: 8px 0 16px;">
-      <a [href]="shopProfile()!.lineOaLink" target="_blank" class="btn btn-line">
-        💬 แชทกับช่างทาง LINE
+      <a [href]="shopProfile()!.lineOaLink" target="_blank" rel="noopener" class="btn btn-line">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.070 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        แชทกับช่างทาง LINE
       </a>
     </div>
   }

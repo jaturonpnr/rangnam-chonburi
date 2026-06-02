@@ -213,6 +213,10 @@ a { color: inherit; text-decoration: none; }
   font-size: 18px;
   letter-spacing: .08em;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .btn-calculate:hover:not(:disabled) {
   background: #fbbf24;
@@ -250,7 +254,7 @@ a { color: inherit; text-decoration: none; }
 .btn-success:disabled { opacity: .45; cursor: not-allowed; }
 
 .btn-danger { background: var(--red);  color: #07101c; border-color: var(--red); }
-.btn-line   { background: #06C755; color: #fff; border-color: #06C755; }
+.btn-line   { background: #06C755; color: #fff; border-color: #06C755; display: inline-flex; align-items: center; gap: 8px; }
 .btn-line:hover { box-shadow: 0 0 18px rgba(6,199,85,.3); }
 .btn-block  { display: flex; width: 100%; }
 .btn-sm     { padding: 6px 14px; font-size: 13px; }
@@ -405,6 +409,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 44px;
   padding: 10px 6px;
   background: var(--bg-input);
   border: 1px solid var(--border);
@@ -422,6 +427,8 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   background: rgba(245,158,11,.08);
   color: var(--amber);
 }
+.floor-seg label:has(input:focus-visible) .floor-pill { outline: 2px solid var(--blue); outline-offset: 2px; }
+.mat-tile:has(input:focus-visible) .mat-tile-inner  { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 /* ── Toggle switch ── */
 .toggle-row {
