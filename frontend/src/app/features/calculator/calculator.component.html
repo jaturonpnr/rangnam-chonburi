@@ -1,129 +1,137 @@
-<div class="container" style="padding-bottom: 56px;">
+<div class="cp">
 
-  <!-- Hero Header -->
-  <div class="page-hero">
-    <div class="eyebrow">ESTIMATE CALCULATOR</div>
+  <!-- ── Hero ── -->
+  <header class="cp-hero">
+    <div class="cp-eyebrow">ESTIMATE CALCULATOR</div>
     @if (shopProfile()) {
-      <h1>{{ shopProfile()!.shopName }}</h1>
-      <div class="hero-sub">TEL — <a href="tel:{{ shopProfile()!.phone }}" style="color:inherit; text-decoration:none;">{{ formatPhone(shopProfile()!.phone) }}</a></div>
+      <h1 class="cp-shop-name">{{ shopProfile()!.shopName }}</h1>
+      <a href="tel:{{ shopProfile()!.phone }}" class="cp-phone">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        {{ formatPhone(shopProfile()!.phone) }}
+      </a>
     } @else {
-      <h1>คำนวณราคาติดตั้งรางน้ำฝน</h1>
+      <h1 class="cp-shop-name">คำนวณรางน้ำฝน</h1>
     }
-  </div>
+  </header>
 
-  <!-- Calculator Form -->
-  <div class="card">
-    <form [formGroup]="calcForm">
+  <!-- ── Main ── -->
+  <main class="cp-main">
+    <form [formGroup]="calcForm" class="cp-form">
 
-      <!-- 01 Material -->
-      <p class="sec-label">01 — Material Spec</p>
-
-      <div class="form-group">
-        <span class="field-label">วัสดุราง</span>
-        <div class="mat-toggle">
-          <label class="mat-tile">
+      <!-- 01 วัสดุราง -->
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <span class="cp-section-num">01</span>
+          <span class="cp-section-title">วัสดุราง</span>
+        </div>
+        <div class="cp-mat-grid">
+          <label class="cp-mat-card">
             <input type="radio" class="sr-only" formControlName="material" value="Galvanized">
-            <div class="mat-tile-inner">
-              <span class="mat-code">GI</span>
-              <span class="mat-name">สังกะสี</span>
-              <span class="mat-sub">Galvanized</span>
+            <div class="cp-mat-card-inner">
+              <span class="cp-mat-badge cp-mat-badge--gi">GI</span>
+              <span class="cp-mat-name">สังกะสี</span>
+              <span class="cp-mat-sub">Galvanized</span>
             </div>
           </label>
-          <label class="mat-tile">
+          <label class="cp-mat-card">
             <input type="radio" class="sr-only" formControlName="material" value="Stainless">
-            <div class="mat-tile-inner">
-              <span class="mat-code">SS</span>
-              <span class="mat-name">สแตนเลส</span>
-              <span class="mat-sub">Stainless</span>
+            <div class="cp-mat-card-inner">
+              <span class="cp-mat-badge cp-mat-badge--ss">SS</span>
+              <span class="cp-mat-name">สแตนเลส</span>
+              <span class="cp-mat-sub">Stainless</span>
             </div>
           </label>
         </div>
       </div>
 
-      <!-- 02 Dimensions -->
-      <p class="sec-label" style="margin-top: 8px;">02 — Dimensions</p>
-
-      <div class="form-group">
-        <label>ประเภทอาคาร <span style="color: var(--red);">*</span></label>
-        <select class="form-control" formControlName="buildingTypeId">
-          <option [value]="null" disabled>-- เลือกประเภทอาคาร --</option>
+      <!-- 02 ประเภทอาคาร -->
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <span class="cp-section-num">02</span>
+          <span class="cp-section-title">ประเภทอาคาร <span style="color:var(--cp-accent);">*</span></span>
+        </div>
+        <select class="cp-select" formControlName="buildingTypeId">
+          <option [value]="null" disabled>— เลือกประเภทอาคาร —</option>
           @for (bt of buildingTypes(); track bt.id) {
             <option [value]="bt.id">{{ bt.label }}</option>
           }
         </select>
-        <div style="font-size:11px; color:var(--text-2); margin-top:4px; font-family:var(--mono);">ระบบจะเลือกขนาดรางที่เหมาะสมให้อัตโนมัติ</div>
+        <p class="cp-hint">ระบบจะเลือกขนาดรางที่เหมาะสมให้อัตโนมัติ</p>
         @if (calcForm.get('buildingTypeId')?.invalid && calcForm.get('buildingTypeId')?.touched) {
-          <div class="error-msg">กรุณาเลือกประเภทอาคาร</div>
+          <p class="cp-error" role="alert">กรุณาเลือกประเภทอาคาร</p>
         }
       </div>
 
-      <div class="form-group">
-        <label>ความยาวราง (เมตร)</label>
-        <div class="input-with-map">
-          <div class="input-unit-wrap">
-            <input class="form-control" type="number" formControlName="lengthMeters"
-                   placeholder="เช่น 15" min="0.1" step="0.1"
+      <!-- 03 ความยาวราง -->
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <span class="cp-section-num">03</span>
+          <span class="cp-section-title">ความยาวราง</span>
+        </div>
+        <div class="cp-length-row">
+          <div class="cp-input-wrap">
+            <input class="cp-input" type="number" formControlName="lengthMeters"
+                   placeholder="0.0" min="0.1" step="0.1" inputmode="decimal"
                    (input)="onLengthMetersInput()">
-            <span class="input-unit">ม.</span>
+            <span class="cp-input-unit">ม.</span>
           </div>
-          <button type="button" class="btn btn-secondary btn-sm map-btn"
-                  (click)="showMapModal.set(true)">
-            📍 วัดจากแผนที่
+          <button type="button" class="cp-map-btn" (click)="showMapModal.set(true)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            วัดจากแผนที่
           </button>
         </div>
         @if (calcForm.get('lengthMeters')?.invalid && calcForm.get('lengthMeters')?.touched) {
-          <span class="error-msg">กรุณาระบุความยาว</span>
+          <p class="cp-error" role="alert">กรุณาระบุความยาว</p>
         }
       </div>
 
-      <!-- 03 Installation Options -->
-      <p class="sec-label" style="margin-top: 8px;">03 — Installation Options</p>
-
-      <div class="form-group">
-        <label>จำนวนจุดท่อน้ำลง</label>
-        <div class="input-unit-wrap">
-          <input class="form-control" type="number" min="0" formControlName="downspoutCount" placeholder="0">
-          <span class="unit-tag">จุด</span>
+      <!-- 04 ท่อน้ำลง -->
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <span class="cp-section-num">04</span>
+          <span class="cp-section-title">จำนวนท่อน้ำลง</span>
+        </div>
+        <div class="cp-input-wrap" style="max-width:160px;">
+          <input class="cp-input" type="number" min="0" formControlName="downspoutCount"
+                 placeholder="0" inputmode="numeric">
+          <span class="cp-input-unit">จุด</span>
         </div>
       </div>
 
-      <div class="form-group">
-        <label>จำนวนชั้นอาคาร</label>
-        <div class="floor-seg">
-          <label>
-            <input type="radio" class="sr-only" [value]="1" formControlName="floors">
-            <span class="floor-pill">1 ชั้น</span>
-          </label>
-          <label>
-            <input type="radio" class="sr-only" [value]="2" formControlName="floors">
-            <span class="floor-pill">2 ชั้น</span>
-          </label>
-          <label>
-            <input type="radio" class="sr-only" [value]="3" formControlName="floors">
-            <span class="floor-pill">3 ชั้น</span>
-          </label>
-          <label>
-            <input type="radio" class="sr-only" [value]="4" formControlName="floors">
-            <span class="floor-pill">4 ชั้น</span>
-          </label>
+      <!-- 05 จำนวนชั้น -->
+      <div class="cp-section">
+        <div class="cp-section-header">
+          <span class="cp-section-num">05</span>
+          <span class="cp-section-title">จำนวนชั้นอาคาร</span>
+        </div>
+        <div class="cp-floors">
+          @for (f of [1,2,3,4]; track f) {
+            <label class="cp-floor-btn">
+              <input type="radio" class="sr-only" [value]="f" formControlName="floors">
+              <span class="cp-floor-label">{{ f }}</span>
+            </label>
+          }
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="toggle-row">
-          <span class="switch">
-            <input type="checkbox" formControlName="removeOld">
-            <span class="switch-track"></span>
-          </span>
-          <span class="toggle-text">มีรางเก่าต้องรื้อถอน</span>
+      <!-- รื้อถอน -->
+      <div class="cp-section">
+        <label class="cp-toggle">
+          <input type="checkbox" formControlName="removeOld">
+          <span class="cp-toggle-track"></span>
+          <span class="cp-toggle-text">มีรางเก่าต้องรื้อถอน</span>
         </label>
       </div>
 
+      <!-- 06 พื้นที่ (optional) -->
       @if (zones().length > 0) {
-        <div class="form-group">
-          <label>พื้นที่ติดตั้ง</label>
-          <select class="form-control" formControlName="serviceZoneId">
-            <option [value]="null">-- ไม่ระบุ --</option>
+        <div class="cp-section">
+          <div class="cp-section-header">
+            <span class="cp-section-num">06</span>
+            <span class="cp-section-title">พื้นที่ติดตั้ง</span>
+          </div>
+          <select class="cp-select" formControlName="serviceZoneId">
+            <option [value]="null">— ไม่ระบุ —</option>
             @for (zone of zones(); track zone.id) {
               <option [value]="zone.id">{{ zone.name }}{{ zone.travelSurcharge > 0 ? ' (+' + zone.travelSurcharge.toLocaleString() + ' บาท)' : '' }}</option>
             }
@@ -131,121 +139,190 @@
         </div>
       }
 
-      <button type="button" class="btn btn-calculate btn-block"
-              [class.is-loading]="loading()"
-              (click)="calculate()"
-              [disabled]="loading()">
-        {{ loading() ? 'กำลังคำนวณ...' : '▶ คำนวณราคา' }}
+      <!-- Server error -->
+      @if (serverError()) {
+        <div class="cp-alert" role="alert">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <span>{{ serverError() }}</span>
+        </div>
+      }
+
+      <!-- Calculate -->
+      <button type="button" class="cp-calc-btn"
+              [disabled]="loading()"
+              (click)="calculate()">
+        @if (loading()) {
+          <span class="cp-spinner" aria-hidden="true"></span>
+          กำลังคำนวณ...
+        } @else {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg>
+          คำนวณราคา
+        }
       </button>
 
     </form>
-  </div>
 
-  <!-- Server Error -->
-  @if (serverError()) {
-    <div class="disclaimer" style="border-color: rgba(248,113,113,.35); background: rgba(248,113,113,.07); color: #fca5a5; margin-bottom: 16px;">
-      <span>⚠</span>
-      <span>{{ serverError() }}</span>
-    </div>
-  }
+    <!-- ── Estimate Result ── -->
+    @if (estimate()) {
 
-  <!-- Estimate Result -->
-  @if (estimate()) {
-    <div class="card">
-      <p class="sec-label">Estimate Output</p>
+      <!-- Galvanized: comparison mode (2 cards) -->
+      @if (stainlessEstimate()) {
+        <div class="cp-compare-grid">
 
-      <table>
-        <thead>
-          <tr>
-            <th>รายการ</th>
-            <th style="text-align:right;">จำนวนเงิน (บาท)</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of estimate()!.breakdown; track $index) {
-            <tr>
-              <td>{{ item.label }}</td>
-              <td style="text-align:right; font-family: var(--mono); font-size: 14px;">{{ formatNumber(item.amount) }}</td>
-            </tr>
+          <!-- Left card: สังกะสี (current) -->
+          <div class="cp-ccard">
+            <div class="cp-ccard-label">สังกะสี</div>
+            <div class="cp-ccard-total">{{ formatNumber(estimate()!.total) }}</div>
+            <div class="cp-ccard-unit">บาท</div>
+            <div class="cp-ccard-table">
+              @for (item of estimate()!.breakdown; track $index) {
+                <div class="cp-ccard-row">
+                  <span class="cp-ccard-row-label">{{ item.label }}</span>
+                  <span class="cp-ccard-row-amount">{{ formatNumber(item.amount) }}</span>
+                </div>
+              }
+            </div>
+            <div class="cp-ccard-disclaimer">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              <span>{{ estimate()!.disclaimer }}</span>
+            </div>
+            @if (!showContactForm()) {
+              <button type="button" class="cp-contact-btn" style="margin-top:auto;" (click)="showContactForm.set(true)">
+                ขอใบเสนอราคา
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            }
+          </div>
+
+          <!-- Right card: สแตนเลส (recommended) -->
+          <div class="cp-ccard cp-ccard--ss">
+            <div class="cp-ccard-badge">คุ้มค่ากว่า</div>
+            <div class="cp-ccard-label">สแตนเลส</div>
+            <div class="cp-ccard-total">{{ formatNumber(stainlessEstimate()!.total) }}</div>
+            <div class="cp-ccard-unit">บาท</div>
+            <div class="cp-ccard-diff">+{{ formatNumber(stainlessEstimate()!.total - estimate()!.total) }} บาท เท่านั้น</div>
+            <ul class="cp-ccard-benefits">
+              <li>ทนสนิม อายุการใช้งาน 15+ ปี</li>
+              <li>ไม่ต้องทาสีซ่อมแซม</li>
+              <li>รับประกันงานติดตั้งยาวขึ้น</li>
+            </ul>
+            <div class="cp-ccard-table">
+              @for (item of stainlessEstimate()!.breakdown; track $index) {
+                <div class="cp-ccard-row">
+                  <span class="cp-ccard-row-label">{{ item.label }}</span>
+                  <span class="cp-ccard-row-amount">{{ formatNumber(item.amount) }}</span>
+                </div>
+              }
+            </div>
+            <div class="cp-ccard-disclaimer">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              <span>{{ stainlessEstimate()!.disclaimer }}</span>
+            </div>
+            <button type="button" class="cp-switch-btn" (click)="switchToStainless()">
+              เลือกสแตนเลส
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+
+        </div>
+
+      } @else {
+        <!-- Stainless (or after switching): single result card -->
+        <div class="cp-result">
+          <div class="cp-result-header">ESTIMATE OUTPUT</div>
+          <div class="cp-result-total">{{ formatNumber(estimate()!.total) }}</div>
+          <div class="cp-result-unit">บาท (ประมาณการ)</div>
+
+          <div class="cp-result-table">
+            @for (item of estimate()!.breakdown; track $index) {
+              <div class="cp-result-row">
+                <span class="cp-result-label">{{ item.label }}</span>
+                <span class="cp-result-amount">{{ formatNumber(item.amount) }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="cp-disclaimer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <span>{{ estimate()!.disclaimer }}</span>
+          </div>
+
+          @if (!showContactForm()) {
+            <button type="button" class="cp-contact-btn" (click)="showContactForm.set(true)">
+              ขอใบเสนอราคา / ให้ช่างติดต่อกลับ
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
           }
-        </tbody>
-        <tfoot>
-          <tr>
-            <td>
-              <div class="total-label">ยอดรวมประเมิน</div>
-            </td>
-            <td style="text-align:right;">
-              <div class="total-value">{{ formatNumber(estimate()!.total) }}</div>
-              <div style="font-family: var(--mono); font-size: 11px; color: var(--text-2); letter-spacing: .06em;">บาท</div>
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-
-      <div class="disclaimer" style="margin-top: 20px;">
-        <span>⚠</span>
-        <span>{{ estimate()!.disclaimer }}</span>
-      </div>
-
-      @if (!showContactForm()) {
-        <button type="button" class="btn btn-primary btn-block"
-                style="margin-top: 16px;"
-                (click)="showContactForm.set(true)">
-          ขอใบเสนอราคา / ให้ช่างติดต่อกลับ
-        </button>
+        </div>
       }
-    </div>
-  }
 
-  <!-- Contact Form -->
-  @if (showContactForm()) {
-    <div class="card">
-      <p class="sec-label">Contact Details</p>
+    }
 
-      <form [formGroup]="contactForm">
-        <div class="form-group">
-          <label>ชื่อ-นามสกุล <span style="color: var(--red);">*</span></label>
-          <input class="form-control" formControlName="customerName" placeholder="ชื่อของท่าน">
-          @if (contactForm.get('customerName')?.invalid && contactForm.get('customerName')?.touched) {
-            <div class="error-msg">กรุณาระบุชื่อ (อย่างน้อย 2 ตัวอักษร)</div>
-          }
+    <!-- ── Contact Form ── -->
+    @if (showContactForm()) {
+      <div class="cp-contact">
+        <div class="cp-section-header" style="margin-bottom:20px;">
+          <span class="cp-section-num" style="background:rgba(52,211,153,.12);border-color:var(--cp-green);color:var(--cp-green);box-shadow:0 0 10px rgba(52,211,153,.15);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span class="cp-section-title">ข้อมูลสำหรับติดต่อกลับ</span>
         </div>
 
-        <div class="form-group">
-          <label>เบอร์โทรศัพท์ <span style="color: var(--red);">*</span></label>
-          <input class="form-control" formControlName="phone" type="tel" placeholder="0812345678">
-          @if (contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched) {
-            <div class="error-msg">เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก</div>
-          }
-        </div>
+        <form [formGroup]="contactForm" class="cp-form">
+          <div class="cp-field">
+            <label class="cp-label" for="cp-name">ชื่อ-นามสกุล <span class="cp-req">*</span></label>
+            <input id="cp-name" class="cp-input" formControlName="customerName"
+                   placeholder="ชื่อของท่าน" autocomplete="name">
+            @if (contactForm.get('customerName')?.invalid && contactForm.get('customerName')?.touched) {
+              <p class="cp-error" role="alert">กรุณาระบุชื่อ (อย่างน้อย 2 ตัวอักษร)</p>
+            }
+          </div>
 
-        <div class="form-group">
-          <label>ที่อยู่ติดตั้ง (ถ้ามี)</label>
-          <textarea class="form-control" formControlName="address" rows="2" placeholder="บ้านเลขที่ / ซอย / ถนน"></textarea>
-        </div>
+          <div class="cp-field">
+            <label class="cp-label" for="cp-phone">เบอร์โทรศัพท์ <span class="cp-req">*</span></label>
+            <input id="cp-phone" class="cp-input" formControlName="phone"
+                   type="tel" placeholder="0812345678" inputmode="tel" autocomplete="tel">
+            @if (contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched) {
+              <p class="cp-error" role="alert">เบอร์โทรต้องเป็นตัวเลข 9-10 หลัก</p>
+            }
+          </div>
 
-        <div class="form-group">
-          <label>รายละเอียดพื้นที่ / จุดสังเกต (ถ้ามี)</label>
-          <input class="form-control" formControlName="locationDetail" placeholder="เช่น ใกล้ปั้มน้ำมัน / บ้านสีฟ้า">
-        </div>
+          <div class="cp-field">
+            <label class="cp-label" for="cp-address">ที่อยู่ติดตั้ง (ถ้ามี)</label>
+            <textarea id="cp-address" class="cp-input" formControlName="address"
+                      rows="2" placeholder="บ้านเลขที่ / ซอย / ถนน" autocomplete="street-address"></textarea>
+          </div>
 
-        <button type="button" class="btn btn-success btn-block"
-                (click)="submitQuote()"
-                [disabled]="submitLoading()">
-          {{ submitLoading() ? 'กำลังส่งข้อมูล...' : 'ส่งขอใบเสนอราคา' }}
-        </button>
-      </form>
-    </div>
-  }
+          <div class="cp-field">
+            <label class="cp-label" for="cp-loc">รายละเอียดพื้นที่ / จุดสังเกต (ถ้ามี)</label>
+            <input id="cp-loc" class="cp-input" formControlName="locationDetail"
+                   placeholder="เช่น ใกล้ปั้มน้ำมัน / บ้านสีฟ้า">
+          </div>
 
-  <!-- LINE Contact -->
-  @if (shopProfile()?.lineOaLink) {
-    <div style="text-align: center; padding: 8px 0 16px;">
-      <a [href]="shopProfile()!.lineOaLink" target="_blank" class="btn btn-line">
-        💬 แชทกับช่างทาง LINE
-      </a>
-    </div>
-  }
+          <button type="button" class="cp-submit-btn"
+                  (click)="submitQuote()" [disabled]="submitLoading()">
+            @if (submitLoading()) {
+              <span class="cp-spinner" aria-hidden="true" style="border-color:rgba(0,0,0,.2);border-top-color:#042f2e;width:16px;height:16px;display:inline-block;"></span>
+              กำลังส่งข้อมูล...
+            } @else {
+              ส่งขอใบเสนอราคา
+            }
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- ── LINE ── -->
+    @if (shopProfile()?.lineOaLink) {
+      <div class="cp-line-wrap">
+        <a [href]="shopProfile()!.lineOaLink" target="_blank" rel="noopener" class="cp-line-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.07 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          แชทกับช่างทาง LINE
+        </a>
+      </div>
+    }
+
+  </main>
 
   @if (showMapModal()) {
     <app-map-measure-modal

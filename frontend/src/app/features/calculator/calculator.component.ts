@@ -1,7 +1,9 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Renderer2 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { BuildingType, ServiceZone, EstimateResult, ShopProfilePublic, MapMeasureResult } from '../../core/models';
 import { MapMeasureModalComponent } from './map-measure-modal/map-measure-modal.component';
@@ -12,15 +14,17 @@ import { MapMeasureModalComponent } from './map-measure-modal/map-measure-modal.
   imports: [CommonModule, ReactiveFormsModule, MapMeasureModalComponent],
   templateUrl: './calculator.component.html'
 })
-export class CalculatorComponent implements OnInit {
+export class CalculatorComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private renderer = inject(Renderer2);
 
   buildingTypes = signal<BuildingType[]>([]);
   zones = signal<ServiceZone[]>([]);
   shopProfile = signal<ShopProfilePublic | null>(null);
   estimate = signal<EstimateResult | null>(null);
+  stainlessEstimate = signal<EstimateResult | null>(null);
   loading = signal(false);
   submitLoading = signal(false);
   showContactForm = signal(false);
@@ -48,6 +52,7 @@ export class CalculatorComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.renderer.addClass(document.body, 'calc-theme');
     this.api.getBuildingTypes().subscribe(bt => this.buildingTypes.set(bt));
     this.api.getZones().subscribe(z => this.zones.set(z));
     this.api.getShopProfile().subscribe(s => this.shopProfile.set(s));
@@ -82,12 +87,30 @@ export class CalculatorComponent implements OnInit {
 
   calculate() {
     if (this.calcForm.invalid) { this.calcForm.markAllAsTouched(); return; }
+    const form = this.coerceForm();
     this.loading.set(true);
     this.estimate.set(null);
-    this.api.estimate(this.coerceForm()).subscribe({
-      next: r => { this.estimate.set(r); this.loading.set(false); },
-      error: e => { this.serverError.set(e.error?.error ?? 'เกิดข้อผิดพลาด'); this.loading.set(false); }
-    });
+    this.stainlessEstimate.set(null);
+    this.serverError.set('');
+    if (form.material === 'Galvanized') {
+      forkJoin({
+        gi: this.api.estimate(form),
+        ss: this.api.estimate({ ...form, material: 'Stainless' })
+      }).subscribe({
+        next: r => { this.estimate.set(r.gi); this.stainlessEstimate.set(r.ss); this.loading.set(false); },
+        error: e => { this.serverError.set(e.error?.error ?? 'เกิดข้อผิดพลาด'); this.loading.set(false); }
+      });
+    } else {
+      this.api.estimate(form).subscribe({
+        next: r => { this.estimate.set(r); this.loading.set(false); },
+        error: e => { this.serverError.set(e.error?.error ?? 'เกิดข้อผิดพลาด'); this.loading.set(false); }
+      });
+    }
+  }
+
+  switchToStainless() {
+    this.calcForm.patchValue({ material: 'Stainless' });
+    this.calculate();
   }
 
   submitQuote() {
@@ -107,6 +130,10 @@ export class CalculatorComponent implements OnInit {
       next: r => this.router.navigate(['/thank-you', r.quoteNumber], { state: { quoteRequestId: r.quoteRequestId } }),
       error: e => { this.serverError.set(e.error?.error ?? 'เกิดข้อผิดพลาด'); this.submitLoading.set(false); }
     });
+  }
+
+  ngOnDestroy() {
+    this.renderer.removeClass(document.body, 'calc-theme');
   }
 
   formatNumber(n: number) { return n.toLocaleString('th-TH'); }

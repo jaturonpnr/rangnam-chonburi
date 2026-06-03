@@ -1,0 +1,271 @@
+<!-- ── NAVBAR ── -->
+<nav class="hn-nav" [class.hn-nav--up]="navScrolled()">
+  <div class="hn-container hn-nav-inner">
+    <a routerLink="/" class="hn-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M14 2C14 2 6 10 6 16a8 8 0 0 0 16 0c0-6-8-14-8-14Z" fill="#38BDF8" opacity=".9"/>
+        <path d="M14 10c0 0-3.5 4.5-3.5 6.5a3.5 3.5 0 0 0 7 0c0-2-3.5-6.5-3.5-6.5Z" fill="#fff" opacity=".5"/>
+      </svg>
+      <span class="hn-logo-text">{{ shop()?.shopName || 'ส.จาตุรนต์ รางน้ำ' }}</span>
+    </a>
+
+    <ul class="hn-nav-links" role="list">
+      <li><a href="#features">บริการ</a></li>
+      <li><a href="#materials">วัสดุ</a></li>
+      <li><a routerLink="/portfolio">ผลงาน</a></li>
+      <li><a href="#cta">ติดต่อ</a></li>
+    </ul>
+
+    <div class="hn-nav-right">
+      @if (shop()?.phone) {
+        <a [href]="'tel:' + shop()!.phone" class="hn-nav-phone">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          {{ formatPhone(shop()!.phone) }}
+        </a>
+      }
+      <a routerLink="/calculator" class="hn-btn-cta">
+        ประเมินราคาฟรี
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hn-hero">
+  <div class="hn-rain-bg" aria-hidden="true"></div>
+
+  <div class="hn-container hn-hero-inner">
+    <p class="hn-eyebrow">ชลบุรี · ศรีราชา · พัทยา</p>
+    <h1 class="hn-hero-h1">
+      ป้องกันบ้านของคุณ<br>
+      <em>จากทุกสายฝน</em>
+    </h1>
+    <p class="hn-hero-sub">
+      รับติดตั้งรางน้ำฝนสแตนเลส 304 และสังกะสีคุณภาพสูง<br>
+      ช่างผู้เชี่ยวชาญ ทำงานเรียบร้อย รับประกันผลงาน
+    </p>
+    <div class="hn-hero-actions">
+      <a routerLink="/calculator" class="hn-btn-primary hn-btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        ประเมินราคาฟรี
+      </a>
+      @if (shop()?.lineOaLink) {
+        <a [href]="shop()!.lineOaLink" target="_blank" rel="noopener" class="hn-btn-outline hn-btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.07 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          แชทกับช่างทาง LINE
+        </a>
+      } @else if (shop()?.phone) {
+        <a [href]="'tel:' + shop()!.phone" class="hn-btn-outline hn-btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          โทรปรึกษาฟรี
+        </a>
+      }
+    </div>
+  </div>
+
+  <div class="hn-hero-wave" aria-hidden="true">
+    <svg viewBox="0 0 1440 72" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,36 C180,72 360,0 540,36 C720,72 900,0 1080,36 C1260,72 1380,18 1440,36 L1440,72 L0,72 Z" fill="#F1F5F9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="hn-features" id="features">
+  <div class="hn-container">
+    <div class="hn-section-header">
+      <span class="hn-section-tag">ทำไมต้องเลือกเรา</span>
+      <h2 class="hn-section-title">มาตรฐานระดับมืออาชีพ<br>ทุกงาน ทุกหลัง</h2>
+    </div>
+
+    <div class="hn-feature-grid">
+      <div class="hn-feature-card">
+        <div class="hn-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3 class="hn-feature-title">วัสดุพรีเมียม แข็งแรงทนทาน</h3>
+        <p class="hn-feature-desc">ใช้สแตนเลส 304 เกรดอุตสาหกรรม ทนสนิม ทนความร้อน อายุการใช้งาน 15 ปีขึ้นไป พร้อมตัวเลือกสังกะสีอาบสีที่ประหยัดกว่า</p>
+      </div>
+
+      <div class="hn-feature-card">
+        <div class="hn-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/><path d="M2 20h20"/></svg>
+        </div>
+        <h3 class="hn-feature-title">ช่างผู้เชี่ยวชาญ ไม่ทิ้งงาน</h3>
+        <p class="hn-feature-desc">ทีมช่างมากประสบการณ์ มีความเชี่ยวชาญเฉพาะด้านรางน้ำฝน ทำงานตรงเวลา รับผิดชอบตั้งแต่ต้นจนจบ ไม่มีบิลเพิ่มซ่อน</p>
+      </div>
+
+      <div class="hn-feature-card">
+        <div class="hn-feature-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </div>
+        <h3 class="hn-feature-title">รับประกันผลงาน</h3>
+        <p class="hn-feature-desc">รับประกันคุณภาพงานติดตั้งทุกโปรเจกต์ หากเกิดปัญหาจากการติดตั้ง ทีมงานพร้อมกลับมาแก้ไขทันที พร้อม QR Code ใบรับประกัน</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MATERIALS ── -->
+<section class="hn-materials" id="materials">
+  <div class="hn-mat-wave-top" aria-hidden="true">
+    <svg viewBox="0 0 1440 72" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,36 C180,0 360,72 540,36 C720,0 900,72 1080,36 C1260,0 1380,54 1440,36 L1440,0 L0,0 Z" fill="#F1F5F9"/>
+    </svg>
+  </div>
+  <div class="hn-container">
+    <div class="hn-section-header hn-section-header--light">
+      <span class="hn-section-tag hn-section-tag--light">วัสดุที่เราใช้</span>
+      <h2 class="hn-section-title hn-section-title--light">เลือกวัสดุที่เหมาะกับบ้านคุณ</h2>
+    </div>
+
+    <div class="hn-mat-grid">
+      <div class="hn-mat-card hn-mat-card--premium">
+        <div class="hn-mat-badge">แนะนำ</div>
+        <div class="hn-mat-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="18" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="4 2"/>
+            <path d="M20 8C20 8 12 15 12 20a8 8 0 0 0 16 0c0-5-8-12-8-12Z" fill="#38BDF8" opacity=".3"/>
+            <path d="M20 13C20 13 16 17.5 16 20a4 4 0 0 0 8 0c0-2.5-4-7-4-7Z" fill="#38BDF8" opacity=".7"/>
+          </svg>
+        </div>
+        <h3 class="hn-mat-title">สแตนเลส 304</h3>
+        <p class="hn-mat-sub">Stainless Steel Grade 304</p>
+        <ul class="hn-mat-list">
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            ทนสนิม 100% ไม่ต้องทาสี
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            อายุการใช้งาน 15–20 ปี
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            ทนความร้อน ทนชายทะเล
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            ดูแลรักษาง่าย ประหยัดระยะยาว
+          </li>
+        </ul>
+        <a routerLink="/calculator" class="hn-btn-primary" style="margin-top:auto;">เลือกสแตนเลส</a>
+      </div>
+
+      <div class="hn-mat-card">
+        <div class="hn-mat-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="18" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 2"/>
+            <rect x="12" y="14" width="16" height="12" rx="2" stroke="#94A3B8" stroke-width="1.5" fill="none"/>
+            <line x1="12" y1="20" x2="28" y2="20" stroke="#94A3B8" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3 class="hn-mat-title">สังกะสีอาบสี</h3>
+        <p class="hn-mat-sub">Galvanized Steel</p>
+        <ul class="hn-mat-list">
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            ราคาประหยัด เข้าถึงได้ง่าย
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            อายุการใช้งาน 8–12 ปี
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            มีหลายขนาดและสี
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            เหมาะกับโกดัง/อาคารพาณิชย์
+          </li>
+        </ul>
+        <a routerLink="/calculator" class="hn-btn-outline-dark" style="margin-top:auto;">เลือกสังกะสี</a>
+      </div>
+    </div>
+  </div>
+  <div class="hn-mat-wave-bot" aria-hidden="true">
+    <svg viewBox="0 0 1440 72" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,36 C180,72 360,0 540,36 C720,72 900,0 1080,36 C1260,72 1380,18 1440,36 L1440,72 L0,72 Z" fill="#F1F5F9"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<section class="hn-stats">
+  <div class="hn-container">
+    <div class="hn-stats-grid">
+      <div class="hn-stat">
+        <span class="hn-stat-num">15+</span>
+        <span class="hn-stat-label">ปีแห่งประสบการณ์</span>
+      </div>
+      <div class="hn-stat-divider" aria-hidden="true"></div>
+      <div class="hn-stat">
+        <span class="hn-stat-num">500+</span>
+        <span class="hn-stat-label">หลังที่ไว้วางใจเรา</span>
+      </div>
+      <div class="hn-stat-divider" aria-hidden="true"></div>
+      <div class="hn-stat">
+        <span class="hn-stat-num">3</span>
+        <span class="hn-stat-label">จังหวัดในชลบุรี</span>
+      </div>
+      <div class="hn-stat-divider" aria-hidden="true"></div>
+      <div class="hn-stat">
+        <span class="hn-stat-num">100%</span>
+        <span class="hn-stat-label">รับประกันผลงาน</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="hn-cta" id="cta">
+  <div class="hn-container hn-cta-inner">
+    <div class="hn-cta-badge">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      ไม่มีค่าใช้จ่ายในการประเมิน
+    </div>
+    <h2 class="hn-cta-title">พร้อมรับใบเสนอราคา<br><em>ฟรีทันที</em></h2>
+    <p class="hn-cta-sub">กรอกข้อมูลแค่ 2 นาที รับราคาประเมินทันที<br>ช่างติดต่อกลับภายใน 1 วันทำการ</p>
+    <div class="hn-cta-actions">
+      <a routerLink="/calculator" class="hn-btn-primary hn-btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        เริ่มประเมินราคาเลย
+      </a>
+      @if (shop()?.phone) {
+        <a [href]="'tel:' + shop()!.phone" class="hn-btn-outline hn-btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          โทร {{ formatPhone(shop()!.phone) }}
+        </a>
+      }
+    </div>
+    @if (shop()?.lineOaLink) {
+      <a [href]="shop()!.lineOaLink" target="_blank" rel="noopener" class="hn-line-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.07 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+        หรือแชทผ่าน LINE OA ได้เลย
+      </a>
+    }
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="hn-footer">
+  <div class="hn-container hn-footer-inner">
+    <div class="hn-footer-brand">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <path d="M14 2C14 2 6 10 6 16a8 8 0 0 0 16 0c0-6-8-14-8-14Z" fill="#38BDF8" opacity=".8"/>
+        <path d="M14 10c0 0-3.5 4.5-3.5 6.5a3.5 3.5 0 0 0 7 0c0-2-3.5-6.5-3.5-6.5Z" fill="#fff" opacity=".4"/>
+      </svg>
+      <span>{{ shop()?.shopName || 'ส.จาตุรนต์ รางน้ำ' }}</span>
+    </div>
+    <p class="hn-footer-desc">รับติดตั้งรางน้ำฝน ชลบุรี · ศรีราชา · พัทยา<br>วัสดุคุณภาพสูง ช่างผู้เชี่ยวชาญ รับประกันผลงาน</p>
+    <div class="hn-footer-links">
+      <a href="#features">บริการ</a>
+      <a href="#materials">วัสดุ</a>
+      <a routerLink="/portfolio">ผลงาน</a>
+      <a routerLink="/calculator">ประเมินราคา</a>
+    </div>
+    <p class="hn-footer-copy">© 2025 {{ shop()?.shopName || 'ส.จาตุรนต์ รางน้ำ' }} · สงวนลิขสิทธิ์</p>
+  </div>
+</footer>
