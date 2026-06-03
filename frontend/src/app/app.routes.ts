@@ -2,7 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/services/auth.guard';
 
 export const routes: Routes = [
-  { path: '', loadComponent: () => import('./features/calculator/calculator.component').then(m => m.CalculatorComponent) },
+  { path: '', loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) },
+  { path: 'calculator', loadComponent: () => import('./features/calculator/calculator.component').then(m => m.CalculatorComponent) },
   { path: 'thank-you/:quoteNumber', loadComponent: () => import('./features/thank-you/thank-you.component').then(m => m.ThankYouComponent) },
   { path: 'w/:token', loadComponent: () => import('./features/warranty/warranty.component').then(m => m.WarrantyComponent) },
   { path: 'portfolio', loadComponent: () => import('./features/portfolio/portfolio.component').then(m => m.PortfolioComponent) },

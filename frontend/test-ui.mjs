@@ -25,6 +25,7 @@ console.log('  H1:', h1);
 
 // ─── 2. กรอกฟอร์ม (Stainless + บ้านพักอาศัย / ทาวน์เฮ้าส์) ──────────────
 console.log('\n[2] เลือกวัสดุ Stainless');
+await page.goto(`${BASE}/calculator`, { waitUntil: 'networkidle' });
 await page.click('input[value="Stainless"]');
 await page.waitForTimeout(600);
 
@@ -122,7 +123,7 @@ console.log('  product rows:', productRows, productRows === 6 ? '✅ 6 สิน
 
 // ─── 11. Validation test ────────────────────────────────────────────────────
 console.log('\n[11] Validation — เบอร์โทรผิดรูปแบบ');
-await page.goto(BASE, { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/calculator`, { waitUntil: 'networkidle' });
 await page.setViewportSize({ width: 390, height: 844 });
 await page.click('input[value="Galvanized"]');
 await page.waitForTimeout(400);
