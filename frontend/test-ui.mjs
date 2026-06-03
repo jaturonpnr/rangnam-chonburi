@@ -35,21 +35,21 @@ await page.selectOption('select[formcontrolname="buildingTypeId"]', { index: 1 }
 await page.fill('input[formcontrolname="lengthMeters"]', '8');
 await page.fill('input[formcontrolname="downspoutCount"]', '2');
 await page.locator('input[formcontrolname="floors"]').nth(1).click();
-await page.locator('label.toggle-row').click();
+await page.locator('label.cp-toggle').click();
 await page.screenshot({ path: SS('02-form-filled'), fullPage: true });
 console.log('  screenshot:', SS('02-form-filled'));
 
 // ─── 3. คำนวณราคา ──────────────────────────────────────────────────────────
 console.log('\n[3] กด "คำนวณราคา"');
 await page.click('button:has-text("คำนวณ")');
-await page.waitForSelector('tfoot', { timeout: 8000 });
+await page.waitForSelector('.cp-result', { timeout: 8000 });
 await page.screenshot({ path: SS('03-estimate-result'), fullPage: true });
 
-const totalText = await page.textContent('tfoot tr td:last-child');
+const totalText = await page.locator('.cp-result-total').first().textContent();
 console.log('  ยอดรวม:', totalText?.trim());
 console.log(totalText?.includes('9,980') ? '  ✅ 9,980 บาท ถูกต้อง' : '  ❌ ยอดไม่ถูกต้อง');
 
-const disclaimer = await page.locator('.disclaimer').first().textContent();
+const disclaimer = await page.locator('.cp-disclaimer').first().textContent();
 console.log('  Disclaimer:', disclaimer?.trim().slice(0, 50));
 
 // ─── 4. ฟอร์มติดต่อ ─────────────────────────────────────────────────────────
@@ -130,14 +130,14 @@ await page.waitForSelector('select[formcontrolname="buildingTypeId"]', { timeout
 await page.selectOption('select[formcontrolname="buildingTypeId"]', { index: 1 });
 await page.fill('input[formcontrolname="lengthMeters"]', '10');
 await page.click('button:has-text("คำนวณ")');
-await page.waitForSelector('tfoot', { timeout: 5000 });
+await page.waitForSelector('.cp-result', { timeout: 5000 });
 await page.click('button:has-text("ขอใบเสนอราคา")');
 await page.waitForSelector('input[formcontrolname="customerName"]', { timeout: 3000 });
 await page.fill('input[formcontrolname="customerName"]', 'ทดสอบ');
 await page.fill('input[formcontrolname="phone"]', '123');
 await page.click('button:has-text("ส่งขอใบเสนอราคา")');
 await page.waitForTimeout(500);
-const errMsg = await page.locator('.error-msg').first().textContent().catch(() => '');
+const errMsg = await page.locator('.cp-error').first().textContent().catch(() => '');
 console.log('  error message:', errMsg?.trim());
 await page.screenshot({ path: SS('11-validation'), fullPage: true });
 
