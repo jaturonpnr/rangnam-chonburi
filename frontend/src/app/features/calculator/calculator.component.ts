@@ -3,6 +3,7 @@ import { Renderer2 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { BuildingType, ServiceZone, EstimateResult, ShopProfilePublic, MapMeasureResult } from '../../core/models';
 import { MapMeasureModalComponent } from './map-measure-modal/map-measure-modal.component';
@@ -23,6 +24,7 @@ export class CalculatorComponent implements OnInit, OnDestroy {
   zones = signal<ServiceZone[]>([]);
   shopProfile = signal<ShopProfilePublic | null>(null);
   estimate = signal<EstimateResult | null>(null);
+  stainlessEstimate = signal<EstimateResult | null>(null);
   loading = signal(false);
   submitLoading = signal(false);
   showContactForm = signal(false);
@@ -85,12 +87,30 @@ export class CalculatorComponent implements OnInit, OnDestroy {
 
   calculate() {
     if (this.calcForm.invalid) { this.calcForm.markAllAsTouched(); return; }
+    const form = this.coerceForm();
     this.loading.set(true);
     this.estimate.set(null);
-    this.api.estimate(this.coerceForm()).subscribe({
-      next: r => { this.estimate.set(r); this.loading.set(false); },
-      error: e => { this.serverError.set(e.error?.error ?? 'เกิดข้อผิดพลาด'); this.loading.set(false); }
-    });
+    this.stainlessEstimate.set(null);
+    this.serverError.set('');
+    if (form.material === 'Galvanized') {
+      forkJoin({
+        gi: this.api.estimate(form),
+        ss: this.api.estimate({ ...form, material: 'Stainless' })
+      }).subscribe({
+        next: r => { this.estimate.set(r.gi); this.stainlessEstimate.set(r.ss); this.loading.set(false); },
+        error: e => { this.serverError.set(e.error?.error ?? 'เกิดข้อผิดพลาด'); this.loading.set(false); }
+      });
+    } else {
+      this.api.estimate(form).subscribe({
+        next: r => { this.estimate.set(r); this.loading.set(false); },
+        error: e => { this.serverError.set(e.error?.error ?? 'เกิดข้อผิดพลาด'); this.loading.set(false); }
+      });
+    }
+  }
+
+  switchToStainless() {
+    this.calcForm.patchValue({ material: 'Stainless' });
+    this.calculate();
   }
 
   submitQuote() {

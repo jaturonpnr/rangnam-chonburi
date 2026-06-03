@@ -164,32 +164,98 @@
 
     <!-- ── Estimate Result ── -->
     @if (estimate()) {
-      <div class="cp-result">
-        <div class="cp-result-header">ESTIMATE OUTPUT</div>
-        <div class="cp-result-total">{{ formatNumber(estimate()!.total) }}</div>
-        <div class="cp-result-unit">บาท (ประมาณการ)</div>
 
-        <div class="cp-result-table">
-          @for (item of estimate()!.breakdown; track $index) {
-            <div class="cp-result-row">
-              <span class="cp-result-label">{{ item.label }}</span>
-              <span class="cp-result-amount">{{ formatNumber(item.amount) }}</span>
+      <!-- Galvanized: comparison mode (2 cards) -->
+      @if (stainlessEstimate()) {
+        <div class="cp-compare-grid">
+
+          <!-- Left card: สังกะสี (current) -->
+          <div class="cp-ccard">
+            <div class="cp-ccard-label">สังกะสี</div>
+            <div class="cp-ccard-total">{{ formatNumber(estimate()!.total) }}</div>
+            <div class="cp-ccard-unit">บาท</div>
+            <div class="cp-ccard-table">
+              @for (item of estimate()!.breakdown; track $index) {
+                <div class="cp-ccard-row">
+                  <span class="cp-ccard-row-label">{{ item.label }}</span>
+                  <span class="cp-ccard-row-amount">{{ formatNumber(item.amount) }}</span>
+                </div>
+              }
             </div>
+            <div class="cp-ccard-disclaimer">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              <span>{{ estimate()!.disclaimer }}</span>
+            </div>
+            @if (!showContactForm()) {
+              <button type="button" class="cp-contact-btn" style="margin-top:auto;" (click)="showContactForm.set(true)">
+                ขอใบเสนอราคา
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            }
+          </div>
+
+          <!-- Right card: สแตนเลส (recommended) -->
+          <div class="cp-ccard cp-ccard--ss">
+            <div class="cp-ccard-badge">คุ้มค่ากว่า</div>
+            <div class="cp-ccard-label">สแตนเลส</div>
+            <div class="cp-ccard-total">{{ formatNumber(stainlessEstimate()!.total) }}</div>
+            <div class="cp-ccard-unit">บาท</div>
+            <div class="cp-ccard-diff">+{{ formatNumber(stainlessEstimate()!.total - estimate()!.total) }} บาท เท่านั้น</div>
+            <ul class="cp-ccard-benefits">
+              <li>ทนสนิม อายุการใช้งาน 15+ ปี</li>
+              <li>ไม่ต้องทาสีซ่อมแซม</li>
+              <li>รับประกันงานติดตั้งยาวขึ้น</li>
+            </ul>
+            <div class="cp-ccard-table">
+              @for (item of stainlessEstimate()!.breakdown; track $index) {
+                <div class="cp-ccard-row">
+                  <span class="cp-ccard-row-label">{{ item.label }}</span>
+                  <span class="cp-ccard-row-amount">{{ formatNumber(item.amount) }}</span>
+                </div>
+              }
+            </div>
+            <div class="cp-ccard-disclaimer">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              <span>{{ stainlessEstimate()!.disclaimer }}</span>
+            </div>
+            <button type="button" class="cp-switch-btn" (click)="switchToStainless()">
+              เลือกสแตนเลส
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+
+        </div>
+
+      } @else {
+        <!-- Stainless (or after switching): single result card -->
+        <div class="cp-result">
+          <div class="cp-result-header">ESTIMATE OUTPUT</div>
+          <div class="cp-result-total">{{ formatNumber(estimate()!.total) }}</div>
+          <div class="cp-result-unit">บาท (ประมาณการ)</div>
+
+          <div class="cp-result-table">
+            @for (item of estimate()!.breakdown; track $index) {
+              <div class="cp-result-row">
+                <span class="cp-result-label">{{ item.label }}</span>
+                <span class="cp-result-amount">{{ formatNumber(item.amount) }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="cp-disclaimer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <span>{{ estimate()!.disclaimer }}</span>
+          </div>
+
+          @if (!showContactForm()) {
+            <button type="button" class="cp-contact-btn" (click)="showContactForm.set(true)">
+              ขอใบเสนอราคา / ให้ช่างติดต่อกลับ
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
           }
         </div>
+      }
 
-        <div class="cp-disclaimer">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-          <span>{{ estimate()!.disclaimer }}</span>
-        </div>
-
-        @if (!showContactForm()) {
-          <button type="button" class="cp-contact-btn" (click)="showContactForm.set(true)">
-            ขอใบเสนอราคา / ให้ช่างติดต่อกลับ
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </button>
-        }
-      </div>
     }
 
     <!-- ── Contact Form ── -->

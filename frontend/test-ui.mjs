@@ -131,7 +131,7 @@ await page.waitForSelector('select[formcontrolname="buildingTypeId"]', { timeout
 await page.selectOption('select[formcontrolname="buildingTypeId"]', { index: 1 });
 await page.fill('input[formcontrolname="lengthMeters"]', '10');
 await page.click('button:has-text("คำนวณ")');
-await page.waitForSelector('.cp-result', { timeout: 5000 });
+await page.waitForSelector('.cp-result, .cp-compare-grid', { timeout: 5000 });
 await page.click('button:has-text("ขอใบเสนอราคา")');
 await page.waitForSelector('input[formcontrolname="customerName"]', { timeout: 3000 });
 await page.fill('input[formcontrolname="customerName"]', 'ทดสอบ');
