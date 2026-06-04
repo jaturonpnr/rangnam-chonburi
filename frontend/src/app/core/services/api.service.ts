@@ -6,7 +6,8 @@ import {
   QuoteRequestSummary, QuoteRequestDetail, PricingConfig,
   ShopProfile, StatsResponse, MeasureSource,
   JobSummary, JobDetail, JobPhoto, WarrantyCard, PortfolioPin, PortfolioSummary,
-  AdminServiceRequest, ServiceRequestStatus
+  AdminServiceRequest, ServiceRequestStatus,
+  ImportDraftItem, ImportBatchSummary
 } from '../models';
 
 export interface CreateQuoteRequestPayload {
@@ -180,5 +181,34 @@ export class ApiService {
   updateServiceRequestStatus(id: number, status: ServiceRequestStatus) {
     return this.http.put<{ id: number; status: string }>(
       `${this.base}/api/admin/service-requests/${id}/status`, { status });
+  }
+
+  // ── CR4: Portfolio Import ─────────────────────────────────────────────────
+  getImportBatches() {
+    return this.http.get<ImportBatchSummary[]>(`${this.base}/api/admin/portfolio/imports`);
+  }
+  getImportDrafts(batchId: number) {
+    return this.http.get<ImportDraftItem[]>(`${this.base}/api/admin/portfolio/imports/${batchId}/drafts`);
+  }
+  importImages(files: File[]) {
+    const form = new FormData();
+    files.forEach(f => form.append('files', f));
+    return this.http.post<{ batchId: number; jobCount: number }>(
+      `${this.base}/api/admin/portfolio/import/images`, form);
+  }
+  updateImportDraft(jobId: number, body: {
+    areaName: string | null; material: string; sizeInches: number;
+    lengthMeters: number; lat?: number | null; lng?: number | null;
+    showInPortfolio: boolean; photoConsent: boolean;
+  }) {
+    return this.http.put<{ id: number }>(
+      `${this.base}/api/admin/portfolio/imports/drafts/${jobId}`, body);
+  }
+  publishImportBatch(batchId: number) {
+    return this.http.post<{ published: number }>(
+      `${this.base}/api/admin/portfolio/imports/${batchId}/publish`, {});
+  }
+  deleteImportDraft(jobId: number) {
+    return this.http.delete(`${this.base}/api/admin/portfolio/imports/drafts/${jobId}`);
   }
 }

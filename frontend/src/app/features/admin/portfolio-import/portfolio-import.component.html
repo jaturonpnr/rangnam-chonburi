@@ -1,0 +1,136 @@
+<nav class="admin-nav">
+  <span class="nav-brand">RG // Admin</span>
+  <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
+  <a routerLink="/admin/jobs" routerLinkActive="active">งาน/ประกัน</a>
+  <a routerLink="/admin/service-requests" routerLinkActive="active">เคลม</a>
+  <a routerLink="/admin/portfolio-import" routerLinkActive="active">Import FB</a>
+  <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
+  <span style="flex:1"></span>
+  <a routerLink="/admin/dashboard" class="btn btn-sm btn-secondary">← กลับ</a>
+</nav>
+
+<div class="admin-content">
+  <h2 class="admin-title">Import รูปจาก Facebook</h2>
+
+  <div class="pi-privacy-note">
+    ⚠️ ก่อนเผยแพร่: ตรวจสอบให้แน่ใจว่าไม่มีข้อมูลที่ระบุตัวลูกค้า ไม่มีใบหน้า หรือป้ายทะเบียนในรูป
+  </div>
+
+  <div class="pi-upload-area">
+    <label class="pi-upload-label" [class.pi-uploading]="uploading()">
+      @if (uploading()) {
+        <span>กำลังอัปโหลด...</span>
+      } @else {
+        <span>คลิกหรือลากไฟล์มาวาง (สูงสุด 20 รูป, 10MB/ไฟล์)</span>
+        <input type="file" multiple accept="image/jpeg,image/png,image/webp"
+               (change)="onFilesSelected($event)" style="display:none">
+      }
+    </label>
+    @if (uploadError()) {
+      <p class="pi-error">{{ uploadError() }}</p>
+    }
+  </div>
+
+  @if (batches().length > 0) {
+    <div class="pi-batch-list">
+      <h3 class="pi-section-title">ชุดอัปโหลด</h3>
+      @for (b of batches(); track b.id) {
+        <button class="pi-batch-btn" [class.pi-batch-btn--active]="selectedBatchId() === b.id"
+                (click)="selectBatch(b.id)">
+          <span class="pi-batch-date">{{ b.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="pi-batch-count">{{ b.jobCount }} รูป</span>
+          @if (selectedBatchId() === b.id) {
+            <span class="pi-batch-active-badge">เลือกอยู่</span>
+          }
+        </button>
+      }
+    </div>
+  }
+
+  @if (selectedBatchId() !== null) {
+    <div class="pi-draft-header">
+      <h3 class="pi-section-title">รูปในชุดนี้</h3>
+      <button class="btn btn-primary btn-sm" (click)="publishBatch()" [disabled]="publishing()">
+        {{ publishing() ? 'กำลังเผยแพร่...' : 'เผยแพร่ทั้งชุด' }}
+      </button>
+    </div>
+
+    @if (loading()) {
+      <p style="color:var(--text-2); font-size:13px;">กำลังโหลด...</p>
+    } @else {
+      <div class="pi-draft-grid">
+        @for (d of drafts(); track d.jobId) {
+          <div class="pi-draft-card">
+            @if (d.photos.length > 0) {
+              <img class="pi-draft-thumb" [src]="d.photos[0].url" [alt]="'รูป ' + d.jobId">
+            } @else {
+              <div class="pi-draft-no-photo">ไม่มีรูป</div>
+            }
+            <div class="pi-draft-info">
+              <span class="pi-draft-area">{{ d.areaName ?? 'ยังไม่ระบุพื้นที่' }}</span>
+              <span class="pi-draft-mat">{{ materialLabel(d.material) }} {{ d.sizeInches }}"</span>
+              <div class="pi-draft-badges">
+                @if (d.showInPortfolio) {
+                  <span class="pi-badge pi-badge--green">แสดงแผนที่</span>
+                }
+                @if (d.photoConsent) {
+                  <span class="pi-badge pi-badge--blue">เผยแพร่รูปได้</span>
+                }
+              </div>
+            </div>
+            <div class="pi-draft-actions">
+              <button class="btn btn-sm btn-secondary" (click)="openEdit(d)">แก้ไข</button>
+              <button class="btn btn-sm pi-btn-delete" (click)="deleteDraft(d.jobId)">ลบ</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+@if (editingDraft()) {
+  <div class="pi-overlay" (click)="cancelEdit()">
+    <div class="pi-panel" (click)="$event.stopPropagation()">
+      <h3 class="pi-panel-title">แก้ไขรายละเอียด</h3>
+      @if (editingDraft()!.photos.length > 0) {
+        <img class="pi-panel-thumb" [src]="editingDraft()!.photos[0].url" alt="preview">
+      }
+      <div class="pi-panel-form">
+        <label>พื้นที่
+          <input class="pi-input" type="text" [(ngModel)]="editArea" placeholder="เช่น ศรีราชา">
+        </label>
+        <label>วัสดุ
+          <select class="pi-input" [(ngModel)]="editMaterial">
+            <option value="Stainless">สแตนเลส</option>
+            <option value="Galvanized">สังกะสี</option>
+          </select>
+        </label>
+        <label>ขนาด (นิ้ว)
+          <select class="pi-input" [(ngModel)]="editSize">
+            <option [value]="4">4"</option>
+            <option [value]="5">5"</option>
+            <option [value]="6">6"</option>
+            <option [value]="8">8"</option>
+          </select>
+        </label>
+        <label>ความยาว (เมตร)
+          <input class="pi-input" type="number" [(ngModel)]="editLength" min="0" step="1">
+        </label>
+        <label class="pi-checkbox-label">
+          <input type="checkbox" [(ngModel)]="editPhotoConsent">
+          เผยแพร่รูปได้ (photoConsent)
+        </label>
+        <label class="pi-checkbox-label">
+          <input type="checkbox" [(ngModel)]="editShowPortfolio">
+          แสดงในแผนที่ (showInPortfolio)
+        </label>
+      </div>
+      <div class="pi-panel-footer">
+        <button class="btn btn-primary" (click)="saveEdit()">บันทึก</button>
+        <button class="btn btn-secondary" (click)="cancelEdit()">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+}

@@ -2,6 +2,7 @@ import type { MultiLineString } from 'geojson';
 
 export type Material = 'Galvanized' | 'Stainless';
 export type QuoteStatus = 'New' | 'Contacted' | 'Quoted' | 'Won' | 'Lost';
+export type JobSource = 'Quote' | 'FacebookImport' | 'Manual';
 
 export interface GutterProduct {
   id: number;
@@ -140,27 +141,28 @@ export interface ServiceRequestItem {
 
 export interface JobSummary {
   id: number;
-  warrantyNumber: string;
-  quoteNumber: string;
-  installedDate: string;
-  warrantyExpiry: string;
+  warrantyNumber: string | null;
+  quoteNumber: string | null;
+  installedDate: string | null;
+  warrantyExpiry: string | null;
   material: Material;
   sizeInches: number;
   lengthMeters: number;
   showInPortfolio: boolean;
   photoConsent: boolean;
   serviceRequestCount: number;
+  source: JobSource;
 }
 
 export interface JobDetail {
   id: number;
-  quoteRequestId: number;
-  quoteNumber: string;
-  warrantyNumber: string;
-  publicToken: string;
-  installedDate: string;
-  warrantyMonths: number;
-  warrantyExpiry: string;
+  quoteRequestId: number | null;
+  quoteNumber: string | null;
+  warrantyNumber: string | null;
+  publicToken: string | null;
+  installedDate: string | null;
+  warrantyMonths: number | null;
+  warrantyExpiry: string | null;
   material: Material;
   sizeInches: number;
   lengthMeters: number;
@@ -172,6 +174,8 @@ export interface JobDetail {
   areaName: string | null;
   showInPortfolio: boolean;
   photoConsent: boolean;
+  source: JobSource;
+  importBatchId: number | null;
   photos: JobPhoto[];
   serviceRequests: ServiceRequestItem[];
 }
@@ -214,4 +218,29 @@ export interface AdminServiceRequest {
   createdAt: string;
   jobId: number;
   warrantyNumber: string;
+}
+
+// ── CR4: Portfolio Import ─────────────────────────────────────────────────────
+
+export interface ImportDraftItem {
+  jobId: number;
+  areaName: string | null;
+  material: Material;
+  sizeInches: number;
+  lengthMeters: number;
+  approxLat: number | null;
+  approxLng: number | null;
+  showInPortfolio: boolean;
+  photoConsent: boolean;
+  photos: JobPhoto[];
+  importBatchId: number;
+  createdAt: string;
+}
+
+export interface ImportBatchSummary {
+  id: number;
+  source: string;
+  photoCount: number;
+  jobCount: number;
+  createdAt: string;
 }

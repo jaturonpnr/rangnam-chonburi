@@ -1,0 +1,132 @@
+import { Component, OnInit, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { ApiService } from '../../../core/services/api.service';
+import { ImportBatchSummary, ImportDraftItem, Material } from '../../../core/models';
+
+@Component({
+  selector: 'app-portfolio-import',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './portfolio-import.component.html',
+  styleUrl: './portfolio-import.component.css'
+})
+export class PortfolioImportComponent implements OnInit {
+  private api = inject(ApiService);
+
+  batches = signal<ImportBatchSummary[]>([]);
+  selectedBatchId = signal<number | null>(null);
+  drafts = signal<ImportDraftItem[]>([]);
+  editingDraft = signal<ImportDraftItem | null>(null);
+
+  uploading = signal(false);
+  uploadError = signal('');
+  publishing = signal(false);
+  loading = signal(false);
+
+  editArea = '';
+  editMaterial: Material = 'Stainless';
+  editSize = 6;
+  editLength = 0;
+  editShowPortfolio = false;
+  editPhotoConsent = true;
+
+  ngOnInit() {
+    this.loadBatches();
+  }
+
+  loadBatches() {
+    this.api.getImportBatches().subscribe(b => this.batches.set(b));
+  }
+
+  onFilesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const files = Array.from(input.files);
+    this.uploading.set(true);
+    this.uploadError.set('');
+    this.api.importImages(files).subscribe({
+      next: r => {
+        this.uploading.set(false);
+        this.loadBatches();
+        this.selectBatch(r.batchId);
+        input.value = '';
+      },
+      error: e => {
+        this.uploading.set(false);
+        this.uploadError.set(e.error?.error ?? 'อัปโหลดล้มเหลว');
+      }
+    });
+  }
+
+  selectBatch(id: number) {
+    this.selectedBatchId.set(id);
+    this.loading.set(true);
+    this.api.getImportDrafts(id).subscribe(d => {
+      this.drafts.set(d);
+      this.loading.set(false);
+    });
+  }
+
+  openEdit(draft: ImportDraftItem) {
+    this.editingDraft.set(draft);
+    this.editArea = draft.areaName ?? '';
+    this.editMaterial = draft.material;
+    this.editSize = draft.sizeInches;
+    this.editLength = Number(draft.lengthMeters);
+    this.editShowPortfolio = draft.showInPortfolio;
+    this.editPhotoConsent = draft.photoConsent;
+  }
+
+  saveEdit() {
+    const draft = this.editingDraft();
+    if (!draft) return;
+    this.api.updateImportDraft(draft.jobId, {
+      areaName: this.editArea || null,
+      material: this.editMaterial,
+      sizeInches: this.editSize,
+      lengthMeters: this.editLength,
+      showInPortfolio: this.editShowPortfolio,
+      photoConsent: this.editPhotoConsent
+    }).subscribe(() => {
+      this.editingDraft.set(null);
+      this.selectBatch(this.selectedBatchId()!);
+    });
+  }
+
+  cancelEdit() {
+    this.editingDraft.set(null);
+  }
+
+  deleteDraft(jobId: number) {
+    if (!confirm('ลบรูปนี้ออก?')) return;
+    this.api.deleteImportDraft(jobId).subscribe(() => {
+      this.selectBatch(this.selectedBatchId()!);
+    });
+  }
+
+  publishBatch() {
+    const id = this.selectedBatchId();
+    if (!id) return;
+    const ready = this.drafts().filter(d => d.photoConsent).length;
+    if (!confirm(`เผยแพร่ ${ready} รูปที่ตั้งค่า photoConsent=true ขึ้นพอร์ตโฟลิโอ?`)) return;
+    this.publishing.set(true);
+    this.api.publishImportBatch(id).subscribe({
+      next: r => {
+        this.publishing.set(false);
+        alert(`เผยแพร่แล้ว ${r.published} รูป`);
+        this.selectBatch(id);
+        this.loadBatches();
+      },
+      error: () => {
+        this.publishing.set(false);
+        alert('เกิดข้อผิดพลาด');
+      }
+    });
+  }
+
+  materialLabel(m: Material) {
+    return m === 'Stainless' ? 'สแตนเลส' : 'สังกะสี';
+  }
+}

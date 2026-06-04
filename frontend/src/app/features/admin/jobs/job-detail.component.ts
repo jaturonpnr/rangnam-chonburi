@@ -41,8 +41,8 @@ export class JobDetailComponent implements OnInit {
     this.api.getAdminJobDetail(jobId).subscribe(j => {
       this.job.set(j);
       this.editForm = {
-        warrantyMonths: j.warrantyMonths,
-        installedDate: j.installedDate,
+        warrantyMonths: j.warrantyMonths ?? 12,
+        installedDate: j.installedDate ?? '',
         areaName: j.areaName ?? '',
         lat: j.lat?.toString() ?? '',
         lng: j.lng?.toString() ?? '',
