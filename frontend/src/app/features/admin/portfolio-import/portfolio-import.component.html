@@ -17,6 +17,36 @@
     ⚠️ ก่อนเผยแพร่: ตรวจสอบให้แน่ใจว่าไม่มีข้อมูลที่ระบุตัวลูกค้า ไม่มีใบหน้า หรือป้ายทะเบียนในรูป
   </div>
 
+  <!-- FB Export zip import -->
+  <div class="pi-section">
+    <h3 class="pi-section-title">นำเข้าจาก Facebook Export (zip)</h3>
+    <p class="pi-section-desc">ใช้ไฟล์ zip จาก "Download Your Information" ของ Facebook (format: JSON, quality: High)</p>
+    <label class="pi-upload-label pi-fb-upload" [class.pi-uploading]="fbUploading()">
+      @if (fbUploading()) {
+        <span>กำลังประมวลผล zip... (อาจใช้เวลาหลายนาที)</span>
+      } @else {
+        <span>เลือกไฟล์ .zip จาก Facebook Export</span>
+        <input type="file" accept=".zip" (change)="onFbZipSelected($event)" style="display:none">
+      }
+    </label>
+    @if (fbUploadError()) {
+      <p class="pi-error">{{ fbUploadError() }}</p>
+    }
+    @if (fbUploadResult()) {
+      <div class="pi-fb-result">
+        <span class="pi-badge pi-badge--green">จับคู่ JSON ได้ {{ fbUploadResult()!.paired }} รูป</span>
+        @if (fbUploadResult()!.unpaired > 0) {
+          <span class="pi-badge pi-badge--blue">ไม่มี caption {{ fbUploadResult()!.unpaired }} รูป</span>
+        }
+        @if (fbUploadResult()!.skipped > 0) {
+          <span class="pi-badge pi-badge--red">ข้าม {{ fbUploadResult()!.skipped }}</span>
+        }
+      </div>
+    }
+  </div>
+  <div class="pi-divider"></div>
+  <h3 class="pi-section-title">อัปโหลดรูปแบบเลือกเอง</h3>
+
   <div class="pi-upload-area">
     <label class="pi-upload-label" [class.pi-uploading]="uploading()">
       @if (uploading()) {
@@ -59,9 +89,33 @@
     @if (loading()) {
       <p style="color:var(--text-2); font-size:13px;">กำลังโหลด...</p>
     } @else {
+      <!-- Bulk selection bar -->
+      @if (drafts().length > 0) {
+        <div class="pi-bulk-bar">
+          <label class="pi-bulk-check">
+            <input type="checkbox"
+              [checked]="selectedIds().size === drafts().length && drafts().length > 0"
+              (change)="selectedIds().size === drafts().length ? clearSelection() : selectAll()">
+            เลือกทั้งหมด ({{ selectedIds().size }})
+          </label>
+          @if (selectedIds().size > 0) {
+            <input class="pi-bulk-area" type="text" placeholder="พื้นที่ (ไม่บังคับ)"
+              [(ngModel)]="bulkAreaName">
+            <button class="pi-btn pi-btn--publish" [disabled]="bulkUpdating()" (click)="bulkPublish()">
+              @if (bulkUpdating()) { กำลังอัปเดต... } @else { เผยแพร่ {{ selectedIds().size }} รายการ }
+            </button>
+            <button class="pi-btn pi-btn--ghost" (click)="clearSelection()">ยกเลิก</button>
+          }
+        </div>
+      }
+
       <div class="pi-draft-grid">
         @for (d of drafts(); track d.jobId) {
           <div class="pi-draft-card">
+            <input class="pi-card-check" type="checkbox"
+              [checked]="selectedIds().has(d.jobId)"
+              (change)="toggleSelect(d.jobId)"
+              (click)="$event.stopPropagation()">
             @if (d.photos.length > 0) {
               <img class="pi-draft-thumb" [src]="d.photos[0].url" [alt]="'รูป ' + d.jobId">
             } @else {
@@ -96,6 +150,11 @@
       <h3 class="pi-panel-title">แก้ไขรายละเอียด</h3>
       @if (editingDraft()!.photos.length > 0) {
         <img class="pi-panel-thumb" [src]="editingDraft()!.photos[0].url" alt="preview">
+      }
+      <div id="pi-edit-map" class="pi-edit-map"></div>
+      <p class="pi-map-hint">คลิกบนแผนที่เพื่อปักพิกัดโดยประมาณ (ไม่ต้องแม่นยำ)</p>
+      @if (editApproxLat && editApproxLng) {
+        <p class="pi-map-coords">{{ editApproxLat | number:'1.4-4' }}, {{ editApproxLng | number:'1.4-4' }}</p>
       }
       <div class="pi-panel-form">
         <label>พื้นที่
