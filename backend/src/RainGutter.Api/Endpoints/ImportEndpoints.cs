@@ -1,3 +1,5 @@
+using System.IO.Compression;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using RainGutter.Api.Data;
@@ -183,6 +185,156 @@ public static class ImportEndpoints
             db.Jobs.Remove(job);
             await db.SaveChangesAsync();
             return Results.NoContent();
+        });
+
+        // POST /api/admin/portfolio/import/fb-export
+        app.MapPost("/api/admin/portfolio/import/fb-export", [Authorize] async (
+            HttpRequest request, AppDbContext db, IStorageService storage) =>
+        {
+            IFormCollection form;
+            try { form = await request.ReadFormAsync(); }
+            catch (InvalidDataException) { return Results.BadRequest(new { error = "ต้องส่งไฟล์ zip" }); }
+
+            var file = form.Files["file"];
+            if (file is null || file.Length == 0)
+                return Results.BadRequest(new { error = "ต้องส่งไฟล์ zip" });
+            if (file.Length > 500 * 1024 * 1024)
+                return Results.BadRequest(new { error = "ไฟล์ใหญ่เกิน 500 MB" });
+
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (ext != ".zip")
+                return Results.BadRequest(new { error = "ต้องเป็นไฟล์ .zip จาก Facebook Export" });
+
+            using var zipStream = file.OpenReadStream();
+            using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+            var parseResult = FbExportParser.Parse(zip);
+
+            var batch = new ImportBatch
+            {
+                Source = "FbExport",
+                PhotoCount = parseResult.Paired.Count + parseResult.UnpairedUris.Count
+            };
+            db.ImportBatches.Add(batch);
+            await db.SaveChangesAsync();
+
+            var imageExts = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
+            int skipped = 0;
+
+            foreach (var entry in parseResult.Paired)
+            {
+                var zipEntry = FbExportParser.FindEntry(zip, entry.ZipUri);
+                if (zipEntry is null) { skipped++; continue; }
+
+                var fileExt = Path.GetExtension(zipEntry.Name).ToLowerInvariant();
+                if (!imageExts.Contains(fileExt)) { skipped++; continue; }
+
+                var fileName = $"portfolio/import/{batch.Id}/{Guid.NewGuid():N}{fileExt}";
+                string url;
+                try
+                {
+                    using var entryStream = zipEntry.Open();
+                    url = await storage.UploadAsync(fileName, entryStream, $"image/{fileExt.TrimStart('.')}");
+                }
+                catch { skipped++; continue; }
+
+                var installedDate = entry.CreationTimestamp > 0
+                    ? DateTimeOffset.FromUnixTimeSeconds(entry.CreationTimestamp).UtcDateTime
+                    : (DateTime?)null;
+
+                var job = new Job
+                {
+                    Source = JobSource.FacebookImport,
+                    ImportBatchId = batch.Id,
+                    Material = Material.Stainless,
+                    SizeInches = 6,
+                    LengthMeters = 0,
+                    DownspoutCount = 0,
+                    ShowInPortfolio = false,
+                    PhotoConsent = true,
+                    InstalledDate = installedDate
+                };
+                db.Jobs.Add(job);
+                await db.SaveChangesAsync();
+
+                db.JobPhotos.Add(new JobPhoto
+                {
+                    JobId = job.Id,
+                    Url = url,
+                    Type = PhotoType.After,
+                    Caption = entry.Description,
+                    DisplayOrder = 1
+                });
+            }
+
+            foreach (var uri in parseResult.UnpairedUris)
+            {
+                var zipEntry = FbExportParser.FindEntry(zip, uri);
+                if (zipEntry is null) { skipped++; continue; }
+
+                var fileExt = Path.GetExtension(zipEntry.Name).ToLowerInvariant();
+                if (!imageExts.Contains(fileExt)) { skipped++; continue; }
+
+                var fileName = $"portfolio/import/{batch.Id}/{Guid.NewGuid():N}{fileExt}";
+                string url;
+                try
+                {
+                    using var entryStream = zipEntry.Open();
+                    url = await storage.UploadAsync(fileName, entryStream, $"image/{fileExt.TrimStart('.')}");
+                }
+                catch { skipped++; continue; }
+
+                var job = new Job
+                {
+                    Source = JobSource.FacebookImport,
+                    ImportBatchId = batch.Id,
+                    Material = Material.Stainless,
+                    SizeInches = 6,
+                    LengthMeters = 0,
+                    DownspoutCount = 0,
+                    ShowInPortfolio = false,
+                    PhotoConsent = true
+                };
+                db.Jobs.Add(job);
+                await db.SaveChangesAsync();
+
+                db.JobPhotos.Add(new JobPhoto
+                {
+                    JobId = job.Id,
+                    Url = url,
+                    Type = PhotoType.After,
+                    DisplayOrder = 1
+                });
+            }
+
+            await db.SaveChangesAsync();
+
+            return Results.Ok(new FbImportResultDto(
+                BatchId: batch.Id,
+                Paired: parseResult.Paired.Count,
+                Unpaired: parseResult.UnpairedUris.Count,
+                Skipped: skipped));
+        });
+
+        // POST /api/admin/portfolio/imports/drafts/bulk
+        app.MapPost("/api/admin/portfolio/imports/drafts/bulk", [Authorize] async (
+            BulkUpdateDraftRequest req, AppDbContext db) =>
+        {
+            if (req.JobIds is null || req.JobIds.Count == 0)
+                return Results.BadRequest(new { error = "ต้องระบุ jobIds อย่างน้อย 1 รายการ" });
+
+            var jobs = await db.Jobs
+                .Where(j => req.JobIds.Contains(j.Id) && j.Source == JobSource.FacebookImport)
+                .ToListAsync();
+
+            foreach (var job in jobs)
+            {
+                if (req.AreaName is not null) job.AreaName = req.AreaName;
+                if (req.ShowInPortfolio.HasValue) job.ShowInPortfolio = req.ShowInPortfolio.Value;
+                if (req.PhotoConsent.HasValue) job.PhotoConsent = req.PhotoConsent.Value;
+            }
+
+            await db.SaveChangesAsync();
+            return Results.Ok(new { updated = jobs.Count });
         });
     }
 }

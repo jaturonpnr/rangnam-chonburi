@@ -56,6 +56,18 @@ public record UpdateImportDraftRequest(
 public record ImportBatchSummaryDto(
     int Id, string Source, int PhotoCount, int JobCount, DateTime CreatedAt);
 
+public record BulkUpdateDraftRequest(
+    List<int> JobIds,
+    string? AreaName,
+    bool? ShowInPortfolio,
+    bool? PhotoConsent);
+
+public record FbImportResultDto(
+    int BatchId,
+    int Paired,
+    int Unpaired,
+    int Skipped);
+
 // ── Public ────────────────────────────────────────────────────────────────────
 public record WarrantyCardDto(
     string? WarrantyNumber,

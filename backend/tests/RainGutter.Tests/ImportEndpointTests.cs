@@ -194,4 +194,49 @@ public class ImportEndpointTests : IClassFixture<RainGutterWebFactory>
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task PostFbExport_NonZip_Returns400()
+    {
+        var client = _factory.CreateAuthenticatedClient();
+        using var content = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent(new byte[] { 0xFF, 0xD8 });
+        fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(fileContent, "file", "photo.jpg");
+        var resp = await client.PostAsync("/api/admin/portfolio/import/fb-export", content);
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task PostFbExport_NoFile_Returns400()
+    {
+        var client = _factory.CreateAuthenticatedClient();
+        using var content = new MultipartFormDataContent();
+        var resp = await client.PostAsync("/api/admin/portfolio/import/fb-export", content);
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task BulkUpdate_EmptyIds_Returns400()
+    {
+        var client = _factory.CreateAuthenticatedClient();
+        using var json = new StringContent(
+            """{"jobIds":[],"areaName":"test"}""",
+            System.Text.Encoding.UTF8, "application/json");
+        var resp = await client.PostAsync("/api/admin/portfolio/imports/drafts/bulk", json);
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task BulkUpdate_NonExistentIds_Returns0Updated()
+    {
+        var client = _factory.CreateAuthenticatedClient();
+        using var json = new StringContent(
+            """{"jobIds":[999998,999999],"areaName":"ศรีราชา"}""",
+            System.Text.Encoding.UTF8, "application/json");
+        var resp = await client.PostAsync("/api/admin/portfolio/imports/drafts/bulk", json);
+        Assert.Equal(System.Net.HttpStatusCode.OK, resp.StatusCode);
+        var body = await resp.Content.ReadAsStringAsync();
+        Assert.Contains("\"updated\":0", body);
+    }
 }
