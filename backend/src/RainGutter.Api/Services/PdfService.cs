@@ -118,7 +118,9 @@ public class PdfService : IPdfService
     public byte[] GenerateWarrantyPdf(Job job, ShopProfile shop, byte[] qrPng)
     {
         var materialLabel = job.Material == Material.Galvanized ? "สังกะสี" : "สแตนเลส";
-        var expiry = job.InstalledDate.AddMonths(job.WarrantyMonths);
+        var expiryStr = job.InstalledDate.HasValue && job.WarrantyMonths.HasValue
+            ? job.InstalledDate.Value.AddMonths(job.WarrantyMonths.Value).ToString("dd/MM/yyyy")
+            : "(ยังไม่ระบุ)";
 
         var document = Document.Create(container =>
         {
@@ -146,8 +148,8 @@ public class PdfService : IPdfService
                     col.Item().PaddingTop(12).Column(inner =>
                     {
                         inner.Item().Text("รายละเอียดการติดตั้ง").Bold().Underline();
-                        inner.Item().PaddingTop(6).Text($"วันที่ติดตั้ง: {job.InstalledDate:dd/MM/yyyy}");
-                        inner.Item().Text($"วันหมดอายุประกัน: {expiry:dd/MM/yyyy}");
+                        inner.Item().PaddingTop(6).Text($"วันที่ติดตั้ง: {job.InstalledDate?.ToString("dd/MM/yyyy") ?? "(ยังไม่ระบุ)"}");
+                        inner.Item().Text($"วันหมดอายุประกัน: {expiryStr}");
                         inner.Item().Text($"วัสดุ: {materialLabel} {job.SizeInches}\"");
                         inner.Item().Text($"ความยาว: {job.LengthMeters} เมตร");
                         inner.Item().Text($"ท่อน้ำลง: {job.DownspoutCount} จุด");
