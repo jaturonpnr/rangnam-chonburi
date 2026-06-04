@@ -158,6 +158,8 @@ export class PortfolioImportComponent implements OnInit, OnDestroy {
       showInPortfolio: this.editShowPortfolio,
       photoConsent: this.editPhotoConsent
     }).subscribe(() => {
+      this.editMap?.remove();
+      this.editMap = null;
       this.editingDraft.set(null);
       this.selectBatch(this.selectedBatchId()!);
     });

@@ -113,9 +113,12 @@ public static class FbExportParser
             }
         }
 
-        var unpairedUris = imageMap.Keys
-            .Where(k => !pairedUris.Contains(k))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
+        // Dedupe by ZipArchiveEntry to avoid processing the same image twice
+        // (imageMap stores both full path and prefix-stripped path for each entry)
+        var unpairedUris = imageMap
+            .Where(kv => !pairedUris.Contains(kv.Key))
+            .GroupBy(kv => kv.Value.FullName, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First().Key)
             .ToList();
 
         return new FbParseResult(paired, unpairedUris);

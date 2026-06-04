@@ -261,7 +261,6 @@ public static class ImportEndpoints
                     JobId = job.Id,
                     Url = url,
                     Type = PhotoType.After,
-                    Caption = entry.Description,
                     DisplayOrder = 1
                 });
             }
