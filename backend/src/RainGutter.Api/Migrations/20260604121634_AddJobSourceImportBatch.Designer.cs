@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RainGutter.Api.Data;
@@ -11,9 +12,11 @@ using RainGutter.Api.Data;
 namespace RainGutter.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260604121634_AddJobSourceImportBatch")]
+    partial class AddJobSourceImportBatch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -234,16 +237,14 @@ namespace RainGutter.Api.Migrations
 
                     b.HasIndex("PublicToken")
                         .IsUnique()
-                        .HasDatabaseName("ix_jobs_public_token")
-                        .HasFilter("public_token IS NOT NULL");
+                        .HasDatabaseName("ix_jobs_public_token");
 
                     b.HasIndex("QuoteRequestId")
                         .HasDatabaseName("ix_jobs_quote_request_id");
 
                     b.HasIndex("WarrantyNumber")
                         .IsUnique()
-                        .HasDatabaseName("ix_jobs_warranty_number")
-                        .HasFilter("warranty_number IS NOT NULL");
+                        .HasDatabaseName("ix_jobs_warranty_number");
 
                     b.ToTable("jobs", (string)null);
                 });

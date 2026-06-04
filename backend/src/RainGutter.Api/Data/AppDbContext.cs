@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<JobPhoto> JobPhotos => Set<JobPhoto>();
     public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
+    public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,11 +52,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // Job relationships
         modelBuilder.Entity<Job>()
             .HasOne(j => j.QuoteRequest).WithMany()
-            .HasForeignKey(j => j.QuoteRequestId);
+            .HasForeignKey(j => j.QuoteRequestId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<Job>()
-            .HasIndex(j => j.WarrantyNumber).IsUnique();
+            .HasOne(j => j.ImportBatch).WithMany(b => b.Jobs)
+            .HasForeignKey(j => j.ImportBatchId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<Job>()
-            .HasIndex(j => j.PublicToken).IsUnique();
+            .HasIndex(j => j.WarrantyNumber).IsUnique()
+            .HasFilter("warranty_number IS NOT NULL");
+        modelBuilder.Entity<Job>()
+            .HasIndex(j => j.PublicToken).IsUnique()
+            .HasFilter("public_token IS NOT NULL");
 
         modelBuilder.Entity<JobPhoto>()
             .HasOne(p => p.Job).WithMany(j => j.Photos)
@@ -68,6 +78,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // Enum conversions
         modelBuilder.Entity<Job>()
             .Property(j => j.Material).HasConversion<string>();
+        modelBuilder.Entity<Job>()
+            .Property(j => j.Source).HasConversion<string>();
         modelBuilder.Entity<JobPhoto>()
             .Property(p => p.Type).HasConversion<string>();
         modelBuilder.Entity<ServiceRequest>()

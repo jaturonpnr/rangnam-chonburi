@@ -21,6 +21,7 @@ if (File.Exists(".env"))
 }
 
 QuestPDF.Settings.License = LicenseType.Community;
+System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
 var fontsDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Fonts");
 foreach (var f in Directory.EnumerateFiles(fontsDir, "*.ttf"))
@@ -86,6 +87,7 @@ app.MapQuoteEndpoints();
 app.MapLineEndpoints();
 app.MapAdminEndpoints();
 app.MapJobEndpoints();
+app.MapImportEndpoints();
 app.MapWarrantyEndpoints();
 
 app.Run();

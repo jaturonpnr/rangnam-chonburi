@@ -4,6 +4,7 @@
   <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
   <a routerLink="/admin/jobs" routerLinkActive="active">งาน/ประกัน</a>
   <a routerLink="/admin/service-requests" routerLinkActive="active">เคลม</a>
+  <a routerLink="/admin/portfolio-import" routerLinkActive="active">Import FB</a>
   <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
   <span style="flex:1"></span>
   <button class="btn btn-sm btn-secondary" (click)="logout()">ออกจากระบบ</button>
@@ -32,11 +33,11 @@
       <tbody>
         @for (j of jobs(); track j.id) {
           <tr>
-            <td style="font-family:var(--mono); font-size:13px;">{{ j.warrantyNumber }}</td>
-            <td style="font-family:var(--mono); font-size:12px; color:var(--text-2);">{{ j.quoteNumber }}</td>
+            <td style="font-family:var(--mono); font-size:13px;">{{ j.warrantyNumber ?? '—' }}</td>
+            <td style="font-family:var(--mono); font-size:12px; color:var(--text-2);">{{ j.quoteNumber ?? '—' }}</td>
             <td>{{ materialLabel(j.material) }} {{ j.sizeInches }}"</td>
-            <td style="font-size:13px; color:var(--text-2);">{{ j.installedDate }}</td>
-            <td style="font-size:13px; color:var(--text-2);">{{ j.warrantyExpiry }}</td>
+            <td style="font-size:13px; color:var(--text-2);">{{ j.installedDate ?? '—' }}</td>
+            <td style="font-size:13px; color:var(--text-2);">{{ j.warrantyExpiry ?? '—' }}</td>
             <td style="text-align:center;">
               @if (j.showInPortfolio) { <span class="badge badge-quoted">ใช่</span> }
               @else { <span style="color:var(--text-2); font-size:12px;">—</span> }

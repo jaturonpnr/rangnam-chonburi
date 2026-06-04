@@ -25,6 +25,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
     <PackageReference Include="QuestPDF" Version="2026.5.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.8" />
     <PackageReference Include="System.Text.Json" Version="10.0.8" />
   </ItemGroup>
 

@@ -5,14 +5,20 @@ namespace RainGutter.Api.Models;
 public class Job
 {
     public int Id { get; set; }
-    public int QuoteRequestId { get; set; }
-    public QuoteRequest QuoteRequest { get; set; } = null!;
 
-    public string WarrantyNumber { get; set; } = "";
-    public string PublicToken { get; set; } = "";
+    public int? QuoteRequestId { get; set; }
+    public QuoteRequest? QuoteRequest { get; set; }
 
-    public DateTime InstalledDate { get; set; }
-    public int WarrantyMonths { get; set; } = 12;
+    public JobSource Source { get; set; } = JobSource.Quote;
+
+    public int? ImportBatchId { get; set; }
+    public ImportBatch? ImportBatch { get; set; }
+
+    public string? WarrantyNumber { get; set; }
+    public string? PublicToken { get; set; }
+
+    public DateTime? InstalledDate { get; set; }
+    public int? WarrantyMonths { get; set; }
 
     public Material Material { get; set; }
     public int SizeInches { get; set; }

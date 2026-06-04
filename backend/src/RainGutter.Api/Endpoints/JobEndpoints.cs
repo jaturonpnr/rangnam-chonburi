@@ -31,8 +31,8 @@ public static class JobEndpoints
 
             var year = DateTime.UtcNow.Year;
             var existing = await db.Jobs
-                .Where(j => j.WarrantyNumber.StartsWith($"WR-{year}-"))
-                .Select(j => j.WarrantyNumber)
+                .Where(j => j.WarrantyNumber != null && j.WarrantyNumber.StartsWith($"WR-{year}-"))
+                .Select(j => j.WarrantyNumber!)
                 .ToListAsync();
             var nextSeq = existing.Count > 0
                 ? existing.Select(n => int.TryParse(n.Split('-').LastOrDefault(), out var v) ? v : 0).Max() + 1
@@ -89,12 +89,14 @@ public static class JobEndpoints
                 page,
                 pageSize,
                 items = items.Select(j => new JobSummaryDto(
-                    j.Id, j.WarrantyNumber, j.QuoteRequest.QuoteNumber,
-                    j.InstalledDate.ToString("yyyy-MM-dd"),
-                    j.InstalledDate.AddMonths(j.WarrantyMonths).ToString("yyyy-MM-dd"),
+                    j.Id, j.WarrantyNumber, j.QuoteRequest?.QuoteNumber,
+                    j.InstalledDate?.ToString("yyyy-MM-dd"),
+                    j.InstalledDate.HasValue && j.WarrantyMonths.HasValue
+                        ? j.InstalledDate.Value.AddMonths(j.WarrantyMonths.Value).ToString("yyyy-MM-dd")
+                        : null,
                     j.Material, j.SizeInches, j.LengthMeters,
                     j.ShowInPortfolio, j.PhotoConsent,
-                    j.ServiceRequests.Count))
+                    j.ServiceRequests.Count, j.Source))
             });
         });
 
@@ -107,7 +109,7 @@ public static class JobEndpoints
                 .Include(j => j.ServiceRequests.OrderByDescending(s => s.CreatedAt))
                 .FirstOrDefaultAsync(j => j.Id == id);
             if (job is null) return Results.NotFound();
-            return Results.Ok(MapJobDetail(job, job.QuoteRequest.QuoteNumber));
+            return Results.Ok(MapJobDetail(job, job.QuoteRequest?.QuoteNumber));
         });
 
         // PUT /api/admin/jobs/{id}
@@ -117,8 +119,8 @@ public static class JobEndpoints
             var job = await db.Jobs.FindAsync(id);
             if (job is null) return Results.NotFound();
 
-            job.WarrantyMonths = req.WarrantyMonths;
-            job.InstalledDate = req.InstalledDate.ToUniversalTime();
+            if (req.WarrantyMonths.HasValue) job.WarrantyMonths = req.WarrantyMonths;
+            if (req.InstalledDate.HasValue) job.InstalledDate = req.InstalledDate.Value.ToUniversalTime();
             job.AreaName = req.AreaName;
             job.ShowInPortfolio = req.ShowInPortfolio;
             job.PhotoConsent = req.PhotoConsent;
@@ -208,8 +210,9 @@ public static class JobEndpoints
             var job = await db.Jobs.FindAsync(id);
             if (job is null) return Results.NotFound();
             var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_PUBLIC_URL") ?? "http://localhost:4200";
+            if (job.PublicToken is null) return Results.BadRequest(new { error = "Job ไม่มี PublicToken" });
             var png = qr.GenerateQrPng($"{frontendUrl}/w/{job.PublicToken}");
-            return Results.File(png, "image/png", $"qr-{job.WarrantyNumber}.png");
+            return Results.File(png, "image/png", $"qr-{job.WarrantyNumber ?? job.Id.ToString()}.png");
         });
 
         // GET /api/admin/jobs/{id}/warranty-pdf
@@ -221,9 +224,10 @@ public static class JobEndpoints
             var shop = await db.ShopProfiles.FindAsync(1);
             if (shop is null) return Results.StatusCode(500);
             var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_PUBLIC_URL") ?? "http://localhost:4200";
+            if (job.PublicToken is null) return Results.BadRequest(new { error = "Job ไม่มี PublicToken" });
             var qrPng = qr.GenerateQrPng($"{frontendUrl}/w/{job.PublicToken}");
             var pdfBytes = pdf.GenerateWarrantyPdf(job, shop, qrPng);
-            return Results.File(pdfBytes, "application/pdf", $"warranty-{job.WarrantyNumber}.pdf");
+            return Results.File(pdfBytes, "application/pdf", $"warranty-{job.WarrantyNumber ?? job.Id.ToString()}.pdf");
         });
 
         // GET /api/admin/service-requests
@@ -262,17 +266,19 @@ public static class JobEndpoints
         });
     }
 
-    private static JobDetailDto MapJobDetail(Job job, string quoteNumber)
+    private static JobDetailDto MapJobDetail(Job job, string? quoteNumber)
     {
-        var expiry = job.InstalledDate.AddMonths(job.WarrantyMonths);
+        string? expiry = job.InstalledDate.HasValue && job.WarrantyMonths.HasValue
+            ? job.InstalledDate.Value.AddMonths(job.WarrantyMonths.Value).ToString("yyyy-MM-dd")
+            : null;
         return new JobDetailDto(
             job.Id, job.QuoteRequestId, quoteNumber,
             job.WarrantyNumber, job.PublicToken,
-            job.InstalledDate.ToString("yyyy-MM-dd"), job.WarrantyMonths,
-            expiry.ToString("yyyy-MM-dd"),
+            job.InstalledDate?.ToString("yyyy-MM-dd"), job.WarrantyMonths, expiry,
             job.Material, job.SizeInches, job.LengthMeters, job.DownspoutCount,
             job.Lat, job.Lng, job.ApproxLat, job.ApproxLng, job.AreaName,
             job.ShowInPortfolio, job.PhotoConsent,
+            job.Source, job.ImportBatchId,
             job.Photos.OrderBy(p => p.DisplayOrder)
                 .Select(p => new JobPhotoDto(p.Id, p.Url, p.Type, p.Caption, p.DisplayOrder)).ToList(),
             job.ServiceRequests.OrderByDescending(s => s.CreatedAt)

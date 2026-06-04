@@ -21,12 +21,13 @@ public static class WarrantyEndpoints
             var shop = await db.ShopProfiles.FindAsync(1);
             if (shop is null) return Results.StatusCode(500);
 
-            var expiry = job.InstalledDate.AddMonths(job.WarrantyMonths);
             // Privacy: returns only warranty/install info + shop contact. No Lat/Lng, no customer PII.
             return Results.Ok(new WarrantyCardDto(
                 job.WarrantyNumber,
-                job.InstalledDate.ToString("yyyy-MM-dd"),
-                expiry.ToString("yyyy-MM-dd"),
+                job.InstalledDate?.ToString("yyyy-MM-dd"),
+                job.InstalledDate.HasValue && job.WarrantyMonths.HasValue
+                    ? job.InstalledDate.Value.AddMonths(job.WarrantyMonths.Value).ToString("yyyy-MM-dd")
+                    : null,
                 job.Material, job.SizeInches, job.LengthMeters, job.DownspoutCount,
                 job.Photos.Select(p => new JobPhotoDto(p.Id, p.Url, p.Type, p.Caption, p.DisplayOrder)).ToList(),
                 shop.ShopName, shop.Phone, shop.LineOaLink
@@ -69,7 +70,7 @@ public static class WarrantyEndpoints
             // Privacy: only ApproxLat/ApproxLng returned. No Lat/Lng, no customer name/phone/address.
             var pins = jobs.Select(j => new PortfolioPinDto(
                 j.Id, j.ApproxLat!.Value, j.ApproxLng!.Value, j.AreaName,
-                j.Material, j.InstalledDate.ToString("yyyy-MM-dd"),
+                j.Material, j.InstalledDate?.ToString("yyyy-MM-dd"),
                 j.PhotoConsent
                     ? j.Photos.Select(p => new JobPhotoDto(p.Id, p.Url, p.Type, p.Caption, p.DisplayOrder)).ToList()
                     : new List<JobPhotoDto>()
