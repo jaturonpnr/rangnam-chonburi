@@ -61,9 +61,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
         modelBuilder.Entity<Job>()
-            .HasIndex(j => j.WarrantyNumber).IsUnique();
+            .HasIndex(j => j.WarrantyNumber).IsUnique()
+            .HasFilter("warranty_number IS NOT NULL");
         modelBuilder.Entity<Job>()
-            .HasIndex(j => j.PublicToken).IsUnique();
+            .HasIndex(j => j.PublicToken).IsUnique()
+            .HasFilter("public_token IS NOT NULL");
 
         modelBuilder.Entity<JobPhoto>()
             .HasOne(p => p.Job).WithMany(j => j.Photos)

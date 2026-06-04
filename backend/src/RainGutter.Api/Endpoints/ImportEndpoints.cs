@@ -142,6 +142,9 @@ public static class ImportEndpoints
         app.MapPost("/api/admin/portfolio/imports/{batchId:int}/publish", [Authorize] async (
             int batchId, AppDbContext db) =>
         {
+            var batch = await db.ImportBatches.FindAsync(batchId);
+            if (batch is null) return Results.NotFound();
+
             var jobs = await db.Jobs
                 .Where(j => j.ImportBatchId == batchId && j.PhotoConsent)
                 .ToListAsync();

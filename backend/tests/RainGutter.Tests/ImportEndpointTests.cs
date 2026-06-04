@@ -150,22 +150,14 @@ public class ImportEndpointTests : IClassFixture<RainGutterWebFactory>
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         content.Add(fileContent, "files", "photo.jpg");
 
-        var response = await client.PostAsync("/api/admin/portfolio/import/images", content);
+        var resp = await client.PostAsync("/api/admin/portfolio/import/images", content);
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
 
-        // Accept 200 (FakeStorageService) or 500 (real storage unavailable)
-        Assert.True(
-            response.StatusCode == HttpStatusCode.OK ||
-            response.StatusCode == HttpStatusCode.InternalServerError,
-            $"Expected 200 or 500, got {(int)response.StatusCode}");
-
-        if (response.StatusCode == HttpStatusCode.OK)
-        {
-            var body = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(body);
-            Assert.True(doc.RootElement.TryGetProperty("batchId", out _), "Response should contain batchId");
-            Assert.True(doc.RootElement.TryGetProperty("jobCount", out var jobCount), "Response should contain jobCount");
-            Assert.Equal(1, jobCount.GetInt32());
-        }
+        var body = await resp.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(body);
+        Assert.True(doc.RootElement.TryGetProperty("batchId", out _), "Response should contain batchId");
+        Assert.True(doc.RootElement.TryGetProperty("jobCount", out var jobCount), "Response should contain jobCount");
+        Assert.Equal(1, jobCount.GetInt32());
     }
 
     // 4 ── GET /api/admin/portfolio/imports → 200 with list ───────────────────

@@ -69,6 +69,8 @@ namespace RainGutter.Api.Migrations
                 nullable: false,
                 defaultValue: "");
 
+            migrationBuilder.Sql("UPDATE jobs SET source = 'Quote' WHERE source = ''");
+
             migrationBuilder.CreateTable(
                 name: "import_batches",
                 columns: table => new
