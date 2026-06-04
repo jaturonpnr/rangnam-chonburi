@@ -8,7 +8,10 @@ public static class SeedData
 {
     public static async Task SeedAsync(AppDbContext db)
     {
-        await db.Database.MigrateAsync();
+        if (db.Database.IsRelational())
+            await db.Database.MigrateAsync();
+        else
+            await db.Database.EnsureCreatedAsync();
 
         // Products — reseed when count doesn't match expected (schema changed: removed Finish)
         if (db.GutterProducts.Count() != 6)
@@ -48,9 +51,21 @@ public static class SeedData
         // Zones — reseed when count doesn't match expected (3 Chonburi zones)
         if (db.ServiceZones.Count() != 3)
         {
-            // Null out FK references on leads before deleting zones
-            await db.Leads.Where(l => l.ServiceZoneId != null)
-                .ExecuteUpdateAsync(s => s.SetProperty(l => l.ServiceZoneId, (int?)null));
+            // Null out FK references on leads before deleting zones.
+            // ExecuteUpdateAsync is relational-only; fall back to tracked-entity update
+            // when using InMemory (e.g. in tests).
+            if (db.Database.IsRelational())
+            {
+                await db.Leads.Where(l => l.ServiceZoneId != null)
+                    .ExecuteUpdateAsync(s => s.SetProperty(l => l.ServiceZoneId, (int?)null));
+            }
+            else
+            {
+                var leadsWithZone = await db.Leads.Where(l => l.ServiceZoneId != null).ToListAsync();
+                foreach (var lead in leadsWithZone)
+                    lead.ServiceZoneId = null;
+                await db.SaveChangesAsync();
+            }
             db.ServiceZones.RemoveRange(db.ServiceZones);
             await db.SaveChangesAsync();
             db.ServiceZones.AddRange(
