@@ -211,4 +211,19 @@ export class ApiService {
   deleteImportDraft(jobId: number) {
     return this.http.delete(`${this.base}/api/admin/portfolio/imports/drafts/${jobId}`);
   }
+  importFbExport(file: File) {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ batchId: number; paired: number; unpaired: number; skipped: number }>(
+      `${this.base}/api/admin/portfolio/import/fb-export`, form);
+  }
+  bulkUpdateDrafts(body: {
+    jobIds: number[];
+    areaName?: string | null;
+    showInPortfolio?: boolean;
+    photoConsent?: boolean;
+  }) {
+    return this.http.post<{ updated: number }>(
+      `${this.base}/api/admin/portfolio/imports/drafts/bulk`, body);
+  }
 }

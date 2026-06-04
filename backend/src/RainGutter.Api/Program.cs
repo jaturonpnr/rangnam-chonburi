@@ -70,6 +70,15 @@ builder.Services.AddCors(opt =>
               .AllowAnyHeader()
               .AllowAnyMethod()));
 
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = 500 * 1024 * 1024; // 500 MB for FB export zip
+});
+builder.WebHost.ConfigureKestrel(k =>
+{
+    k.Limits.MaxRequestBodySize = 500 * 1024 * 1024; // 500 MB
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
