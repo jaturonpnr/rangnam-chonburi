@@ -1,0 +1,17 @@
+User-agent: *
+Disallow: /admin
+Disallow: /admin/
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://rangnam-chonburi.vercel.app/sitemap.xml
