@@ -219,6 +219,49 @@
   </div>
 </section>
 
+<!-- ── PORTFOLIO TEASER ── -->
+<section class="hn-portfolio" id="portfolio">
+  <div class="hn-container">
+    <div class="hn-section-header">
+      <span class="hn-section-tag">ผลงานของเรา</span>
+      <h2 class="hn-section-title">งานติดตั้งจริง<br>ทั่วชลบุรี</h2>
+    </div>
+
+    <!-- Banner + by-area stats -->
+    <div class="hn-port-banner">
+      <div class="hn-port-count">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        @if (totalInstalled() > 0) {
+          ติดตั้งแล้ว <strong>{{ totalInstalled() }}</strong> จุด
+        } @else {
+          ติดตั้งทั่วชลบุรี
+        }
+      </div>
+      @if (byArea().length > 0) {
+        <div class="hn-port-areas">
+          @for (area of byArea(); track area.name) {
+            <span class="hn-port-area-pill">{{ area.name }} <strong>{{ area.count }}</strong></span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Map -->
+    <div class="hn-port-map-wrap">
+      <div id="home-portfolio-map" class="hn-port-map"></div>
+      <div class="hn-port-map-overlay" aria-hidden="true"></div>
+    </div>
+
+    <div class="hn-port-footer">
+      <a routerLink="/portfolio" class="hn-btn-outline hn-btn-port">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        ดูผลงานทั้งหมด พร้อมรูปภาพ
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ── CTA ── -->
 <section class="hn-cta" id="cta">
   <div class="hn-container hn-cta-inner">
