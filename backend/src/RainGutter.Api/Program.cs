@@ -98,6 +98,7 @@ app.MapAdminEndpoints();
 app.MapJobEndpoints();
 app.MapImportEndpoints();
 app.MapWarrantyEndpoints();
+app.MapPortfolioPostEndpoints();
 
 app.Run();
 
