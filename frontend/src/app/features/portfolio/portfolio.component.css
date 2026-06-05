@@ -9,7 +9,7 @@
 .pf-loading { font-size: 13px; color: var(--text-2); }
 .pf-map-wrap { flex: 1; position: relative; }
 .pf-map { width: 100%; height: 100%; }
-.pf-embed-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.pf-embed-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
 .pf-embed-panel { background: var(--surface); border-radius: 12px; padding: 20px; max-width: 540px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; }
 .pf-embed-close { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-2); }
 .pf-embed-placeholder { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; text-align: center; }

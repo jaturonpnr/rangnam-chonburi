@@ -104,6 +104,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   }
 
   openPanel(id: number, encodedUrl: string) {
+    this.map?.closePopup();
     this.activePinId.set(id);
     this.activeEmbedUrl.set(null);
     this.embedLoaded.set(false);
