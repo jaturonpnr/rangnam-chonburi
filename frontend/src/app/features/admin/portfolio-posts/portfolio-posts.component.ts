@@ -1,18 +1,22 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { PortfolioPostAdmin, SavePortfolioPostRequest, CsvImportResult } from '../../../core/models';
 
 @Component({
   selector: 'app-portfolio-posts',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './portfolio-posts.component.html',
   styleUrls: ['./portfolio-posts.component.css']
 })
 export class PortfolioPostsComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
+  private auth = inject(AuthService);
+  private router = inject(Router);
 
   posts = signal<PortfolioPostAdmin[]>([]);
   loading = signal(true);
@@ -39,6 +43,11 @@ export class PortfolioPostsComponent implements OnInit, OnDestroy {
   ngOnInit() { this.load(); }
 
   ngOnDestroy() { this.destroyMap(); }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/admin/login']);
+  }
 
   load() {
     this.loading.set(true);
@@ -126,15 +135,20 @@ export class PortfolioPostsComponent implements OnInit, OnDestroy {
 
   deletePost(id: number) {
     if (!confirm('ลบโพสต์นี้?')) return;
-    this.api.deletePortfolioPost(id).subscribe({ next: () => this.load() });
+    this.api.deletePortfolioPost(id).subscribe({
+      next: () => this.load(),
+      error: e => alert(e.error?.error ?? 'ลบไม่สำเร็จ')
+    });
   }
 
   private async initEditMap() {
     const L = await import('leaflet');
     this.destroyMap();
+    const el = document.getElementById('pp-edit-map');
+    if (!el) return;
     const lat = this.editApproxLat() ?? 13.36;
     const lng = this.editApproxLng() ?? 101.0;
-    this.editMap = L.map('pp-edit-map').setView([lat, lng], 12);
+    this.editMap = L.map(el).setView([lat, lng], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.editMap);

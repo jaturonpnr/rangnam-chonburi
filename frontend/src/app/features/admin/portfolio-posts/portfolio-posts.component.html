@@ -1,8 +1,22 @@
-<div class="pp-wrap">
-  <div class="pp-header">
-    <h2 class="pp-title">จัดการ Portfolio Posts</h2>
-    <button class="pp-btn pp-btn--primary" (click)="openCreate()">+ เพิ่มโพสต์</button>
-  </div>
+<nav class="admin-nav">
+  <span class="nav-brand">RG // Admin</span>
+  <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
+  <a routerLink="/admin/leads" routerLinkActive="active">Leads</a>
+  <a routerLink="/admin/jobs" routerLinkActive="active">งาน/ประกัน</a>
+  <a routerLink="/admin/service-requests" routerLinkActive="active">เคลม</a>
+  <a routerLink="/admin/portfolio-import" routerLinkActive="active">Import FB</a>
+  <a routerLink="/admin/portfolio-posts" routerLinkActive="active">Portfolio Posts</a>
+  <a routerLink="/admin/pricing" routerLinkActive="active">ราคา/ตั้งค่า</a>
+  <span style="flex:1"></span>
+  <button class="btn btn-sm btn-secondary" (click)="logout()">ออกจากระบบ</button>
+</nav>
+
+<div class="admin-content">
+  <div class="pp-wrap">
+    <div class="pp-header">
+      <h2 class="pp-title">จัดการ Portfolio Posts</h2>
+      <button class="pp-btn pp-btn--primary" (click)="openCreate()">+ เพิ่มโพสต์</button>
+    </div>
 
   <!-- CSV Import -->
   <div class="pp-section">
@@ -113,4 +127,5 @@
       </div>
     </div>
   }
+  </div>
 </div>
