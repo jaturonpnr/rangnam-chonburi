@@ -98,7 +98,19 @@
             <input class="pp-input" [(ngModel)]="editForm.title" placeholder="ไม่บังคับ">
           </label>
           <label>พื้นที่
-            <input class="pp-input" [(ngModel)]="editForm.areaName" placeholder="เช่น ศรีราชา">
+            <select class="pp-input" [(ngModel)]="editForm.areaName">
+              <option value="">-- ไม่ระบุ --</option>
+              <option>เมืองชลบุรี</option>
+              <option>ศรีราชา</option>
+              <option>บางละมุง</option>
+              <option>สัตหีบ</option>
+              <option>พานทอง</option>
+              <option>บ้านบึง</option>
+              <option>พนัสนิคม</option>
+              <option>หนองใหญ่</option>
+              <option>บ่อทอง</option>
+              <option>เกาะจันทร์</option>
+            </select>
           </label>
           <label>วันที่โพสต์
             <input class="pp-input" type="date" [(ngModel)]="editForm.postedDate">

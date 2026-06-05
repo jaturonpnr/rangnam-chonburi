@@ -22,6 +22,58 @@
     @if (!loading() && pins().length === 0) {
       <p class="pf-empty">ยังไม่มีผลงานที่เผยแพร่</p>
     }
+
+    <!-- Geo section -->
+    <div class="pf-geo-section">
+      @if (geoState() === 'idle') {
+        <button class="pf-geo-btn" (click)="requestGeo()">📍 ดูผลงานใกล้บ้านคุณ</button>
+      }
+      @if (geoState() === 'unsupported') {
+        <p class="pf-geo-error">เบราว์เซอร์นี้ไม่รองรับการระบุตำแหน่ง</p>
+      }
+      @if (geoState() === 'locating') {
+        <div class="pf-geo-locating">
+          <div class="pf-embed-spinner"></div>
+          <span>กำลังหาตำแหน่ง...</span>
+        </div>
+      }
+      @if (geoState() === 'denied') {
+        <p class="pf-geo-error">ไม่ได้รับอนุญาตให้เข้าถึงตำแหน่ง</p>
+      }
+      @if (geoState() === 'error') {
+        <p class="pf-geo-error">หาตำแหน่งไม่ได้</p>
+        <button class="pf-geo-btn" (click)="requestGeo()">ลองอีกครั้ง</button>
+      }
+      @if (geoState() === 'success') {
+        @if (nearCount() > 0) {
+          <div class="pf-geo-banner">
+            <div class="pf-geo-count">ติดตั้งแล้ว <strong>{{ nearCount() }}</strong> จุดใกล้คุณ</div>
+            <div class="pf-geo-sub">ในรัศมี {{ nearRadius() }} กม.</div>
+          </div>
+        } @else {
+          <div class="pf-geo-banner pf-geo-banner--empty">
+            <div class="pf-geo-count">ยังไม่มีผลงานใกล้คุณ</div>
+            <div class="pf-geo-sub">แต่เราพร้อมรับงานในพื้นที่ของคุณ!</div>
+            <div class="pf-geo-contacts">
+              @if (shop()?.phone) {
+                <a [href]="'tel:' + shop()!.phone" class="pf-geo-contact">📞 โทรหาเรา</a>
+              }
+              @if (shop()?.lineOaLink) {
+                <a [href]="shop()!.lineOaLink!" target="_blank" rel="noopener" class="pf-geo-contact pf-geo-contact--line">💬 LINE</a>
+              }
+            </div>
+          </div>
+        }
+        <div class="pf-radius-row">
+          <span class="pf-radius-label">รัศมี:</span>
+          @for (r of [5, 10, 20]; track r) {
+            <button class="pf-radius-btn" [class.pf-radius-btn--active]="nearRadius() === r"
+              (click)="setRadius(r)">{{ r }} กม.</button>
+          }
+        </div>
+        <button class="pf-geo-reset" (click)="resetGeo()">✕ ล้างตำแหน่ง</button>
+      }
+    </div>
   </aside>
 
   <!-- Mobile filter bar -->
@@ -35,6 +87,12 @@
           (click)="filterArea(area)">{{ area }}</button>
       }
     </div>
+    <button class="pf-chip pf-chip--sm pf-chip--geo"
+      [class.pf-chip--active]="geoState() === 'success'"
+      (click)="geoState() === 'success' ? resetGeo() : requestGeo()"
+      [disabled]="geoState() === 'locating'">
+      {{ geoState() === 'success' ? (nearCount() + ' จุดใกล้คุณ') : (geoState() === 'locating' ? '...' : '📍') }}
+    </button>
   </div>
 
   <!-- Map -->

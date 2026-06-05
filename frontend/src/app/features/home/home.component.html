@@ -244,6 +244,39 @@
           }
         </div>
       }
+
+      <!-- Geo button -->
+      <div class="hn-port-geo">
+        @if (geoState() === 'idle' || geoState() === 'denied' || geoState() === 'error' || geoState() === 'unsupported') {
+          <button class="hn-port-geo-btn" (click)="requestGeo()" [disabled]="geoState() === 'unsupported'">
+            📍 ใกล้บ้านคุณ
+          </button>
+          @if (geoState() === 'denied') {
+            <span class="hn-port-geo-msg hn-port-geo-msg--err">ไม่ได้รับอนุญาต</span>
+          }
+          @if (geoState() === 'error') {
+            <span class="hn-port-geo-msg hn-port-geo-msg--err">หาตำแหน่งไม่ได้</span>
+          }
+          @if (geoState() === 'unsupported') {
+            <span class="hn-port-geo-msg hn-port-geo-msg--err">ไม่รองรับ</span>
+          }
+        }
+        @if (geoState() === 'locating') {
+          <span class="hn-port-geo-msg">กำลังหาตำแหน่ง...</span>
+        }
+        @if (geoState() === 'success') {
+          <div class="hn-port-geo-result">
+            @if (nearCount() > 0) {
+              <span class="hn-port-geo-pill">
+                <strong>{{ nearCount() }}</strong> จุดใกล้คุณ ({{ nearRadiusKm }} กม.)
+              </span>
+            } @else {
+              <span class="hn-port-geo-pill hn-port-geo-pill--empty">ยังไม่มีผลงานใกล้คุณ</span>
+            }
+            <button class="hn-port-geo-reset" (click)="resetGeo()">✕</button>
+          </div>
+        }
+      </div>
     </div>
 
     <!-- Map -->

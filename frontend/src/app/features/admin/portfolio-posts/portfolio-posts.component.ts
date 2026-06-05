@@ -169,8 +169,8 @@ export class PortfolioPostsComponent implements OnInit, OnDestroy {
     this.destroyMap();
     const el = document.getElementById('pp-edit-map');
     if (!el) return;
-    const lat = this.editApproxLat() ?? 13.36;
-    const lng = this.editApproxLng() ?? 101.0;
+    const lat = this.editApproxLat() ?? 13.3435218;
+    const lng = this.editApproxLng() ?? 100.9820816;
     this.editMap = L.map(el).setView([lat, lng], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'

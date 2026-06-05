@@ -34,6 +34,28 @@
 .pf-embed-spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: #4267B2; border-radius: 50%; animation: pf-spin .7s linear infinite; }
 @keyframes pf-spin { to { transform: rotate(360deg); } }
 
+/* Geo feature */
+.pf-geo-section { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.pf-geo-btn { padding: 8px 12px; background: var(--accent); color: #0D1B3E; border: none; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: opacity .15s; }
+.pf-geo-btn:hover { opacity: 0.85; }
+.pf-geo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pf-geo-locating { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
+.pf-geo-error { font-size: 12px; color: #e11d48; margin: 0; }
+.pf-geo-banner { background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.3); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.pf-geo-banner--empty { background: rgba(249,115,22,.08); border-color: rgba(249,115,22,.25); }
+.pf-geo-count { font-size: 14px; font-weight: 700; color: var(--text-1); }
+.pf-geo-sub { font-size: 11px; color: var(--text-2); }
+.pf-geo-contacts { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.pf-geo-contact { font-size: 12px; padding: 4px 10px; border-radius: 6px; text-decoration: none; background: var(--accent); color: #0D1B3E; font-weight: 600; }
+.pf-geo-contact--line { background: #06C755; color: #fff; }
+.pf-radius-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pf-radius-label { font-size: 11px; color: var(--text-2); }
+.pf-radius-btn { padding: 3px 8px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--text-2); font-size: 11px; cursor: pointer; transition: all .15s; }
+.pf-radius-btn--active { border-color: var(--accent); color: var(--accent); font-weight: 600; background: rgba(56,189,248,.1); }
+.pf-geo-reset { font-size: 11px; color: var(--text-2); background: none; border: none; cursor: pointer; align-self: flex-start; padding: 0; }
+.pf-geo-reset:hover { color: var(--text-1); }
+.pf-chip--geo { border-color: rgba(56,189,248,.5); flex-shrink: 0; }
+
 /* Mobile */
 @media (max-width: 600px) {
   .pf-layout { flex-direction: column; height: calc(100vh - 64px); }
