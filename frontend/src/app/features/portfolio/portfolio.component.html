@@ -32,11 +32,12 @@
       <button class="pf-embed-close" (click)="closePanel()">✕</button>
 
       @if (!embedLoaded()) {
-        <div class="pf-embed-placeholder">
-          <p class="pf-embed-hint">โหลด Facebook Embed จะส่ง request ไปยัง Facebook</p>
-          <button class="pf-embed-load-btn" (click)="loadEmbed()">โหลดโพสต์ Facebook</button>
+        <div class="pf-embed-loading">
+          <div class="pf-embed-spinner"></div>
+          <span>กำลังโหลด...</span>
         </div>
-      } @else {
+      }
+      @if (activeEmbedUrl()) {
         <iframe [src]="activeEmbedUrl()"
           width="500" height="600" style="border:none;overflow:hidden;max-width:100%"
           scrolling="no" frameborder="0" allowfullscreen="true"

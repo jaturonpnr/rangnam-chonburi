@@ -109,6 +109,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     this.activeEmbedUrl.set(null);
     this.embedLoaded.set(false);
     this._pendingUrl = decodeURIComponent(encodedUrl);
+    this.loadEmbed();
   }
 
   loadEmbed() {
