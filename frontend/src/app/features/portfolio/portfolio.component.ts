@@ -61,7 +61,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   }
 
   private async initMap(pins: PortfolioPostPin[]) {
-    const L = await import('leaflet');
+    const L = await import('leaflet').then(m => (m as any).default ?? m);
     if (this.map) { this.map.remove(); this.map = null; }
 
     this.map = L.map('portfolio-map', { zoomControl: true }).setView([13.36, 101.0], 10);
@@ -101,7 +101,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
 
   filterArea(area: string | null) {
     this.selectedArea.set(area);
-    import('leaflet').then(L => this.renderMarkers(L, this.pins()));
+    import('leaflet').then(m => (m as any).default ?? m).then(L => this.renderMarkers(L, this.pins()));
   }
 
   openPanel(id: number, encodedUrl: string) {
