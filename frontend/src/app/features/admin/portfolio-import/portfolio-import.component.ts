@@ -123,7 +123,7 @@ export class PortfolioImportComponent implements OnInit, OnDestroy {
   private async initEditMap() {
     const el = document.getElementById('pi-edit-map');
     if (!el || this.editMap) return;
-    const L = await import('leaflet');
+    const L = await import('leaflet').then(m => (m as any).default ?? m);
     const center: [number, number] = (this.editApproxLat && this.editApproxLng)
       ? [this.editApproxLat, this.editApproxLng]
       : [13.16, 100.93];

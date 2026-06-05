@@ -47,7 +47,7 @@ export class LeadDetailComponent implements OnInit, OnDestroy {
   }
 
   private async initMiniMap(d: QuoteRequestDetail) {
-    const L = await import('leaflet');
+    const L = await import('leaflet').then(m => (m as any).default ?? m);
     const el = document.getElementById('admin-mini-map');
     if (!el || this.miniMap) return;
 

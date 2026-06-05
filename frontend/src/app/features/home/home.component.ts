@@ -53,7 +53,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async initPortfolioMap() {
-    const L = await import('leaflet');
+    const L = await import('leaflet').then(m => (m as any).default ?? m);
     const el = document.getElementById('home-portfolio-map');
     if (!el || this.portfolioMap) return;
 
@@ -72,7 +72,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async addMapMarkers(pins: PortfolioPostPin[]) {
-    const L = await import('leaflet');
+    const L = await import('leaflet').then(m => (m as any).default ?? m);
     // Wait until map is initialized (may arrive before ngAfterViewInit completes)
     if (!this.portfolioMap) await this.initPortfolioMap();
 

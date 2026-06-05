@@ -156,7 +156,7 @@ export class PortfolioPostsComponent implements OnInit, OnDestroy {
     const lng = this.editApproxLng();
     if (!this.editMap || !lat || !lng) return;
     if (this.editMarker) this.editMarker.remove();
-    import('leaflet').then(L => {
+    import('leaflet').then(m => (m as any).default ?? m).then(L => {
       this.editMarker = L.circleMarker([lat, lng], {
         radius: 8, fillColor: '#38bdf8', color: '#0D1B3E', weight: 2, fillOpacity: 0.9
       }).addTo(this.editMap);
@@ -165,7 +165,7 @@ export class PortfolioPostsComponent implements OnInit, OnDestroy {
   }
 
   private async initEditMap() {
-    const L = await import('leaflet');
+    const L = await import('leaflet').then(m => (m as any).default ?? m);
     this.destroyMap();
     const el = document.getElementById('pp-edit-map');
     if (!el) return;
