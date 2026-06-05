@@ -66,7 +66,7 @@
           [checked]="selectedIds().has(post.id)"
           (change)="toggleSelect(post.id)">
         <div class="pp-card-body">
-          <div class="pp-card-url">{{ post.fbPostUrl }}</div>
+          <a class="pp-card-url" [href]="post.fbPostUrl" target="_blank" rel="noopener noreferrer">{{ post.fbPostUrl }}</a>
           <div class="pp-card-meta">
             @if (post.areaName) { <span class="pp-badge pp-badge--blue">{{ post.areaName }}</span> }
             @if (post.isPublished) { <span class="pp-badge pp-badge--green">เผยแพร่แล้ว</span> }

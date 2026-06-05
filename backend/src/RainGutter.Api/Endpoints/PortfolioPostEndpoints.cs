@@ -44,7 +44,7 @@ public static class PortfolioPostEndpoints
         app.MapGet("/api/admin/portfolio/posts", [Authorize] async (AppDbContext db) =>
         {
             var posts = await db.PortfolioPosts
-                .OrderByDescending(p => p.CreatedAt)
+                .OrderByDescending(p => p.PostedDate).ThenByDescending(p => p.CreatedAt)
                 .Select(p => new PortfolioPostAdminDto(
                     p.Id, p.FbPostUrl, p.Title, p.AreaName,
                     p.ApproxLat, p.ApproxLng, p.PostedDate, p.Reach,
