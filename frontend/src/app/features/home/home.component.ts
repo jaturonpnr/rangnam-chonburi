@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, signal, inject, computed, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, signal, inject, computed, NgZone, PLATFORM_ID } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
+import { MetaSeoService } from '../../core/services/meta-seo.service';
 import { ShopProfilePublic, PortfolioPostPin } from '../../core/models';
 import { environment } from '../../../environments/environment';
 
@@ -15,6 +16,8 @@ import { environment } from '../../../environments/environment';
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private api = inject(ApiService);
   private zone = inject(NgZone);
+  private platformId = inject(PLATFORM_ID);
+  private metaSeo = inject(MetaSeoService);
 
   shop = signal<ShopProfilePublic | null>(null);
   navScrolled = signal(false);
@@ -41,16 +44,24 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   nearCount = computed(() => this.nearPinIds().size);
   readonly nearRadiusKm = environment.nearRadiusKm;
 
-  private scrollHandler = () => this.navScrolled.set(window.scrollY > 48);
+  private scrollHandler = () => {
+    if (isPlatformBrowser(this.platformId)) this.navScrolled.set(window.scrollY > 48);
+  };
   private portfolioMap: any = null;
   private mapMarkers: any[] = [];
   private userMarker: any = null;
   private userCircle: any = null;
 
   ngOnInit() {
+    this.metaSeo.set({
+      title: 'ส.จาตุรนต์ รางน้ำ — รับติดตั้งรางน้ำฝนสแตนเลส ชลบุรี ศรีราชา พัทยา',
+      description: 'รับติดตั้งรางน้ำฝนสแตนเลส 304 และสังกะสี ชลบุรี ศรีราชา พัทยา ช่างผู้เชี่ยวชาญ ราคาโปร่งใส ประเมินราคาฟรีออนไลน์',
+      canonical: 'https://rangnam-chonburi.vercel.app/'
+    });
     this.api.getShopProfile().subscribe(s => this.shop.set(s));
-    window.addEventListener('scroll', this.scrollHandler, { passive: true });
-
+    if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener('scroll', this.scrollHandler, { passive: true });
+    }
     this.api.getPortfolioPostSummary().subscribe(s => this.portfolioSummary.set(s));
     this.api.getPortfolioPosts().subscribe({
       next: pins => { this.pins.set(pins); this.addMapMarkers(pins); },
@@ -59,12 +70,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    // Init map immediately after DOM is ready — independent of API call
-    setTimeout(() => this.initPortfolioMap(), 0);
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => this.initPortfolioMap(), 0);
+    }
   }
 
   ngOnDestroy() {
-    window.removeEventListener('scroll', this.scrollHandler);
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('scroll', this.scrollHandler);
+    }
     this.userMarker?.remove();
     this.userCircle?.remove();
     this.portfolioMap?.remove();
@@ -86,7 +100,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   requestGeo() {
-    if (!navigator.geolocation) { this.geoState.set('unsupported'); return; }
+    if (!isPlatformBrowser(this.platformId) || !navigator.geolocation) { this.geoState.set('unsupported'); return; }
     this.geoState.set('locating');
     navigator.geolocation.getCurrentPosition(
       pos => this.zone.run(() => {

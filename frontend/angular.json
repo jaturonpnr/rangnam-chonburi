@@ -31,7 +31,12 @@
               "node_modules/@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "server": "src/main.server.ts",
+            "prerender": {
+              "discoverRoutes": false,
+              "routesFile": "routes-prerender.txt"
+            }
           },
           "configurations": {
             "production": {

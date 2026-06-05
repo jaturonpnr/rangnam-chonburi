@@ -7,6 +7,7 @@ export const routes: Routes = [
   { path: 'thank-you/:quoteNumber', loadComponent: () => import('./features/thank-you/thank-you.component').then(m => m.ThankYouComponent) },
   { path: 'w/:token', loadComponent: () => import('./features/warranty/warranty.component').then(m => m.WarrantyComponent) },
   { path: 'portfolio', loadComponent: () => import('./features/portfolio/portfolio.component').then(m => m.PortfolioComponent) },
+  { path: 'service/:area', loadComponent: () => import('./features/service-area/service-area.component').then(m => m.ServiceAreaComponent) },
   { path: 'admin/login', loadComponent: () => import('./features/admin/login/login.component').then(m => m.LoginComponent) },
   { path: 'admin', canActivate: [authGuard], children: [
     { path: 'dashboard', loadComponent: () => import('./features/admin/dashboard/dashboard.component').then(m => m.DashboardComponent) },

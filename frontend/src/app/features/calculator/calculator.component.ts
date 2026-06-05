@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject, PLATFORM_ID } from '@angular/core';
 import { Renderer2 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { MetaSeoService } from '../../core/services/meta-seo.service';
 import { BuildingType, ServiceZone, EstimateResult, ShopProfilePublic, MapMeasureResult } from '../../core/models';
 import { MapMeasureModalComponent } from './map-measure-modal/map-measure-modal.component';
 
@@ -19,6 +20,9 @@ export class CalculatorComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private renderer = inject(Renderer2);
+  private metaSeo = inject(MetaSeoService);
+  private platformId = inject(PLATFORM_ID);
+  private doc = inject(DOCUMENT);
 
   buildingTypes = signal<BuildingType[]>([]);
   zones = signal<ServiceZone[]>([]);
@@ -52,7 +56,14 @@ export class CalculatorComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit() {
-    this.renderer.addClass(document.body, 'calc-theme');
+    this.metaSeo.set({
+      title: 'ประเมินราคารางน้ำฝนออนไลน์ฟรี — ส.จาตุรนต์ รางน้ำ ชลบุรี',
+      description: 'คำนวณราคาติดตั้งรางน้ำฝนสแตนเลส 304 และสังกะสี ทันที ไม่ต้องรอช่าง บริการชลบุรี ศรีราชา พัทยา',
+      canonical: 'https://rangnam-chonburi.vercel.app/calculator'
+    });
+    if (isPlatformBrowser(this.platformId)) {
+      this.renderer.addClass(this.doc.body, 'calc-theme');
+    }
     this.api.getBuildingTypes().subscribe(bt => this.buildingTypes.set(bt));
     this.api.getZones().subscribe(z => this.zones.set(z));
     this.api.getShopProfile().subscribe(s => this.shopProfile.set(s));
@@ -133,7 +144,9 @@ export class CalculatorComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.renderer.removeClass(document.body, 'calc-theme');
+    if (isPlatformBrowser(this.platformId)) {
+      this.renderer.removeClass(this.doc.body, 'calc-theme');
+    }
   }
 
   formatNumber(n: number) { return n.toLocaleString('th-TH'); }

@@ -1,9 +1,6 @@
 import { Component, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import * as L from 'leaflet';
-import '@geoman-io/leaflet-geoman-free';
-import length from '@turf/length';
-import { multiLineString } from '@turf/helpers';
+import type * as L from 'leaflet';
 import { environment } from '../../../../environments/environment';
 import { MapMeasureResult } from '../../../core/models';
 
@@ -19,23 +16,25 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
   @Output() dismissed = new EventEmitter<void>();
 
   totalMeters = 0;
-  private map!: L.Map;
-  private drawnLayers: L.Polyline[] = [];
-  private locationMarker: L.CircleMarker | null = null;
+  private map: any = null;
+  private drawnLayers: any[] = [];
+  private locationMarker: any = null;
 
-  ngAfterViewInit() {
-    // Fix Leaflet default icon paths broken by Angular bundler
-    const iconDefault = L.icon({
+  async ngAfterViewInit() {
+    const Lm = await import('leaflet').then(m => (m as any).default ?? m);
+    await import('@geoman-io/leaflet-geoman-free');
+
+    const iconDefault = Lm.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       iconSize: [25, 41], iconAnchor: [12, 41]
     });
-    L.Marker.prototype.options.icon = iconDefault;
+    Lm.Marker.prototype.options.icon = iconDefault;
 
-    this.map = L.map('map-measure-container', { center: [13.756, 100.502], zoom: 15 });
+    this.map = Lm.map('map-measure-container', { center: [13.756, 100.502] as [number, number], zoom: 15 });
 
-    L.tileLayer(environment.satelliteTileUrl, {
+    Lm.tileLayer(environment.satelliteTileUrl, {
       attribution: environment.satelliteAttribution,
       maxZoom: 20,
       maxNativeZoom: 18
@@ -56,14 +55,13 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
     });
 
     this.map.on('pm:create', (e: any) => {
-      const layer = e.layer as L.Polyline;
-      this.drawnLayers.push(layer);
+      this.drawnLayers.push(e.layer);
       this.recalculate();
-      layer.on('pm:edit', () => this.recalculate());
+      e.layer.on('pm:edit', () => this.recalculate());
     });
 
     this.map.on('pm:remove', (e: any) => {
-      this.drawnLayers = this.drawnLayers.filter(l => l !== e.layer);
+      this.drawnLayers = this.drawnLayers.filter((l: any) => l !== e.layer);
       this.recalculate();
     });
 
@@ -75,22 +73,28 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
     this.map?.remove();
   }
 
-  private recalculate() {
+  private async recalculate() {
     if (this.drawnLayers.length === 0) { this.totalMeters = 0; return; }
-    const coords = this.drawnLayers.map(l =>
-      (l.getLatLngs() as L.LatLng[]).map(ll => [ll.lng, ll.lat] as [number, number])
+    const [{ default: length }, { multiLineString }] = await Promise.all([
+      import('@turf/length'),
+      import('@turf/helpers')
+    ]);
+    const coords = this.drawnLayers.map((l: any) =>
+      l.getLatLngs().map((ll: any) => [ll.lng, ll.lat] as [number, number])
     );
     const km = length(multiLineString(coords), { units: 'kilometers' });
     this.totalMeters = Math.round(km * 1000 * 10) / 10;
   }
 
-  locateMe() {
+  async locateMe() {
+    if (!navigator.geolocation) return;
+    const Lm = await import('leaflet').then(m => (m as any).default ?? m);
     navigator.geolocation.getCurrentPosition(
       pos => {
-        const latlng: L.LatLngTuple = [pos.coords.latitude, pos.coords.longitude];
+        const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         this.map.setView(latlng, 18);
         this.locationMarker?.remove();
-        this.locationMarker = L.circleMarker(latlng, {
+        this.locationMarker = Lm.circleMarker(latlng, {
           radius: 8, color: '#fff', weight: 2,
           fillColor: '#0284C7', fillOpacity: 1
         }).addTo(this.map).bindPopup('ตำแหน่งของคุณ').openPopup();
@@ -100,7 +104,7 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
   }
 
   clearAll() {
-    (this.map as any).pm.getGeomanLayers().forEach((l: L.Layer) => l.remove());
+    (this.map as any)?.pm.getGeomanLayers().forEach((l: any) => l.remove());
     this.drawnLayers = [];
     this.totalMeters = 0;
     this.locationMarker?.remove();
@@ -109,8 +113,8 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
 
   apply() {
     const center = this.map.getCenter();
-    const coords = this.drawnLayers.map(l =>
-      (l.getLatLngs() as L.LatLng[]).map(ll => [ll.lng, ll.lat] as [number, number])
+    const coords = this.drawnLayers.map((l: any) =>
+      l.getLatLngs().map((ll: any) => [ll.lng, ll.lat] as [number, number])
     );
     this.applied.emit({
       geojson: { type: 'MultiLineString', coordinates: coords },
