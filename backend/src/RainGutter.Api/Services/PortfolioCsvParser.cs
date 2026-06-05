@@ -65,7 +65,7 @@ public static class PortfolioCsvParser
 
                 int? reach = null;
                 var reachStr = csv.GetField("การเข้าถึง") ?? "";
-                if (int.TryParse(reachStr, out var r)) reach = r;
+                if (int.TryParse(reachStr.Replace(",", ""), out var r)) reach = r;
 
                 entries.Add(new CsvEntry(url, string.IsNullOrWhiteSpace(title) ? null : title, postedDate, reach));
             }

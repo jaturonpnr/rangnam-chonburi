@@ -79,4 +79,15 @@ public class PortfolioCsvParserTests
         Assert.DoesNotContain("#", result.Entries[0].Title ?? "");
         Assert.True(result.Entries[0].Title?.Length <= 100);
     }
+
+    [Fact]
+    public void Parse_TitleTruncatedAt100Chars()
+    {
+        var longTitle = new string('ก', 150);
+        var csv = "\"ID โพสต์\",ชื่อ,เวลาที่เผยแพร่,ลิงก์ถาวร,เป็นโพสต์ข้าม,เป็นโพสต์ที่แชร์หรือไม่,ประเภทโพสต์,การเข้าถึง\n" +
+                  $"\"300\",\"{longTitle}\",01/15/2026 10:00,https://www.facebook.com/page/posts/300,0,0,รูปภาพ,100";
+        var result = PortfolioCsvParser.Parse(ToStream(csv));
+        Assert.Single(result.Entries);
+        Assert.Equal(100, result.Entries[0].Title?.Length);
+    }
 }
