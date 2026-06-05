@@ -1,10 +1,10 @@
-// frontend/src/app/features/portfolio/portfolio.component.ts
 import { Component, OnInit, OnDestroy, signal, computed, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '../../core/services/api.service';
-import { PortfolioPostPin } from '../../core/models';
+import { PortfolioPostPin, ShopProfilePublic } from '../../core/models';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-portfolio',
@@ -25,7 +25,24 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   embedLoaded = signal(false);
   loading = signal(true);
 
-  private _pendingUrl: string | null = null;
+  // Geolocation
+  geoState = signal<'idle'|'locating'|'success'|'denied'|'error'|'unsupported'>('idle');
+  userLat = signal<number|null>(null);
+  userLng = signal<number|null>(null);
+  nearRadius = signal<number>(environment.nearRadiusKm);
+  shop = signal<ShopProfilePublic|null>(null);
+
+  nearPinIds = computed(() => {
+    const lat = this.userLat();
+    const lng = this.userLng();
+    if (lat === null || lng === null) return new Set<number>();
+    const r = this.nearRadius();
+    return new Set(this.pins()
+      .filter(p => this.haversineKm(lat, lng, p.approxLat, p.approxLng) <= r)
+      .map(p => p.id));
+  });
+
+  nearCount = computed(() => this.nearPinIds().size);
 
   areas = computed(() => {
     const all = this.pins().map(p => p.areaName).filter((a): a is string => !!a);
@@ -34,9 +51,21 @@ export class PortfolioComponent implements OnInit, OnDestroy {
 
   private map: any = null;
   private markers: any[] = [];
+  private userMarker: any = null;
+  private userCircle: any = null;
+  private _pendingUrl: string | null = null;
 
   private escHtml(s: string) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  private haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2
+      + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   ngOnInit() {
@@ -49,6 +78,8 @@ export class PortfolioComponent implements OnInit, OnDestroy {
       error: () => this.loading.set(false)
     });
 
+    this.api.getShopProfile().subscribe(s => this.shop.set(s));
+
     // Global bridge for Leaflet popup button → Angular (must run inside NgZone)
     (window as any).ppOpen = (id: number, url: string) =>
       this.zone.run(() => this.openPanel(id, url));
@@ -58,6 +89,8 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     delete (window as any).ppOpen;
     this.map?.remove();
     this.map = null;
+    this.userMarker?.remove();
+    this.userCircle?.remove();
   }
 
   private async initMap(pins: PortfolioPostPin[]) {
@@ -77,11 +110,17 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     this.markers = [];
     const area = this.selectedArea();
     const filtered = area ? pins.filter(p => p.areaName === area) : pins;
+    const nearIds = this.nearPinIds();
 
     filtered.forEach(pin => {
+      const isNear = nearIds.size > 0 && nearIds.has(pin.id);
       const marker = L.circleMarker([pin.approxLat, pin.approxLng], {
-        radius: 8, fillColor: '#38bdf8', color: '#0D1B3E',
-        weight: 2, opacity: 1, fillOpacity: 0.85
+        radius: isNear ? 10 : 8,
+        fillColor: isNear ? '#f97316' : '#38bdf8',
+        color: '#0D1B3E',
+        weight: isNear ? 3 : 2,
+        opacity: 1,
+        fillOpacity: isNear ? 1 : 0.85
       });
       marker.bindPopup(`
         <div style="font-family:sans-serif;font-size:13px;min-width:140px">
@@ -104,6 +143,67 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     import('leaflet').then(m => (m as any).default ?? m).then(L => this.renderMarkers(L, this.pins()));
   }
 
+  // --- Geolocation ---
+
+  requestGeo() {
+    if (!navigator.geolocation) { this.geoState.set('unsupported'); return; }
+    this.geoState.set('locating');
+    navigator.geolocation.getCurrentPosition(
+      pos => this.zone.run(() => {
+        this.userLat.set(pos.coords.latitude);
+        this.userLng.set(pos.coords.longitude);
+        this.geoState.set('success');
+        this.updateGeoMap();
+      }),
+      err => this.zone.run(() => {
+        this.geoState.set(err.code === 1 ? 'denied' : 'error');
+      }),
+      { timeout: 10000, maximumAge: 60000 }
+    );
+  }
+
+  setRadius(r: number) {
+    this.nearRadius.set(r);
+    if (this.geoState() === 'success') this.updateGeoMap();
+  }
+
+  resetGeo() {
+    this.geoState.set('idle');
+    this.userLat.set(null);
+    this.userLng.set(null);
+    this.userMarker?.remove(); this.userMarker = null;
+    this.userCircle?.remove(); this.userCircle = null;
+    import('leaflet').then(m => (m as any).default ?? m)
+      .then(L => this.renderMarkers(L, this.pins()));
+    this.map?.setView([13.3435218, 100.9820816], 10);
+  }
+
+  private async updateGeoMap() {
+    const lat = this.userLat();
+    const lng = this.userLng();
+    if (lat === null || lng === null || !this.map) return;
+    const L = await import('leaflet').then(m => (m as any).default ?? m);
+
+    this.userMarker?.remove();
+    this.userCircle?.remove();
+
+    this.map.setView([lat, lng], 12);
+
+    this.userCircle = L.circle([lat, lng], {
+      radius: this.nearRadius() * 1000,
+      color: '#38bdf8', fillColor: '#38bdf8', fillOpacity: 0.08,
+      weight: 2, dashArray: '6 4'
+    }).addTo(this.map);
+
+    this.userMarker = L.circleMarker([lat, lng], {
+      radius: 10, fillColor: '#fff', color: '#38bdf8', weight: 3, fillOpacity: 1
+    }).bindPopup('<b>ตำแหน่งของคุณ</b>').addTo(this.map);
+
+    this.renderMarkers(L, this.pins());
+  }
+
+  // --- FB embed panel ---
+
   openPanel(id: number, encodedUrl: string) {
     this.map?.closePopup();
     this.activePinId.set(id);
@@ -118,7 +218,6 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     if (!url) return;
     const embedSrc = `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&show_text=true&width=500`;
     this.activeEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(embedSrc));
-    // embedLoaded stays false until iframe fires (load) event
   }
 
   onIframeLoad() {
