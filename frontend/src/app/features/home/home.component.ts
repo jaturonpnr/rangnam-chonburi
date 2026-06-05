@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, inject, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, signal, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
@@ -12,7 +12,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private api = inject(ApiService);
 
   shop = signal<ShopProfilePublic | null>(null);
@@ -31,9 +31,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.api.getPortfolioPostSummary().subscribe(s => this.portfolioSummary.set(s));
     this.api.getPortfolioPosts().subscribe({
-      next: pins => setTimeout(() => this.initPortfolioMap(pins), 200),
+      next: pins => this.addMapMarkers(pins),
       error: () => {}
     });
+  }
+
+  ngAfterViewInit() {
+    // Init map immediately after DOM is ready — independent of API call
+    setTimeout(() => this.initPortfolioMap(), 0);
   }
 
   ngOnDestroy() {
@@ -47,7 +52,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return phone;
   }
 
-  private async initPortfolioMap(pins: PortfolioPostPin[]) {
+  private async initPortfolioMap() {
     const L = await import('leaflet');
     const el = document.getElementById('home-portfolio-map');
     if (!el || this.portfolioMap) return;
@@ -64,6 +69,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       maxZoom: 20,
       maxNativeZoom: 18
     }).addTo(this.portfolioMap);
+  }
+
+  private async addMapMarkers(pins: PortfolioPostPin[]) {
+    const L = await import('leaflet');
+    // Wait until map is initialized (may arrive before ngAfterViewInit completes)
+    if (!this.portfolioMap) await this.initPortfolioMap();
 
     for (const pin of pins) {
       L.circleMarker([pin.approxLat, pin.approxLng] as [number, number], {
