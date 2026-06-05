@@ -141,6 +141,29 @@ export class PortfolioPostsComponent implements OnInit, OnDestroy {
     });
   }
 
+  onLatChange(val: number | null) {
+    this.editApproxLat.set(val ? +Number(val).toFixed(5) : null);
+    this.moveMarker();
+  }
+
+  onLngChange(val: number | null) {
+    this.editApproxLng.set(val ? +Number(val).toFixed(5) : null);
+    this.moveMarker();
+  }
+
+  private moveMarker() {
+    const lat = this.editApproxLat();
+    const lng = this.editApproxLng();
+    if (!this.editMap || !lat || !lng) return;
+    if (this.editMarker) this.editMarker.remove();
+    import('leaflet').then(L => {
+      this.editMarker = L.circleMarker([lat, lng], {
+        radius: 8, fillColor: '#38bdf8', color: '#0D1B3E', weight: 2, fillOpacity: 0.9
+      }).addTo(this.editMap);
+      this.editMap.setView([lat, lng]);
+    });
+  }
+
   private async initEditMap() {
     const L = await import('leaflet');
     this.destroyMap();
@@ -153,14 +176,18 @@ export class PortfolioPostsComponent implements OnInit, OnDestroy {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.editMap);
     if (this.editApproxLat() && this.editApproxLng()) {
-      this.editMarker = L.marker([lat, lng]).addTo(this.editMap);
+      this.editMarker = L.circleMarker([lat, lng], {
+        radius: 8, fillColor: '#38bdf8', color: '#0D1B3E', weight: 2, fillOpacity: 0.9
+      }).addTo(this.editMap);
     }
     this.editMap.on('click', (e: any) => {
       const { lat, lng } = e.latlng;
       this.editApproxLat.set(+lat.toFixed(5));
       this.editApproxLng.set(+lng.toFixed(5));
       if (this.editMarker) this.editMarker.remove();
-      this.editMarker = L.marker([lat, lng]).addTo(this.editMap);
+      this.editMarker = L.circleMarker([lat, lng], {
+        radius: 8, fillColor: '#38bdf8', color: '#0D1B3E', weight: 2, fillOpacity: 0.9
+      }).addTo(this.editMap);
     });
   }
 
