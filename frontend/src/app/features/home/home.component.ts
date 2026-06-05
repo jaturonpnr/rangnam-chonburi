@@ -176,9 +176,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         fillOpacity: isNear ? 1 : 0.9
       })
         .addTo(this.portfolioMap)
-        .bindPopup(`<div style="font-family:sans-serif;font-size:13px;min-width:120px;">
+        .bindPopup(`<div style="font-family:sans-serif;font-size:13px;min-width:140px;">
           <strong>${pin.areaName ?? 'ชลบุรี'}</strong>
           ${pin.title ? `<br><span style="color:#555;">${pin.title}</span>` : ''}
+          ${pin.postedDate ? `<br><span style="color:#888;font-size:11px">${pin.postedDate.substring(0, 10)}</span>` : ''}
+          <br><a href="${pin.fbPostUrl}" target="_blank" rel="noopener noreferrer"
+            style="display:inline-block;margin-top:6px;padding:4px 10px;background:#38bdf8;border-radius:4px;text-decoration:none;font-size:12px;color:#0D1B3E;font-weight:600">
+            ดูโพสต์ Facebook
+          </a>
         </div>`);
       this.mapMarkers.push(marker);
     }
