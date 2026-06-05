@@ -1,6 +1,7 @@
 // frontend/src/app/features/portfolio/portfolio.component.ts
 import { Component, OnInit, OnDestroy, signal, computed, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '../../core/services/api.service';
 import { PortfolioPostPin } from '../../core/models';
@@ -8,7 +9,7 @@ import { PortfolioPostPin } from '../../core/models';
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.css']
 })
@@ -117,6 +118,10 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     if (!url) return;
     const embedSrc = `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&show_text=true&width=500`;
     this.activeEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(embedSrc));
+    // embedLoaded stays false until iframe fires (load) event
+  }
+
+  onIframeLoad() {
     this.embedLoaded.set(true);
   }
 

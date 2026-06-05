@@ -1,6 +1,7 @@
 <div class="pf-layout">
   <!-- Sidebar -->
   <aside class="pf-sidebar">
+    <a class="pf-back-link" routerLink="/">← กลับหน้าหลัก</a>
     <h2 class="pf-title">ผลงานติดตั้ง</h2>
     <p class="pf-subtitle">คลิกหมุดบนแผนที่เพื่อดูโพสต์ Facebook</p>
 
@@ -17,10 +18,33 @@
     @if (loading()) {
       <p class="pf-loading">กำลังโหลด...</p>
     }
+
+    @if (!loading() && pins().length === 0) {
+      <p class="pf-empty">ยังไม่มีผลงานที่เผยแพร่</p>
+    }
   </aside>
+
+  <!-- Mobile filter bar -->
+  <div class="pf-mobile-bar">
+    <a class="pf-mobile-back" routerLink="/">← กลับ</a>
+    <div class="pf-mobile-chips">
+      <button class="pf-chip pf-chip--sm" [class.pf-chip--active]="selectedArea() === null"
+        (click)="filterArea(null)">ทั้งหมด</button>
+      @for (area of areas(); track area) {
+        <button class="pf-chip pf-chip--sm" [class.pf-chip--active]="selectedArea() === area"
+          (click)="filterArea(area)">{{ area }}</button>
+      }
+    </div>
+  </div>
 
   <!-- Map -->
   <div class="pf-map-wrap">
+    @if (!loading() && pins().length === 0) {
+      <div class="pf-map-empty">
+        <div class="pf-map-empty-icon">📍</div>
+        <p class="pf-map-empty-text">ยังไม่มีผลงานในพื้นที่นี้</p>
+      </div>
+    }
     <div id="portfolio-map" class="pf-map"></div>
   </div>
 </div>
@@ -29,7 +53,7 @@
 @if (activePinId() !== null) {
   <div class="pf-embed-overlay" (click)="closePanel()">
     <div class="pf-embed-panel" (click)="$event.stopPropagation()">
-      <button class="pf-embed-close" (click)="closePanel()">✕</button>
+      <button class="pf-embed-close" (click)="closePanel()" aria-label="ปิด">✕</button>
 
       @if (!embedLoaded()) {
         <div class="pf-embed-loading">
@@ -39,9 +63,11 @@
       }
       @if (activeEmbedUrl()) {
         <iframe [src]="activeEmbedUrl()"
+          title="โพสต์ Facebook"
           width="500" height="600" style="border:none;overflow:hidden;max-width:100%"
           scrolling="no" frameborder="0" allowfullscreen="true"
-          allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share">
+          allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share"
+          (load)="onIframeLoad()">
         </iframe>
       }
     </div>
