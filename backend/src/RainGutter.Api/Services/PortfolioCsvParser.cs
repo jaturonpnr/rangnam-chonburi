@@ -61,7 +61,7 @@ public static class PortfolioCsvParser
                 var dateStr = csv.GetField("เวลาที่เผยแพร่") ?? "";
                 if (DateTime.TryParseExact(dateStr, "MM/dd/yyyy HH:mm",
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
-                    postedDate = dt;
+                    postedDate = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
 
                 int? reach = null;
                 var reachStr = csv.GetField("การเข้าถึง") ?? "";

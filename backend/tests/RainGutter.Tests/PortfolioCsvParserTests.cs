@@ -65,7 +65,8 @@ public class PortfolioCsvParserTests
                   "100,โพสต์,12/31/2025 23:59,https://www.facebook.com/page/posts/100,0,0,รูปภาพ,300";
         var result = PortfolioCsvParser.Parse(ToStream(csv));
         Assert.Single(result.Entries);
-        Assert.Equal(new DateTime(2025, 12, 31, 23, 59, 0), result.Entries[0].PostedDate);
+        Assert.Equal(DateTime.SpecifyKind(new DateTime(2025, 12, 31, 23, 59, 0), DateTimeKind.Utc), result.Entries[0].PostedDate);
+        Assert.Equal(DateTimeKind.Utc, result.Entries[0].PostedDate!.Value.Kind);
     }
 
     [Fact]
