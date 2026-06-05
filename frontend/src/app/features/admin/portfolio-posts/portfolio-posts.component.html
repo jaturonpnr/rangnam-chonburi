@@ -1,0 +1,116 @@
+<div class="pp-wrap">
+  <div class="pp-header">
+    <h2 class="pp-title">จัดการ Portfolio Posts</h2>
+    <button class="pp-btn pp-btn--primary" (click)="openCreate()">+ เพิ่มโพสต์</button>
+  </div>
+
+  <!-- CSV Import -->
+  <div class="pp-section">
+    <div class="pp-section-title">นำเข้าจาก Meta Business Suite CSV</div>
+    <p class="pp-section-desc">Export จาก Meta Business Suite › Insights › Posts › Export CSV</p>
+    <label class="pp-upload-label" [class.pp-uploading]="csvUploading()">
+      <input type="file" accept=".csv" hidden (change)="onCsvSelected($event)" [disabled]="csvUploading()">
+      <span>{{ csvUploading() ? 'กำลังนำเข้า...' : '📄 เลือกไฟล์ CSV' }}</span>
+    </label>
+    @if (csvResult()) {
+      <div class="pp-csv-result">
+        นำเข้าใหม่ <b>{{ csvResult()!.imported }}</b> | อัปเดต <b>{{ csvResult()!.updated }}</b> | ข้าม <b>{{ csvResult()!.skipped }}</b>
+        @if (csvResult()!.errors.length > 0) { <span class="pp-error"> ({{ csvResult()!.errors.length }} errors)</span> }
+      </div>
+    }
+    @if (csvError()) { <div class="pp-error">{{ csvError() }}</div> }
+  </div>
+
+  <hr class="pp-divider">
+
+  <!-- Bulk bar -->
+  @if (selectedIds().size > 0) {
+    <div class="pp-bulk-bar">
+      <span class="pp-bulk-count">เลือก {{ selectedIds().size }} รายการ</span>
+      <button class="pp-btn pp-btn--primary pp-btn--sm" (click)="bulkPublish(true)" [disabled]="bulkUpdating()">เผยแพร่</button>
+      <button class="pp-btn pp-btn--ghost pp-btn--sm" (click)="bulkPublish(false)" [disabled]="bulkUpdating()">ซ่อน</button>
+      <button class="pp-btn pp-btn--ghost pp-btn--sm" (click)="clearSelection()">ยกเลิก</button>
+    </div>
+  }
+
+  <!-- Select all -->
+  <div class="pp-select-all">
+    <label class="pp-check-label">
+      <input type="checkbox" (change)="$any($event.target).checked ? selectAll() : clearSelection()"
+        [checked]="selectedIds().size === posts().length && posts().length > 0">
+      เลือกทั้งหมด ({{ posts().length }})
+    </label>
+  </div>
+
+  @if (loading()) { <p class="pp-loading">กำลังโหลด...</p> }
+
+  <!-- Post list -->
+  <div class="pp-list">
+    @for (post of posts(); track post.id) {
+      <div class="pp-card" [class.pp-card--selected]="selectedIds().has(post.id)">
+        <input type="checkbox" class="pp-card-check"
+          [checked]="selectedIds().has(post.id)"
+          (change)="toggleSelect(post.id)">
+        <div class="pp-card-body">
+          <div class="pp-card-url">{{ post.fbPostUrl }}</div>
+          <div class="pp-card-meta">
+            @if (post.areaName) { <span class="pp-badge pp-badge--blue">{{ post.areaName }}</span> }
+            @if (post.isPublished) { <span class="pp-badge pp-badge--green">เผยแพร่แล้ว</span> }
+            @else { <span class="pp-badge pp-badge--grey">ฉบับร่าง</span> }
+            @if (post.approxLat) { <span class="pp-badge pp-badge--cyan">มีพิกัด</span> }
+          </div>
+          @if (post.title) { <div class="pp-card-title">{{ post.title }}</div> }
+          @if (post.postedDate) { <div class="pp-card-date">{{ post.postedDate | date:'dd/MM/yyyy' }}</div> }
+        </div>
+        <div class="pp-card-actions">
+          <button class="pp-btn pp-btn--ghost pp-btn--sm" (click)="openEdit(post)">แก้ไข</button>
+          <button class="pp-btn pp-btn--danger pp-btn--sm" (click)="deletePost(post.id)">ลบ</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Edit overlay -->
+  @if (editingPost()) {
+    <div class="pp-overlay">
+      <div class="pp-panel">
+        <h3 class="pp-panel-title">{{ editingPost()!.id === 0 ? 'เพิ่มโพสต์' : 'แก้ไขโพสต์' }}</h3>
+
+        <div class="pp-panel-form">
+          <label>URL โพสต์ Facebook *
+            <input class="pp-input" [(ngModel)]="editForm.fbPostUrl" placeholder="https://www.facebook.com/...">
+          </label>
+          <label>ชื่อ/Title
+            <input class="pp-input" [(ngModel)]="editForm.title" placeholder="ไม่บังคับ">
+          </label>
+          <label>พื้นที่
+            <input class="pp-input" [(ngModel)]="editForm.areaName" placeholder="เช่น ศรีราชา">
+          </label>
+          <label>วันที่โพสต์
+            <input class="pp-input" type="date" [(ngModel)]="editForm.postedDate">
+          </label>
+          <label class="pp-check-label">
+            <input type="checkbox" [(ngModel)]="editForm.isPublished"> เผยแพร่บนแผนที่
+          </label>
+
+          <div class="pp-map-section">
+            <div class="pp-map-label">คลิกแผนที่เพื่อกำหนด ApproxLat/Lng (พิกัดเยื้อง)</div>
+            <div id="pp-edit-map" class="pp-edit-map"></div>
+            @if (editApproxLat()) {
+              <div class="pp-map-coords">{{ editApproxLat() }}, {{ editApproxLng() }}</div>
+            }
+          </div>
+        </div>
+
+        @if (editError()) { <div class="pp-error">{{ editError() }}</div> }
+
+        <div class="pp-panel-footer">
+          <button class="pp-btn pp-btn--ghost" (click)="cancelEdit()">ยกเลิก</button>
+          <button class="pp-btn pp-btn--primary" (click)="saveEdit()" [disabled]="savingEdit()">
+            {{ savingEdit() ? 'กำลังบันทึก...' : 'บันทึก' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
