@@ -5,9 +5,10 @@ import {
   GutterProduct, BuildingType, ServiceZone, ShopProfilePublic, EstimateResult,
   QuoteRequestSummary, QuoteRequestDetail, PricingConfig,
   ShopProfile, StatsResponse, MeasureSource,
-  JobSummary, JobDetail, JobPhoto, WarrantyCard, PortfolioPin, PortfolioSummary,
+  JobSummary, JobDetail, JobPhoto, WarrantyCard,
   AdminServiceRequest, ServiceRequestStatus,
-  ImportDraftItem, ImportBatchSummary
+  ImportDraftItem, ImportBatchSummary,
+  PortfolioPostPin, PortfolioPostAdmin, SavePortfolioPostRequest, CsvImportResult
 } from '../models';
 
 export interface CreateQuoteRequestPayload {
@@ -135,13 +136,6 @@ export class ApiService {
   createServiceRequest(token: string, body: { contactPhone: string; customerNote?: string; type: string }) {
     return this.http.post<{ id: number }>(`${this.base}/api/warranty/${token}/service-request`, body);
   }
-  getPortfolioPins() {
-    return this.http.get<PortfolioPin[]>(`${this.base}/api/portfolio`);
-  }
-  getPortfolioSummary() {
-    return this.http.get<PortfolioSummary>(`${this.base}/api/portfolio/summary`);
-  }
-
   // ── Admin Jobs ────────────────────────────────────────────────────────────
   completeJob(quoteRequestId: number, body: { installedDate: string; warrantyMonths: number; lat?: number | null; lng?: number | null; areaName?: string | null }) {
     return this.http.post<JobDetail>(`${this.base}/api/admin/quote-requests/${quoteRequestId}/complete`, body);
@@ -225,5 +219,33 @@ export class ApiService {
   }) {
     return this.http.post<{ updated: number }>(
       `${this.base}/api/admin/portfolio/imports/drafts/bulk`, body);
+  }
+
+  // ── CR5: Portfolio Posts ─────────────────────────────────────────────────
+  getPortfolioPosts() {
+    return this.http.get<PortfolioPostPin[]>(`${this.base}/api/portfolio/posts`);
+  }
+  getPortfolioPostSummary() {
+    return this.http.get<{ total: number; byArea: { area: string; count: number }[] }>(`${this.base}/api/portfolio/summary`);
+  }
+  getAdminPortfolioPosts() {
+    return this.http.get<PortfolioPostAdmin[]>(`${this.base}/api/admin/portfolio/posts`);
+  }
+  createPortfolioPost(req: SavePortfolioPostRequest) {
+    return this.http.post<{ id: number }>(`${this.base}/api/admin/portfolio/posts`, req);
+  }
+  updatePortfolioPost(id: number, req: SavePortfolioPostRequest) {
+    return this.http.put(`${this.base}/api/admin/portfolio/posts/${id}`, req);
+  }
+  deletePortfolioPost(id: number) {
+    return this.http.delete(`${this.base}/api/admin/portfolio/posts/${id}`);
+  }
+  importPortfolioCsv(file: File) {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<CsvImportResult>(`${this.base}/api/admin/portfolio/import-csv`, fd);
+  }
+  bulkPublishPortfolioPosts(ids: number[], isPublished: boolean) {
+    return this.http.post<{ updated: number }>(`${this.base}/api/admin/portfolio/posts/bulk-publish`, { ids, isPublished });
   }
 }

@@ -194,21 +194,6 @@ export interface WarrantyCard {
   lineOaLink: string;
 }
 
-export interface PortfolioPin {
-  jobId: number;
-  approxLat: number;
-  approxLng: number;
-  areaName: string | null;
-  material: Material;
-  installedDate: string;
-  consentedPhotos: JobPhoto[];
-}
-
-export interface PortfolioSummary {
-  total: number;
-  byArea: { name: string; count: number }[];
-}
-
 export interface AdminServiceRequest {
   id: number;
   contactPhone: string;
@@ -243,4 +228,48 @@ export interface ImportBatchSummary {
   photoCount: number;
   jobCount: number;
   createdAt: string;
+}
+
+// ── CR5: Portfolio Posts ─────────────────────────────────────────────────────
+
+export interface PortfolioPostPin {
+  id: number;
+  approxLat: number;
+  approxLng: number;
+  areaName: string | null;
+  fbPostUrl: string;
+  title: string | null;
+  postedDate: string | null;
+}
+
+export interface PortfolioPostAdmin {
+  id: number;
+  fbPostUrl: string;
+  title: string | null;
+  areaName: string | null;
+  approxLat: number | null;
+  approxLng: number | null;
+  postedDate: string | null;
+  reach: number | null;
+  isPublished: boolean;
+  displayOrder: number;
+  createdAt: string;
+}
+
+export interface SavePortfolioPostRequest {
+  fbPostUrl: string;
+  title?: string | null;
+  areaName?: string | null;
+  approxLat?: number | null;
+  approxLng?: number | null;
+  postedDate?: string | null;
+  isPublished: boolean;
+  displayOrder: number;
+}
+
+export interface CsvImportResult {
+  imported: number;
+  skipped: number;
+  updated: number;
+  errors: string[];
 }

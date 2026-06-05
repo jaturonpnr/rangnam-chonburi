@@ -312,18 +312,18 @@
   gap: 8px;
   padding: 12px 24px;
   background: transparent;
-  color: var(--hn-navy);
+  color: var(--hn-white);
   font-family: var(--hn-prompt);
   font-weight: 700;
   font-size: 15px;
   border-radius: 10px;
   text-decoration: none;
-  border: 1.5px solid var(--hn-silver);
+  border: 1.5px solid rgba(255,255,255,0.5);
   transition: all 0.15s;
 }
 .hn-btn-outline-dark:hover {
-  border-color: var(--hn-navy);
-  background: var(--hn-bg);
+  border-color: var(--hn-white);
+  background: rgba(255,255,255,0.1);
   transform: translateY(-2px);
 }
 .hn-btn-lg { padding: 14px 28px; font-size: 16px; }

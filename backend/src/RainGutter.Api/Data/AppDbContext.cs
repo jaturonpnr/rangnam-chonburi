@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<JobPhoto> JobPhotos => Set<JobPhoto>();
     public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
     public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
+    public DbSet<PortfolioPost> PortfolioPosts => Set<PortfolioPost>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -86,5 +87,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(s => s.Type).HasConversion<string>();
         modelBuilder.Entity<ServiceRequest>()
             .Property(s => s.Status).HasConversion<string>();
+
+        modelBuilder.Entity<PortfolioPost>()
+            .HasIndex(p => p.FbPostUrl).IsUnique();
     }
 }

@@ -1,0 +1,53 @@
+.pp-wrap { padding: 24px; max-width: 900px; margin: 0 auto; }
+.pp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.pp-title { font-size: 20px; font-weight: 700; margin: 0; }
+.pp-section { margin-bottom: 16px; }
+.pp-section-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.pp-section-desc { font-size: 12px; color: var(--text-2); margin: 0 0 8px; }
+.pp-upload-label { display: flex; align-items: center; justify-content: center; border: 2px dashed var(--border); border-radius: 10px; padding: 20px; cursor: pointer; font-size: 14px; color: var(--text-2); }
+.pp-upload-label:hover { border-color: var(--accent); }
+.pp-uploading { opacity: 0.6; cursor: not-allowed; }
+.pp-csv-result { font-size: 13px; margin-top: 8px; color: var(--text-1); }
+.pp-error { color: #e11d48; font-size: 13px; margin-top: 6px; }
+.pp-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.pp-bulk-bar { display: flex; align-items: center; gap: 10px; padding: 10px 0; flex-wrap: wrap; }
+.pp-bulk-count { font-size: 13px; color: var(--text-2); }
+.pp-select-all { margin-bottom: 10px; }
+.pp-check-label { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.pp-loading { font-size: 14px; color: var(--text-2); }
+.pp-list { display: flex; flex-direction: column; gap: 8px; }
+.pp-card { display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--surface); }
+.pp-card--selected { border-color: var(--accent); background: rgba(56,189,248,.05); }
+.pp-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.pp-card-url { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-card-meta { display: flex; gap: 4px; flex-wrap: wrap; }
+.pp-card-title { font-size: 13px; font-weight: 600; }
+.pp-card-date { font-size: 11px; color: var(--text-2); }
+.pp-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.pp-card-check { flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+.pp-badge { padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.pp-badge--green { background: rgba(16,185,129,.15); color: #059669; }
+.pp-badge--blue { background: rgba(56,189,248,.15); color: #0284c7; }
+.pp-badge--grey { background: rgba(150,150,150,.15); color: #666; }
+.pp-badge--cyan { background: rgba(6,182,212,.15); color: #0891b2; }
+.pp-btn { padding: 7px 14px; border-radius: 7px; font-size: 13px; cursor: pointer; border: 1px solid transparent; }
+.pp-btn--sm { padding: 4px 10px; font-size: 12px; }
+.pp-btn--primary { background: var(--accent); color: #0D1B3E; font-weight: 600; }
+.pp-btn--primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.pp-btn--ghost { background: transparent; color: var(--text-2); border-color: var(--border); }
+.pp-btn--danger { background: rgba(220,38,38,.1); color: #dc2626; border-color: rgba(220,38,38,.3); }
+.pp-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.pp-panel { background: var(--surface); border-radius: 14px; padding: 24px; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.pp-panel-title { font-size: 16px; font-weight: 700; margin: 0; }
+.pp-panel-form { display: flex; flex-direction: column; gap: 10px; }
+.pp-panel-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.pp-input { padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 14px; background: var(--bg); color: var(--text-1); }
+.pp-input:focus { outline: none; border-color: var(--accent); }
+.pp-map-section { display: flex; flex-direction: column; gap: 8px; }
+.pp-map-label { font-size: 12px; color: var(--text-2); font-weight: 600; }
+.pp-coords-inputs { display: flex; gap: 8px; }
+.pp-coords-inputs label { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-2); }
+.pp-input--sm { padding: 6px 8px; font-size: 13px; }
+.pp-edit-map { width: 100%; height: 200px; border-radius: 8px; border: 1px solid var(--border); }
+.pp-map-coords { font-size: 11px; color: var(--text-2); font-family: monospace; }
+.pp-panel-footer { display: flex; gap: 10px; justify-content: flex-end; }

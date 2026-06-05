@@ -59,35 +59,5 @@ public static class WarrantyEndpoints
             return Results.Ok(new { sr.Id });
         });
 
-        // GET /api/portfolio — public, ApproxLat/Lng only
-        app.MapGet("/api/portfolio", async (AppDbContext db) =>
-        {
-            var jobs = await db.Jobs
-                .Include(j => j.Photos.OrderBy(p => p.DisplayOrder))
-                .Where(j => j.ShowInPortfolio && j.ApproxLat != null && j.ApproxLng != null)
-                .ToListAsync();
-
-            // Privacy: only ApproxLat/ApproxLng returned. No Lat/Lng, no customer name/phone/address.
-            var pins = jobs.Select(j => new PortfolioPinDto(
-                j.Id, j.ApproxLat!.Value, j.ApproxLng!.Value, j.AreaName,
-                j.Material, j.InstalledDate?.ToString("yyyy-MM-dd"),
-                j.PhotoConsent
-                    ? j.Photos.Select(p => new JobPhotoDto(p.Id, p.Url, p.Type, p.Caption, p.DisplayOrder)).ToList()
-                    : new List<JobPhotoDto>()
-            )).ToList();
-            return Results.Ok(pins);
-        });
-
-        // GET /api/portfolio/summary — public
-        app.MapGet("/api/portfolio/summary", async (AppDbContext db) =>
-        {
-            var total = await db.Jobs.CountAsync(j => j.ShowInPortfolio);
-            var byArea = await db.Jobs
-                .Where(j => j.ShowInPortfolio && j.AreaName != null)
-                .GroupBy(j => j.AreaName!)
-                .Select(g => new AreaCountDto(g.Key, g.Count()))
-                .ToListAsync();
-            return Results.Ok(new PortfolioSummaryDto(total, byArea));
-        });
     }
 }

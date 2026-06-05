@@ -17,6 +17,7 @@ export const routes: Routes = [
     { path: 'jobs/:id', loadComponent: () => import('./features/admin/jobs/job-detail.component').then(m => m.JobDetailComponent) },
     { path: 'service-requests', loadComponent: () => import('./features/admin/service-requests/service-requests.component').then(m => m.ServiceRequestsComponent) },
     { path: 'portfolio-import', loadComponent: () => import('./features/admin/portfolio-import/portfolio-import.component').then(m => m.PortfolioImportComponent) },
+    { path: 'portfolio-posts', loadComponent: () => import('./features/admin/portfolio-posts/portfolio-posts.component').then(m => m.PortfolioPostsComponent) },
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
   ]},
   { path: '**', redirectTo: '' }
