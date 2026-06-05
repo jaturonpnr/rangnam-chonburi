@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!el || this.portfolioMap) return;
 
     this.portfolioMap = L.map(el, {
-      center: [13.16, 100.93] as [number, number],
+      center: [13.3435218, 100.9820816] as [number, number],
       zoom: 11,
       scrollWheelZoom: false,
       zoomControl: true

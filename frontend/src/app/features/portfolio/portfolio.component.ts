@@ -64,7 +64,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
     const L = await import('leaflet').then(m => (m as any).default ?? m);
     if (this.map) { this.map.remove(); this.map = null; }
 
-    this.map = L.map('portfolio-map', { zoomControl: true }).setView([13.36, 101.0], 10);
+    this.map = L.map('portfolio-map', { zoomControl: true }).setView([13.3435218, 100.9820816], 10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(this.map);

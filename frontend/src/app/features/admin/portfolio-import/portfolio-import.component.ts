@@ -126,7 +126,7 @@ export class PortfolioImportComponent implements OnInit, OnDestroy {
     const L = await import('leaflet').then(m => (m as any).default ?? m);
     const center: [number, number] = (this.editApproxLat && this.editApproxLng)
       ? [this.editApproxLat, this.editApproxLng]
-      : [13.16, 100.93];
+      : [13.3435218, 100.9820816];
     this.editMap = L.map(el, { center, zoom: 11, scrollWheelZoom: false });
     const { environment } = await import('../../../../environments/environment');
     L.tileLayer(environment.satelliteTileUrl, {
