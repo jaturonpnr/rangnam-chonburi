@@ -82,6 +82,13 @@ public static class PortfolioPostEndpoints
             var post = await db.PortfolioPosts.FindAsync(id);
             if (post is null) return Results.NotFound();
 
+            // Check uniqueness when URL is changing
+            if (post.FbPostUrl != req.FbPostUrl)
+            {
+                var urlTaken = await db.PortfolioPosts.AnyAsync(p => p.FbPostUrl == req.FbPostUrl && p.Id != id);
+                if (urlTaken) return Results.Conflict(new { error = "URL already exists" });
+            }
+
             post.FbPostUrl = req.FbPostUrl; post.Title = req.Title;
             post.AreaName = req.AreaName; post.ApproxLat = req.ApproxLat;
             post.ApproxLng = req.ApproxLng; post.PostedDate = req.PostedDate;
@@ -124,11 +131,16 @@ public static class PortfolioPostEndpoints
             using var stream = file.OpenReadStream();
             var parsed = PortfolioCsvParser.Parse(stream);
 
+            // Batch lookup to avoid N+1 queries
+            var urls = parsed.Entries.Select(e => e.FbPostUrl).ToList();
+            var existingByUrl = await db.PortfolioPosts
+                .Where(p => urls.Contains(p.FbPostUrl))
+                .ToDictionaryAsync(p => p.FbPostUrl);
+
             int imported = 0, updated = 0;
             foreach (var entry in parsed.Entries)
             {
-                var existing = await db.PortfolioPosts.FirstOrDefaultAsync(p => p.FbPostUrl == entry.FbPostUrl);
-                if (existing is not null)
+                if (existingByUrl.TryGetValue(entry.FbPostUrl, out var existing))
                 {
                     // Update metadata but preserve admin-set fields (AreaName, ApproxLat/Lng, IsPublished)
                     existing.Title ??= entry.Title;
