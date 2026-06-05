@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, signal, inject, computed } from '@angular
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
-import { ShopProfilePublic, PortfolioPin, PortfolioSummary } from '../../core/models';
+import { ShopProfilePublic, PortfolioPostPin } from '../../core/models';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -17,7 +17,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   shop = signal<ShopProfilePublic | null>(null);
   navScrolled = signal(false);
-  portfolioSummary = signal<PortfolioSummary | null>(null);
+  portfolioSummary = signal<{ total: number; byArea: { area: string; count: number }[] } | null>(null);
 
   totalInstalled = computed(() => this.portfolioSummary()?.total ?? 0);
   byArea = computed(() => this.portfolioSummary()?.byArea ?? []);
@@ -29,9 +29,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.api.getShopProfile().subscribe(s => this.shop.set(s));
     window.addEventListener('scroll', this.scrollHandler, { passive: true });
 
-    this.api.getPortfolioSummary().subscribe(s => this.portfolioSummary.set(s));
-    this.api.getPortfolioPins().subscribe(pins => {
-      setTimeout(() => this.initPortfolioMap(pins), 200);
+    this.api.getPortfolioPostSummary().subscribe(s => this.portfolioSummary.set(s));
+    this.api.getPortfolioPosts().subscribe({
+      next: pins => setTimeout(() => this.initPortfolioMap(pins), 200),
+      error: () => {}
     });
   }
 
@@ -46,7 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return phone;
   }
 
-  private async initPortfolioMap(pins: PortfolioPin[]) {
+  private async initPortfolioMap(pins: PortfolioPostPin[]) {
     const L = await import('leaflet');
     const el = document.getElementById('home-portfolio-map');
     if (!el || this.portfolioMap) return;
@@ -64,8 +65,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       maxNativeZoom: 18
     }).addTo(this.portfolioMap);
 
-    const matLabel = (m: string) => m === 'Galvanized' ? 'สังกะสี' : 'สแตนเลส';
-
     for (const pin of pins) {
       L.circleMarker([pin.approxLat, pin.approxLng] as [number, number], {
         radius: 7, color: '#0D2461', weight: 2,
@@ -73,8 +72,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       })
         .addTo(this.portfolioMap)
         .bindPopup(`<div style="font-family:sans-serif;font-size:13px;min-width:120px;">
-          <strong>${pin.areaName ?? 'ชลบุรี'}</strong><br>
-          <span style="color:#555;">${matLabel(pin.material)}</span>
+          <strong>${pin.areaName ?? 'ชลบุรี'}</strong>
+          ${pin.title ? `<br><span style="color:#555;">${pin.title}</span>` : ''}
         </div>`);
     }
   }

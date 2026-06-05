@@ -194,21 +194,6 @@ export interface WarrantyCard {
   lineOaLink: string;
 }
 
-export interface PortfolioPin {
-  jobId: number;
-  approxLat: number;
-  approxLng: number;
-  areaName: string | null;
-  material: Material;
-  installedDate: string;
-  consentedPhotos: JobPhoto[];
-}
-
-export interface PortfolioSummary {
-  total: number;
-  byArea: { name: string; count: number }[];
-}
-
 export interface AdminServiceRequest {
   id: number;
   contactPhone: string;

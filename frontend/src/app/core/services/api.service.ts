@@ -5,7 +5,7 @@ import {
   GutterProduct, BuildingType, ServiceZone, ShopProfilePublic, EstimateResult,
   QuoteRequestSummary, QuoteRequestDetail, PricingConfig,
   ShopProfile, StatsResponse, MeasureSource,
-  JobSummary, JobDetail, JobPhoto, WarrantyCard, PortfolioPin, PortfolioSummary,
+  JobSummary, JobDetail, JobPhoto, WarrantyCard,
   AdminServiceRequest, ServiceRequestStatus,
   ImportDraftItem, ImportBatchSummary,
   PortfolioPostPin, PortfolioPostAdmin, SavePortfolioPostRequest, CsvImportResult
@@ -136,13 +136,6 @@ export class ApiService {
   createServiceRequest(token: string, body: { contactPhone: string; customerNote?: string; type: string }) {
     return this.http.post<{ id: number }>(`${this.base}/api/warranty/${token}/service-request`, body);
   }
-  getPortfolioPins() {
-    return this.http.get<PortfolioPin[]>(`${this.base}/api/portfolio`);
-  }
-  getPortfolioSummary() {
-    return this.http.get<PortfolioSummary>(`${this.base}/api/portfolio/summary`);
-  }
-
   // ── Admin Jobs ────────────────────────────────────────────────────────────
   completeJob(quoteRequestId: number, body: { installedDate: string; warrantyMonths: number; lat?: number | null; lng?: number | null; areaName?: string | null }) {
     return this.http.post<JobDetail>(`${this.base}/api/admin/quote-requests/${quoteRequestId}/complete`, body);
@@ -233,7 +226,7 @@ export class ApiService {
     return this.http.get<PortfolioPostPin[]>(`${this.base}/api/portfolio/posts`);
   }
   getPortfolioPostSummary() {
-    return this.http.get<{ total: number; byArea: { name: string; count: number }[] }>(`${this.base}/api/portfolio/summary`);
+    return this.http.get<{ total: number; byArea: { area: string; count: number }[] }>(`${this.base}/api/portfolio/summary`);
   }
   getAdminPortfolioPosts() {
     return this.http.get<PortfolioPostAdmin[]>(`${this.base}/api/admin/portfolio/posts`);

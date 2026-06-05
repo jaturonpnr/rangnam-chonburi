@@ -239,8 +239,8 @@
       </div>
       @if (byArea().length > 0) {
         <div class="hn-port-areas">
-          @for (area of byArea(); track area.name) {
-            <span class="hn-port-area-pill">{{ area.name }} <strong>{{ area.count }}</strong></span>
+          @for (area of byArea(); track area.area) {
+            <span class="hn-port-area-pill">{{ area.area }} <strong>{{ area.count }}</strong></span>
           }
         </div>
       }
