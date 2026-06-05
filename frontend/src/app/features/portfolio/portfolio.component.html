@@ -23,26 +23,26 @@
   <div class="pf-map-wrap">
     <div id="portfolio-map" class="pf-map"></div>
   </div>
-
-  <!-- FB Embed Panel -->
-  @if (activePinId() !== null) {
-    <div class="pf-embed-overlay" (click)="closePanel()">
-      <div class="pf-embed-panel" (click)="$event.stopPropagation()">
-        <button class="pf-embed-close" (click)="closePanel()">✕</button>
-
-        @if (!embedLoaded()) {
-          <div class="pf-embed-placeholder">
-            <p class="pf-embed-hint">โหลด Facebook Embed จะส่ง request ไปยัง Facebook</p>
-            <button class="pf-embed-load-btn" (click)="loadEmbed()">โหลดโพสต์ Facebook</button>
-          </div>
-        } @else {
-          <iframe [src]="activeEmbedUrl()"
-            width="500" height="600" style="border:none;overflow:hidden;max-width:100%"
-            scrolling="no" frameborder="0" allowfullscreen="true"
-            allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share">
-          </iframe>
-        }
-      </div>
-    </div>
-  }
 </div>
+
+<!-- FB Embed Panel — outside pf-layout to escape stacking context -->
+@if (activePinId() !== null) {
+  <div class="pf-embed-overlay" (click)="closePanel()">
+    <div class="pf-embed-panel" (click)="$event.stopPropagation()">
+      <button class="pf-embed-close" (click)="closePanel()">✕</button>
+
+      @if (!embedLoaded()) {
+        <div class="pf-embed-placeholder">
+          <p class="pf-embed-hint">โหลด Facebook Embed จะส่ง request ไปยัง Facebook</p>
+          <button class="pf-embed-load-btn" (click)="loadEmbed()">โหลดโพสต์ Facebook</button>
+        </div>
+      } @else {
+        <iframe [src]="activeEmbedUrl()"
+          width="500" height="600" style="border:none;overflow:hidden;max-width:100%"
+          scrolling="no" frameborder="0" allowfullscreen="true"
+          allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share">
+        </iframe>
+      }
+    </div>
+  </div>
+}
