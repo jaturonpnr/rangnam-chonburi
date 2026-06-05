@@ -1,5 +1,5 @@
 // frontend/src/app/features/portfolio/portfolio.component.ts
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '../../core/services/api.service';
@@ -15,6 +15,7 @@ import { PortfolioPostPin } from '../../core/models';
 export class PortfolioComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private sanitizer = inject(DomSanitizer);
+  private zone = inject(NgZone);
 
   pins = signal<PortfolioPostPin[]>([]);
   selectedArea = signal<string | null>(null);
@@ -47,8 +48,9 @@ export class PortfolioComponent implements OnInit, OnDestroy {
       error: () => this.loading.set(false)
     });
 
-    // Global bridge for Leaflet popup button → Angular
-    (window as any).ppOpen = (id: number, url: string) => this.openPanel(id, url);
+    // Global bridge for Leaflet popup button → Angular (must run inside NgZone)
+    (window as any).ppOpen = (id: number, url: string) =>
+      this.zone.run(() => this.openPanel(id, url));
   }
 
   ngOnDestroy() {
