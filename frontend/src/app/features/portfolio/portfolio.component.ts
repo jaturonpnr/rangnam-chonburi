@@ -33,11 +33,18 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   private map: any = null;
   private markers: any[] = [];
 
+  private escHtml(s: string) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   ngOnInit() {
-    this.api.getPortfolioPosts().subscribe(pins => {
-      this.pins.set(pins);
-      this.loading.set(false);
-      this.initMap(pins);
+    this.api.getPortfolioPosts().subscribe({
+      next: pins => {
+        this.pins.set(pins);
+        this.loading.set(false);
+        this.initMap(pins);
+      },
+      error: () => this.loading.set(false)
     });
 
     // Global bridge for Leaflet popup button → Angular
@@ -75,8 +82,8 @@ export class PortfolioComponent implements OnInit, OnDestroy {
       });
       marker.bindPopup(`
         <div style="font-family:sans-serif;font-size:13px;min-width:140px">
-          <b>${pin.areaName ?? 'ผลงาน'}</b><br>
-          ${pin.title ? `<span style="color:#555">${pin.title}</span><br>` : ''}
+          <b>${this.escHtml(pin.areaName ?? 'ผลงาน')}</b><br>
+          ${pin.title ? `<span style="color:#555">${this.escHtml(pin.title)}</span><br>` : ''}
           ${pin.postedDate ? `<span style="color:#888;font-size:11px">${pin.postedDate.substring(0, 10)}</span><br>` : ''}
           <button onclick="window.ppOpen(${pin.id},'${encodeURIComponent(pin.fbPostUrl)}')"
             style="margin-top:6px;padding:4px 10px;background:#38bdf8;border:none;border-radius:4px;cursor:pointer;font-size:12px;color:#0D1B3E;font-weight:600">

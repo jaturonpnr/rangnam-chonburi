@@ -20,6 +20,11 @@
   --thai:         'Sarabun', sans-serif;
   --head:         'Prompt', 'Sarabun', sans-serif;
   --r:            4px;
+  /* Aliases used by admin/portfolio components */
+  --surface:      #FFFFFF;
+  --bg:           #F1F5F9;
+  --text-1:       #1E293B;
+  --accent:       #38BDF8;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
