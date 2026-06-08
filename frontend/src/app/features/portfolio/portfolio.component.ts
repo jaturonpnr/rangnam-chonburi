@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject, NgZone } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, signal, computed, inject, NgZone, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '../../core/services/api.service';
+import { MetaSeoService } from '../../core/services/meta-seo.service';
 import { PortfolioPostPin, ShopProfilePublic } from '../../core/models';
 import { environment } from '../../../environments/environment';
 
@@ -17,6 +18,8 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private sanitizer = inject(DomSanitizer);
   private zone = inject(NgZone);
+  private platformId = inject(PLATFORM_ID);
+  private metaSeo = inject(MetaSeoService);
 
   pins = signal<PortfolioPostPin[]>([]);
   selectedArea = signal<string | null>(null);
@@ -69,24 +72,34 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.metaSeo.set({
+      title: 'ผลงานติดตั้งรางน้ำฝน ชลบุรี — ส.จาตุรนต์ รางน้ำ',
+      description: 'ดูผลงานติดตั้งรางน้ำฝนจริงทั่วชลบุรี ศรีราชา พัทยา กว่า 500 หลัง ดูโพสต์ Facebook ประกอบ',
+      canonical: 'https://rangnam-chonburi.vercel.app/portfolio'
+    });
     this.api.getPortfolioPosts().subscribe({
       next: pins => {
         this.pins.set(pins);
         this.loading.set(false);
-        this.initMap(pins);
+        if (isPlatformBrowser(this.platformId)) {
+          this.initMap(pins);
+        }
       },
       error: () => this.loading.set(false)
     });
 
     this.api.getShopProfile().subscribe(s => this.shop.set(s));
 
-    // Global bridge for Leaflet popup button → Angular (must run inside NgZone)
-    (window as any).ppOpen = (id: number, url: string) =>
-      this.zone.run(() => this.openPanel(id, url));
+    if (isPlatformBrowser(this.platformId)) {
+      (window as any).ppOpen = (id: number, url: string) =>
+        this.zone.run(() => this.openPanel(id, url));
+    }
   }
 
   ngOnDestroy() {
-    delete (window as any).ppOpen;
+    if (isPlatformBrowser(this.platformId)) {
+      delete (window as any).ppOpen;
+    }
     this.map?.remove();
     this.map = null;
     this.userMarker?.remove();
@@ -146,7 +159,7 @@ export class PortfolioComponent implements OnInit, OnDestroy {
   // --- Geolocation ---
 
   requestGeo() {
-    if (!navigator.geolocation) { this.geoState.set('unsupported'); return; }
+    if (!isPlatformBrowser(this.platformId) || !navigator.geolocation) { this.geoState.set('unsupported'); return; }
     this.geoState.set('locating');
     navigator.geolocation.getCurrentPosition(
       pos => this.zone.run(() => {

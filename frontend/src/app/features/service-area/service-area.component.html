@@ -1,0 +1,114 @@
+@if (area(); as a) {
+<div class="sa-page">
+  <nav class="sa-breadcrumb" aria-label="breadcrumb">
+    <a routerLink="/">หน้าแรก</a>
+    <span>›</span>
+    <span>บริการ {{ a.name }}</span>
+  </nav>
+
+  <section class="sa-hero">
+    <div class="sa-container">
+      <h1 class="sa-h1">{{ a.h1 }}</h1>
+      <p class="sa-lead">{{ a.lead }}</p>
+      <div class="sa-hero-actions">
+        <a routerLink="/calculator" class="sa-btn-primary">ประเมินราคาฟรี →</a>
+        <a href="tel:+66814569272" class="sa-btn-outline">📞 081-456-9272</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sa-highlight">
+    <div class="sa-container">
+      <p class="sa-highlight-text">{{ a.highlight }}</p>
+    </div>
+  </section>
+
+  <section class="sa-services">
+    <div class="sa-container">
+      <h2 class="sa-h2">บริการในพื้นที่ {{ a.name }}</h2>
+      <div class="sa-service-grid">
+        <div class="sa-service-card sa-service-card--premium">
+          <h3>รางน้ำสแตนเลส 304</h3>
+          <p>วัสดุเกรดอุตสาหกรรม ทนสนิม ทนความร้อน ทนเกลือชายทะเล อายุการใช้งาน 15–20 ปี</p>
+          <p class="sa-price">เริ่มต้น <strong>450 บาท/เมตร</strong></p>
+          <ul>
+            <li>ขนาด 6" และ 8"</li>
+            <li>ไม่ต้องทาสี ไม่ต้องบำรุงรักษา</li>
+            <li>รับประกันคุณภาพ</li>
+          </ul>
+        </div>
+        <div class="sa-service-card">
+          <h3>รางน้ำสังกะสีอาบสี</h3>
+          <p>ราคาประหยัด เหมาะกับโกดัง อาคารพาณิชย์ หรืองบประมาณจำกัด</p>
+          <p class="sa-price">เริ่มต้น <strong>200 บาท/เมตร</strong></p>
+          <ul>
+            <li>ขนาด 4", 5", 6", 8"</li>
+            <li>มีหลายสีให้เลือก</li>
+            <li>อายุการใช้งาน 8–12 ปี</li>
+          </ul>
+        </div>
+      </div>
+      <p class="sa-note">* ราคาเริ่มต้น ขั้นต่ำ 10 เมตร ราคาจริงขึ้นอยู่กับความยาว จำนวนชั้น และระยะทาง</p>
+      <div class="sa-cta-center">
+        <a routerLink="/calculator" class="sa-btn-primary">คำนวณราคาของคุณ →</a>
+      </div>
+    </div>
+  </section>
+
+  @if (localPins().length > 0) {
+  <section class="sa-portfolio">
+    <div class="sa-container">
+      <h2 class="sa-h2">ผลงานในพื้นที่ {{ a.name }}</h2>
+      <div class="sa-pin-grid">
+        @for (pin of localPins(); track pin.id) {
+          <a [href]="pin.fbPostUrl" target="_blank" rel="noopener" class="sa-pin-card">
+            <div class="sa-pin-dot"></div>
+            <div class="sa-pin-info">
+              <strong>{{ pin.areaName }}</strong>
+              @if (pin.title) { <span>{{ pin.title }}</span> }
+              @if (pin.postedDate) { <time>{{ pin.postedDate.substring(0, 10) }}</time> }
+            </div>
+            <span class="sa-pin-fb">ดูใน Facebook →</span>
+          </a>
+        }
+      </div>
+      <div class="sa-cta-center" style="margin-top:24px">
+        <a routerLink="/portfolio" class="sa-btn-outline-dark">ดูผลงานทั้งหมดบนแผนที่ →</a>
+      </div>
+    </div>
+  </section>
+  }
+
+  <section class="sa-faq">
+    <div class="sa-container">
+      <h2 class="sa-h2">คำถามที่พบบ่อย — {{ a.name }}</h2>
+      <dl class="sa-faq-list">
+        @for (item of a.faqs; track item.q) {
+          <div class="sa-faq-item">
+            <dt>{{ item.q }}</dt>
+            <dd>{{ item.a }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="sa-cta-section">
+    <div class="sa-container sa-cta-inner">
+      <h2>พร้อมรับใบเสนอราคา<br>สำหรับ{{ a.name }}ฟรี</h2>
+      <div class="sa-cta-actions">
+        <a routerLink="/calculator" class="sa-btn-primary sa-btn-lg">ประเมินราคาออนไลน์ →</a>
+        <a href="tel:+66814569272" class="sa-btn-outline sa-btn-lg">📞 081-456-9272</a>
+      </div>
+    </div>
+  </section>
+
+  <div [innerHTML]="safeJsonLd(a)"></div>
+</div>
+}
+
+@if (!area()) {
+  <div style="padding:80px 20px;text-align:center">
+    <p>ไม่พบข้อมูลพื้นที่นี้ <a routerLink="/">กลับหน้าแรก</a></p>
+  </div>
+}

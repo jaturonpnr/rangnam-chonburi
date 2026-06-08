@@ -1,0 +1,6 @@
+/
+/calculator
+/portfolio
+/service/chonburi
+/service/sriracha
+/service/pattaya
