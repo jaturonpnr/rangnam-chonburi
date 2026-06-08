@@ -64,9 +64,11 @@ export class CalculatorComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       this.renderer.addClass(this.doc.body, 'calc-theme');
     }
-    this.api.getBuildingTypes().subscribe(bt => this.buildingTypes.set(bt));
-    this.api.getZones().subscribe(z => this.zones.set(z));
-    this.api.getShopProfile().subscribe(s => this.shopProfile.set(s));
+    if (isPlatformBrowser(this.platformId)) {
+      this.api.getBuildingTypes().subscribe(bt => this.buildingTypes.set(bt));
+      this.api.getZones().subscribe(z => this.zones.set(z));
+      this.api.getShopProfile().subscribe(s => this.shopProfile.set(s));
+    }
     this.calcForm.get('material')?.valueChanges.subscribe(() => { this.estimate.set(null); });
   }
 

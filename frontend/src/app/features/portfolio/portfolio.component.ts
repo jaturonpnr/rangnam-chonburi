@@ -77,20 +77,16 @@ export class PortfolioComponent implements OnInit, OnDestroy {
       description: 'ดูผลงานติดตั้งรางน้ำฝนจริงทั่วชลบุรี ศรีราชา พัทยา กว่า 500 หลัง ดูโพสต์ Facebook ประกอบ',
       canonical: 'https://rangnam-chonburi.vercel.app/portfolio'
     });
-    this.api.getPortfolioPosts().subscribe({
-      next: pins => {
-        this.pins.set(pins);
-        this.loading.set(false);
-        if (isPlatformBrowser(this.platformId)) {
-          this.initMap(pins);
-        }
-      },
-      error: () => this.loading.set(false)
-    });
-
-    this.api.getShopProfile().subscribe(s => this.shop.set(s));
-
     if (isPlatformBrowser(this.platformId)) {
+      this.api.getPortfolioPosts().subscribe({
+        next: pins => {
+          this.pins.set(pins);
+          this.loading.set(false);
+          this.initMap(pins);
+        },
+        error: () => this.loading.set(false)
+      });
+      this.api.getShopProfile().subscribe(s => this.shop.set(s));
       (window as any).ppOpen = (id: number, url: string) =>
         this.zone.run(() => this.openPanel(id, url));
     }
