@@ -1,0 +1,15 @@
+{
+  "name": "ส.จาตุรนต์ รางน้ำ",
+  "short_name": "จาตุรนต์ รางน้ำ",
+  "description": "รับติดตั้งรางน้ำฝนสแตนเลส 304 และสังกะสี ชลบุรี ศรีราชา พัทยา",
+  "lang": "th",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#15306E",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    { "src": "icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

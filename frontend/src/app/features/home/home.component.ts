@@ -58,15 +58,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       description: 'รับติดตั้งรางน้ำฝนสแตนเลส 304 และสังกะสี ชลบุรี ศรีราชา พัทยา ช่างผู้เชี่ยวชาญ ราคาโปร่งใส ประเมินราคาฟรีออนไลน์',
       canonical: 'https://rangnam-chonburi.vercel.app/'
     });
-    this.api.getShopProfile().subscribe(s => this.shop.set(s));
     if (isPlatformBrowser(this.platformId)) {
       window.addEventListener('scroll', this.scrollHandler, { passive: true });
+      this.api.getShopProfile().subscribe(s => this.shop.set(s));
+      this.api.getPortfolioPostSummary().subscribe(s => this.portfolioSummary.set(s));
+      this.api.getPortfolioPosts().subscribe({
+        next: pins => { this.pins.set(pins); this.addMapMarkers(pins); },
+        error: () => {}
+      });
     }
-    this.api.getPortfolioPostSummary().subscribe(s => this.portfolioSummary.set(s));
-    this.api.getPortfolioPosts().subscribe({
-      next: pins => { this.pins.set(pins); this.addMapMarkers(pins); },
-      error: () => {}
-    });
   }
 
   ngAfterViewInit() {
