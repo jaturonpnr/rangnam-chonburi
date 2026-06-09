@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>วัดความยาวรางจากแผนที่ — Demo</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", "Sarabun", system-ui, sans-serif; background:#0f172a; color:#e2e8f0; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 14px; }
+  h1 { font-size: 18px; margin: 4px 0 2px; }
+  .sub { font-size: 13px; color:#94a3b8; margin: 0 0 12px; }
+  .layout { display:flex; gap:12px; flex-wrap:wrap; }
+  #map { flex:1 1 460px; height: 460px; border-radius:12px; overflow:hidden; border:1px solid #1e293b; min-width:280px; }
+  .panel { flex:1 1 240px; min-width:240px; display:flex; flex-direction:column; gap:10px; }
+  .card { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:12px; }
+  .len { font-size:34px; font-weight:700; color:#38bdf8; line-height:1; }
+  .len small { font-size:14px; color:#94a3b8; font-weight:500; }
+  .hint { font-size:12.5px; color:#cbd5e1; line-height:1.5; }
+  .hint b { color:#fff; }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; }
+  button { font-family:inherit; font-size:13px; border:none; border-radius:9px; padding:9px 11px; cursor:pointer; background:#334155; color:#e2e8f0; transition:.15s; }
+  button:hover { background:#475569; }
+  button.primary { background:#0ea5e9; color:#fff; font-weight:600; flex:1 1 100%; padding:11px; }
+  button.primary:hover { background:#0284c7; }
+  button.ghost { background:transparent; border:1px solid #475569; }
+  .disclaimer { font-size:11.5px; color:#fbbf24; background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.25); padding:8px 10px; border-radius:8px; }
+  .mockform { display:flex; align-items:center; gap:8px; }
+  .mockform label { font-size:13px; color:#94a3b8; }
+  .mockform input { background:#0f172a; border:1px solid #475569; color:#fff; border-radius:8px; padding:8px 10px; width:90px; font-size:15px; text-align:right; }
+  .mockform span { font-size:13px; color:#94a3b8; }
+  .flash { animation: flash 1s ease; }
+  @keyframes flash { 0%{ background:#0ea5e9; } 100%{ background:#0f172a; } }
+  .layerbtns { display:flex; gap:6px; }
+  .layerbtns button { flex:1; font-size:12px; padding:6px; }
+  .layerbtns button.active { background:#0ea5e9; color:#fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📍 วัดความยาวรางน้ำจากแผนที่</h1>
+  <p class="sub">Demo — ลากเส้นตามขอบหลังคา ระบบคำนวณเมตรให้อัตโนมัติ</p>
+  <div class="layout">
+    <div id="map"></div>
+    <div class="panel">
+      <div class="card">
+        <div class="layerbtns">
+          <button id="btnSat" class="active">🛰️ ดาวเทียม</button>
+          <button id="btnOsm">🗺️ แผนที่ถนน</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="len"><span id="lenVal">0.0</span> <small>เมตร</small></div>
+        <p class="hint" style="margin:8px 0 0;">คลิกบนแผนที่เพื่อ<b>ปักจุดตามขอบหลังคา</b> ทีละจุด เส้นจะวิ่งตามและคิดความยาวให้ทันที</p>
+      </div>
+      <div class="card btns">
+        <button id="btnNew" class="ghost">➕ เส้นใหม่</button>
+        <button id="btnUndo" class="ghost">↩ ถอยจุด</button>
+        <button id="btnClear" class="ghost">🗑 ล้าง</button>
+        <button id="btnLoc" class="ghost">📍 ตำแหน่งฉัน</button>
+        <button id="btnUse" class="primary">ใช้ค่านี้ →</button>
+      </div>
+      <div class="card mockform">
+        <label>จำนวนเมตร</label>
+        <input id="meters" type="text" value="" placeholder="0" readonly>
+        <span>(ในฟอร์มจริง)</span>
+      </div>
+      <div class="disclaimer">⚠️ ค่าประมาณจากแผนที่ ยืนยันความยาวจริงหน้างานอีกครั้ง</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+window.addEventListener('load', function () {
+  // ---- map setup, center on a residential area in Chonburi/Sriracha ----
+  var map = L.map('map', { center: [13.1602, 100.9304], zoom: 18, maxZoom: 21 });
+
+  var sat = L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    { maxNativeZoom: 19, maxZoom: 21, attribution: 'Tiles &copy; Esri' }
+  ).addTo(map);
+
+  var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    { maxZoom: 21, attribution: '&copy; OpenStreetMap' });
+
+  document.getElementById('btnSat').onclick = function(){ map.removeLayer(osm); sat.addTo(map); this.classList.add('active'); document.getElementById('btnOsm').classList.remove('active'); };
+  document.getElementById('btnOsm').onclick = function(){ map.removeLayer(sat); osm.addTo(map); this.classList.add('active'); document.getElementById('btnSat').classList.remove('active'); };
+
+  // ---- drawing state: array of lines, each line = array of latlng ----
+  var lines = [[]];
+  var drawLayer = L.layerGroup().addTo(map);
+
+  function haversine(a, b) {
+    var R = 6371000, toRad = Math.PI/180;
+    var dLat = (b.lat-a.lat)*toRad, dLng = (b.lng-a.lng)*toRad;
+    var lat1 = a.lat*toRad, lat2 = b.lat*toRad;
+    var h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;
+    return 2*R*Math.asin(Math.sqrt(h));
+  }
+
+  function totalLength() {
+    var sum = 0;
+    lines.forEach(function(line){
+      for (var i=1; i<line.length; i++) sum += haversine(line[i-1], line[i]);
+    });
+    return sum;
+  }
+
+  function redraw() {
+    drawLayer.clearLayers();
+    lines.forEach(function(line){
+      if (line.length >= 2) {
+        L.polyline(line, { color:'#38bdf8', weight:4, opacity:0.95 }).addTo(drawLayer);
+      }
+      line.forEach(function(pt, idx){
+        var isLast = (line === lines[lines.length-1] && idx === line.length-1);
+        L.circleMarker(pt, { radius:5, color:'#fff', weight:2, fillColor: isLast ? '#f59e0b' : '#0ea5e9', fillOpacity:1 }).addTo(drawLayer);
+      });
+    });
+    var len = totalLength();
+    document.getElementById('lenVal').textContent = len.toFixed(1);
+  }
+
+  map.on('click', function(e){
+    lines[lines.length-1].push(e.latlng);
+    redraw();
+  });
+
+  document.getElementById('btnNew').onclick = function(){
+    if (lines[lines.length-1].length > 0) lines.push([]);
+    redraw();
+  };
+  document.getElementById('btnUndo').onclick = function(){
+    var cur = lines[lines.length-1];
+    if (cur.length > 0) cur.pop();
+    else if (lines.length > 1) lines.pop();
+    redraw();
+  };
+  document.getElementById('btnClear').onclick = function(){
+    lines = [[]]; redraw();
+    var m = document.getElementById('meters'); m.value = '';
+  };
+  document.getElementById('btnLoc').onclick = function(){
+    if (!navigator.geolocation) { alert('เบราว์เซอร์ไม่รองรับการหาตำแหน่ง'); return; }
+    navigator.geolocation.getCurrentPosition(
+      function(p){ map.setView([p.coords.latitude, p.coords.longitude], 19); },
+      function(){ alert('หาตำแหน่งไม่สำเร็จ ลองเลื่อนแผนที่ไปบ้านคุณเองได้เลย'); }
+    );
+  };
+  document.getElementById('btnUse').onclick = function(){
+    var len = totalLength();
+    var m = document.getElementById('meters');
+    m.value = len.toFixed(1);
+    m.classList.remove('flash'); void m.offsetWidth; m.classList.add('flash');
+  };
+
+  redraw();
+});
+</script>
+</body>
+</html>

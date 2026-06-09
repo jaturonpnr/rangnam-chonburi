@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2554C7"/>
+      <stop offset="1" stop-color="#15306E"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4F6F9"/>
+      <stop offset="0.45" stop-color="#CBD3DD"/>
+      <stop offset="1" stop-color="#8A95A5"/>
+    </linearGradient>
+    <linearGradient id="drop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EAF6FF"/>
+      <stop offset="1" stop-color="#7FC2F5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background squircle -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#bg)"/>
+
+  <!-- raindrop -->
+  <path d="M256 86
+           C 256 86 196 178 196 232
+           a 60 60 0 1 0 120 0
+           C 316 178 256 86 256 86 Z"
+        fill="url(#drop)"/>
+  <ellipse cx="232" cy="236" rx="16" ry="26" fill="#FFFFFF" opacity="0.55"/>
+
+  <!-- stainless gutter trough (end view), with cutout via evenodd -->
+  <path fill-rule="evenodd" fill="url(#steel)" d="
+        M 120 300
+        L 120 350
+        Q 120 410 180 410
+        L 332 410
+        Q 392 410 392 350
+        L 392 300
+        L 356 300
+        L 356 348
+        Q 356 374 330 374
+        L 182 374
+        Q 156 374 156 348
+        L 156 300
+        Z"/>
+  <!-- gutter lips -->
+  <circle cx="138" cy="300" r="18" fill="url(#steel)"/>
+  <circle cx="374" cy="300" r="18" fill="url(#steel)"/>
+</svg>
