@@ -97,7 +97,7 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
         this.locationMarker = Lm.circleMarker(latlng, {
           radius: 8, color: '#fff', weight: 2,
           fillColor: '#0284C7', fillOpacity: 1
-        }).addTo(this.map).bindPopup('ตำแหน่งของคุณ').openPopup();
+        }).addTo(this.map);
       },
       () => {}
     );
