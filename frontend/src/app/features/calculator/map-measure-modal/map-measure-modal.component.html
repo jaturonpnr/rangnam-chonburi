@@ -3,7 +3,13 @@
 
     <div class="modal-header">
       <span class="modal-title">วัดความยาวรางจากแผนที่</span>
-      <button class="modal-close" (click)="dismissed.emit()">✕</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button type="button" class="modal-tour-btn" (click)="startMapTour()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          วิธีวัด
+        </button>
+        <button class="modal-close" (click)="dismissed.emit()" aria-label="ปิด">✕</button>
+      </div>
     </div>
 
     <div class="map-wrapper">
@@ -12,17 +18,17 @@
     </div>
 
     <div class="modal-footer">
-      <div class="length-display">
+      <div class="length-display" id="tour-length-display">
         ความยาวรวม: <strong>{{ totalMeters | number:'1.1-1' }} เมตร</strong>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary btn-sm" type="button" (click)="locateMe()">
+        <button class="btn btn-secondary btn-sm" type="button" id="tour-locate-btn" (click)="locateMe()">
           📍 ตำแหน่งปัจจุบัน
         </button>
-        <button class="btn btn-secondary btn-sm" type="button" (click)="clearAll()">
+        <button class="btn btn-secondary btn-sm" type="button" id="tour-clear-btn" (click)="clearAll()">
           🗑 ล้าง / วาดใหม่
         </button>
-        <button class="btn btn-primary" type="button"
+        <button class="btn btn-primary" type="button" id="tour-apply-btn"
                 [disabled]="totalMeters === 0" (click)="apply()">
           ใช้ค่านี้ (≈ {{ totalMeters | number:'1.1-1' }} เมตร)
         </button>

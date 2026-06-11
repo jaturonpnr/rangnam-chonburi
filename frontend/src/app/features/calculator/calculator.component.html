@@ -19,7 +19,7 @@
     <form [formGroup]="calcForm" class="cp-form">
 
       <!-- 01 วัสดุราง -->
-      <div class="cp-section">
+      <div class="cp-section" id="tour-material">
         <div class="cp-section-header">
           <span class="cp-section-num">01</span>
           <span class="cp-section-title">วัสดุราง</span>
@@ -45,7 +45,7 @@
       </div>
 
       <!-- 02 ประเภทอาคาร -->
-      <div class="cp-section">
+      <div class="cp-section" id="tour-building-type">
         <div class="cp-section-header">
           <span class="cp-section-num">02</span>
           <span class="cp-section-title">ประเภทอาคาร <span style="color:var(--cp-accent);">*</span></span>
@@ -63,7 +63,7 @@
       </div>
 
       <!-- 03 ความยาวราง -->
-      <div class="cp-section">
+      <div class="cp-section" id="tour-length">
         <div class="cp-section-header">
           <span class="cp-section-num">03</span>
           <span class="cp-section-title">ความยาวราง</span>
@@ -75,7 +75,7 @@
                    (input)="onLengthMetersInput()">
             <span class="cp-input-unit">ม.</span>
           </div>
-          <button type="button" class="cp-map-btn" (click)="showMapModal.set(true)">
+          <button type="button" class="cp-map-btn" id="tour-map-btn" (click)="showMapModal.set(true)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
             วัดจากแผนที่
           </button>
@@ -86,7 +86,7 @@
       </div>
 
       <!-- 04 ท่อน้ำลง -->
-      <div class="cp-section">
+      <div class="cp-section" id="tour-downspout">
         <div class="cp-section-header">
           <span class="cp-section-num">04</span>
           <span class="cp-section-title">จำนวนท่อน้ำลง</span>
@@ -99,7 +99,7 @@
       </div>
 
       <!-- 05 จำนวนชั้น -->
-      <div class="cp-section">
+      <div class="cp-section" id="tour-floors">
         <div class="cp-section-header">
           <span class="cp-section-num">05</span>
           <span class="cp-section-title">จำนวนชั้นอาคาร</span>
@@ -115,7 +115,7 @@
       </div>
 
       <!-- รื้อถอน -->
-      <div class="cp-section">
+      <div class="cp-section" id="tour-remove-old">
         <label class="cp-toggle">
           <input type="checkbox" formControlName="removeOld">
           <span class="cp-toggle-track"></span>
@@ -125,7 +125,7 @@
 
       <!-- 06 พื้นที่ (optional) -->
       @if (zones().length > 0) {
-        <div class="cp-section">
+        <div class="cp-section" id="tour-zone">
           <div class="cp-section-header">
             <span class="cp-section-num">06</span>
             <span class="cp-section-title">พื้นที่ติดตั้ง</span>
@@ -148,7 +148,7 @@
       }
 
       <!-- Calculate -->
-      <button type="button" class="cp-calc-btn"
+      <button type="button" class="cp-calc-btn" id="tour-calc-btn"
               [disabled]="loading()"
               (click)="calculate()">
         @if (loading()) {
@@ -323,6 +323,12 @@
     }
 
   </main>
+
+  <!-- Floating tour help button -->
+  <button type="button" class="cp-tour-btn" (click)="startTour()" aria-label="วิธีใช้">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    วิธีใช้
+  </button>
 
   @if (showMapModal()) {
     <app-map-measure-modal
