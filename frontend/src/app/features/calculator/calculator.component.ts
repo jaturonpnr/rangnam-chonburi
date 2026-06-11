@@ -37,6 +37,7 @@ export class CalculatorComponent implements OnInit, OnDestroy {
 
   private measureSource: 'Manual' | 'Map' = 'Manual';
   private mapMeasureResult: MapMeasureResult | null = null;
+  private driverObj: any = null;
 
   calcForm = this.fb.group({
     material: ['Galvanized', Validators.required],
@@ -68,6 +69,9 @@ export class CalculatorComponent implements OnInit, OnDestroy {
       this.api.getBuildingTypes().subscribe(bt => this.buildingTypes.set(bt));
       this.api.getZones().subscribe(z => this.zones.set(z));
       this.api.getShopProfile().subscribe(s => this.shopProfile.set(s));
+      if (!localStorage.getItem('estimate_tour_seen')) {
+        setTimeout(() => this.startTour(), 800);
+      }
     }
     this.calcForm.get('material')?.valueChanges.subscribe(() => { this.estimate.set(null); });
   }
@@ -145,7 +149,107 @@ export class CalculatorComponent implements OnInit, OnDestroy {
     });
   }
 
+  async startTour() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.driverObj?.destroy();
+    const { driver } = await import('driver.js');
+
+    const steps: any[] = [
+      {
+        element: '#tour-material',
+        popover: {
+          title: 'วัสดุราง',
+          description: 'เลือกวัสดุราง: <b>สังกะสี</b> (ประหยัด) หรือ <b>สแตนเลส</b> (ทนสนิม เหมาะพื้นที่ใกล้ทะเล)',
+          side: 'bottom', align: 'start',
+        }
+      },
+      {
+        element: '#tour-building-type',
+        popover: {
+          title: 'ประเภทอาคาร',
+          description: 'ไม่ต้องรู้ขนาดราง — เลือกตามลักษณะอาคาร ระบบจะเลือกขนาดที่เหมาะให้เอง',
+          side: 'bottom', align: 'start',
+        }
+      },
+      {
+        element: '#tour-map-btn',
+        popover: {
+          title: '⭐ วัดจากแผนที่ดาวเทียม',
+          description: 'ยังไม่รู้ว่าต้องใช้กี่เมตร? กดปุ่มนี้วัดจากภาพดาวเทียมได้เลย ระบบคำนวณความยาวให้ทันที',
+          side: 'bottom', align: 'start',
+        }
+      },
+      {
+        element: '#tour-length',
+        popover: {
+          title: 'ความยาวราง',
+          description: 'ระบุความยาวรางที่ต้องติดตั้ง หรือจะได้จากการวัดแผนที่ข้างบนก็ได้',
+          side: 'bottom', align: 'start',
+        }
+      },
+      {
+        element: '#tour-downspout',
+        popover: {
+          title: 'ท่อน้ำลง',
+          description: 'จำนวนจุดที่ให้น้ำไหลลงสู่พื้น',
+          side: 'bottom', align: 'start',
+        }
+      },
+      {
+        element: '#tour-floors',
+        popover: {
+          title: 'จำนวนชั้น',
+          description: 'อาคารกี่ชั้น — มีผลต่อค่าติดตั้งถ้าเกิน 2 ชั้น',
+          side: 'bottom', align: 'start',
+        }
+      },
+      {
+        element: '#tour-remove-old',
+        popover: {
+          title: 'รื้อของเดิม',
+          description: 'ถ้ามีรางเก่าต้องรื้อออกก่อน เปิดตัวนี้ ระบบจะบวกค่ารื้อถอนให้',
+          side: 'bottom', align: 'start',
+        }
+      },
+    ];
+
+    if (document.getElementById('tour-zone')) {
+      steps.push({
+        element: '#tour-zone',
+        popover: {
+          title: 'พื้นที่ติดตั้ง',
+          description: 'เลือกเขตพื้นที่บริการ ระบบจะบวกค่าเดินทางให้อัตโนมัติ',
+          side: 'bottom', align: 'start',
+        }
+      });
+    }
+
+    steps.push({
+      element: '#tour-calc-btn',
+      popover: {
+        title: 'คำนวณราคา',
+        description: 'กดเพื่อดูราคาประเมินทันที — จากนั้นกด <b>ขอใบเสนอราคา</b> เพื่อให้ช่างติดต่อกลับ',
+        side: 'top', align: 'start',
+      }
+    });
+
+    this.driverObj = driver({
+      showProgress: true,
+      nextBtnText: 'ถัดไป →',
+      prevBtnText: '← ย้อนกลับ',
+      doneBtnText: 'เสร็จสิ้น ✓',
+      progressText: '{{current}} / {{total}}',
+      onDestroyed: () => {
+        localStorage.setItem('estimate_tour_seen', '1');
+      },
+      steps,
+    });
+
+    this.driverObj.drive();
+  }
+
   ngOnDestroy() {
+    this.driverObj?.destroy();
     if (isPlatformBrowser(this.platformId)) {
       this.renderer.removeClass(this.doc.body, 'calc-theme');
     }

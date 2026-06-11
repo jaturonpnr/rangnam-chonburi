@@ -19,6 +19,7 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
   private map: any = null;
   private drawnLayers: any[] = [];
   private locationMarker: any = null;
+  private mapTourObj: any = null;
 
   async ngAfterViewInit() {
     const Lm = await import('leaflet').then(m => (m as any).default ?? m);
@@ -67,10 +68,76 @@ export class MapMeasureModalComponent implements AfterViewInit, OnDestroy {
 
     this.map.on('pm:drawstart', () => this.locationMarker?.setStyle({ opacity: 0, fillOpacity: 0 }));
     this.map.on('pm:drawend', () => this.locationMarker?.setStyle({ opacity: 1, fillOpacity: 1 }));
+
+    if (!localStorage.getItem('map_tour_seen')) {
+      setTimeout(() => this.startMapTour(), 600);
+    }
   }
 
   ngOnDestroy() {
+    this.mapTourObj?.destroy();
     this.map?.remove();
+  }
+
+  async startMapTour() {
+    this.mapTourObj?.destroy();
+    const { driver } = await import('driver.js');
+
+    this.mapTourObj = driver({
+      showProgress: true,
+      overlayOpacity: 0,
+      nextBtnText: 'ถัดไป →',
+      prevBtnText: '← ย้อนกลับ',
+      doneBtnText: 'เข้าใจแล้ว ✓',
+      progressText: '{{current}} / {{total}}',
+      onDestroyed: () => {
+        localStorage.setItem('map_tour_seen', '1');
+      },
+      steps: [
+        {
+          element: '#tour-locate-btn',
+          popover: {
+            title: 'ใช้ตำแหน่งปัจจุบัน',
+            description: 'กดเพื่อให้แผนที่เลื่อนไปยังบ้านของคุณอัตโนมัติ',
+            side: 'top', align: 'start',
+          }
+        },
+        {
+          element: '#map-measure-container',
+          popover: {
+            title: 'วาดเส้นบนแผนที่',
+            description: 'กดปุ่ม <b>✏️ วาดเส้น</b> ในแถบเครื่องมือ แล้วคลิกตามขอบหลังคาทีละจุด — ต้องการหลายด้าน วาดเส้นใหม่ได้เลย ระบบบวกรวมให้',
+            side: 'bottom', align: 'center',
+          }
+        },
+        {
+          element: '#tour-length-display',
+          popover: {
+            title: 'ความยาวรวม',
+            description: 'ดูผลรวมความยาวตรงนี้ อัปเดตเรียลไทม์ขณะปักจุด',
+            side: 'top', align: 'center',
+          }
+        },
+        {
+          element: '#tour-clear-btn',
+          popover: {
+            title: 'ล้าง / วาดใหม่',
+            description: 'กดเพื่อลบเส้นทั้งหมดและเริ่มต้นใหม่',
+            side: 'top', align: 'start',
+          }
+        },
+        {
+          element: '#tour-apply-btn',
+          popover: {
+            title: 'ใช้ค่านี้',
+            description: 'พอใจแล้วกด "ใช้ค่านี้" — เมตรจะถูกเติมเข้าฟอร์มคำนวณอัตโนมัติ',
+            side: 'top', align: 'end',
+          }
+        },
+      ],
+    });
+
+    this.mapTourObj.drive();
   }
 
   private async recalculate() {
